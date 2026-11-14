@@ -1,24 +1,13 @@
-This is the **interface** asset for TMC's **Dot** collection. It is the plumbing behind screens and menus, and it deliberately ships no art so it never fights your own.
+# dot-ui
 
-This collection of assets provides modular building blocks for creating games and applications within the TMC ecosystem, ensuring consistency and interoperability across all `dot-*` assets. This includes core functionality, networking, authentication, cloud integration, and more.
-
-**These assets are COMPLETELY OPEN SOURCE**. You are free to use, modify, and distribute them under the terms of the MIT license. The only thing not open source is the back-end web infrastructure. So if you opt into using your own authentication backend instead of integrating with TMC, you will need to build and integrate your own back-end infrastructure.
-
-## From Maintainer & WARNING
-This asset, along with all the others, was built initially with **Claude Code** and will continue to be maintained and extended using it. This is because I (`gamemann`) cannot build the entire TMC platform alone (I wish I could lol).
-
-**Please treat this as partially tested.** Every asset has its own headless test suite and those suites pass, but very little of this has been in front of real players yet. Expect rough edges, and please report anything you run into.
-
-I intend on reviewing code, testing, and editing documentation regularly. If you're interested in helping out, please let me know!
-
-## Screens, HUD and Menus
-Screens, HUD and menus for a Godot 4 game, with **no art assets**. A screen stack that derives z-order, input blocking and mouse mode from one place; a settings panel generated from any `DotConfig`; a rebinder with conflict detection; and data-driven HUD widgets.
-
-Part of the [dot-*](https://github.com/modcommunity) family. Needs **dot-core** and nothing else.
+Screens, HUD and menus for a Godot 4 game, with no art assets. A screen stack that works out z-order, input blocking and mouse mode from one place, a settings panel generated from any `DotConfig`, a rebinder with conflict detection, and data-driven HUD widgets.
 
 ## Install
 
-Copy `addons/dot_ui/` and `addons/dot_core/` into your project and enable both in *Project → Project Settings → Plugins*.
+1. Get [Godot 4.7](https://godotengine.org/download).
+2. Either use [dot-bootstrap](https://github.com/modcommunity/dot-bootstrap), which clones every project and links the addons, or copy `addons/dot_ui/` and [dot-core](https://github.com/modcommunity/dot-core)'s `addons/dot_core/` into your project and enable both in *Project > Project Settings > Plugins*.
+
+dot-core is the only dependency.
 
 ## Use
 
@@ -37,48 +26,38 @@ settings_panel.bind(server_config)
 health_bar.bind(func(): return health.health)
 ```
 
-## The idea
+`DotScreenStack` derives z-order, input blocking, mouse capture and the back key from one stack whenever it changes, so you do not get a pause menu that is visible but not focused or an escape key that closes two screens.
 
-**Four things have to agree, and they are usually written in four places.** Z-order, input blocking, mouse capture and the back key are each simple alone. The bug is a pause menu that is visible but not focused, a scoreboard that captures the mouse, or an escape key that closes two screens at once.
+dot-ui ships no textures, fonts or nine-patches and knows nothing about dot-match or dot-combat. The theme is generated from `StyleBoxFlat`s, the kill feed takes coloured string fragments and the scoreboard takes rows of dictionaries.
 
-`DotScreenStack` derives all four from one stack, every time it changes.
+## What is in it
 
-The second idea is that **dot-ui ships no art and imports nothing.** No textures, no fonts, no nine-patches, and no knowledge of dot-match or dot-combat. The theme is generated from `StyleBoxFlat`s; the kill feed takes coloured string fragments; the scoreboard takes rows of dictionaries.
-
-## What is in the box
-
-| | |
+| Class | What it is |
 | --- | --- |
-| `DotScreenStack` / `DotScreen` | What is open, in what order, and who gets input. |
-| `DotUiTheme` | A whole `Theme` from a palette and a scale. No assets. |
-| `DotHud` / `DotHudWidget` | The always-on layer, and widgets that *pull* rather than being pushed. |
-| `DotStatBar` | Health, armour, ammo. Eased bar, un-eased number. |
+| `DotScreenStack`, `DotScreen` | What is open, in what order, and who gets input. |
+| `DotUiTheme` | A whole `Theme` from a palette and a scale. |
+| `DotHud`, `DotHudWidget` | The always-on layer, and widgets that pull a value rather than being pushed. |
+| `DotStatBar` | Health, armour, ammo. |
 | `DotCrosshair` | Opens by the actual spread angle through the actual camera projection. |
-| `DotStarfield` | A parallax starfield drawn into any `CanvasItem`. Hashed, so nothing is stored. |
-| `DotFeedView` | A bounded, self-expiring list of coloured fragments. Kill feed and chat. |
-| `DotChatWindow` | A chat box: a log that fades, a line to type in, and a key that opens it. |
-| `DotTableView` | Rows and columns. Scoreboard, server browser, ban list. |
-| `DotVitals`, `DotAmmoCounter`, `DotScoreStrip` | The glance HUD: health with armour on one plate, `magazine \| reserve` under the weapon's name, the clock with two optional score plates. Values in, theme colours, readable over a pale map. |
-| `DotHitMarker`, `DotDamageNumbers` | Four ticks on a confirmed hit, red on a kill; numbers that rise off where a hit landed and add up over a burst. |
-| `DotKeyPrompt`, `DotKeyHints` | "Open door [E]" and a column of keys worth knowing, with the player's binding drawn as a key. |
-| `DotBallotPanel` | A ballot on the HUD from a dot-vote `DotVoteBallotView` dictionary: number keys, a click, or both, a countdown, and each voter's avatar on the option they chose. Emits `chosen`; what a choice becomes is the host's. |
+| `DotStarfield` | A parallax starfield drawn into any `CanvasItem`. |
+| `DotFeedView` | A self-expiring list of coloured fragments, for a kill feed or chat. |
+| `DotChatWindow` | A chat box: a fading log, a line to type in, and a key that opens it. |
+| `DotTableView` | Rows and columns: scoreboard, server browser, ban list. |
+| `DotVitals`, `DotAmmoCounter`, `DotScoreStrip` | The glance HUD: health and armour, `magazine \| reserve`, the clock with optional score plates. |
+| `DotHitMarker`, `DotDamageNumbers` | Hit ticks (red on a kill) and numbers that rise off where a hit landed. |
+| `DotKeyPrompt`, `DotKeyHints` | "Open door [E]" and a column of keys, drawn from the player's binding. |
+| `DotBallotPanel` | A dot-vote ballot on the HUD, by number key, click or both, with a countdown and voters' avatars. Emits `chosen`. |
 | `DotSettingsPanel` | Builds itself from a `DotConfig`. Never shows a secret. |
-| `DotBindingsPanel` | Rebinding, conflict detection, and a file that survives a restart. |
-| `DotInputBinding` | One binding as a short string — `"Y"`, `"Shift+A"`, `"Mouse 1"` — and back. |
+| `DotBindingsPanel` | Rebinding with conflict detection, in a file that survives a restart. |
+| `DotInputBinding` | One binding as text (`"Y"`, `"Shift+A"`, `"Mouse 1"`) and back. |
 
-## `DotSettingsPanel` reads the config you already wrote
+## Settings panel
 
-Every project in this family already describes its settings in `@export` annotations: keys, types, ranges, enum choices, groups, and which ones are secrets. A hand-built settings screen restates all of that and then drifts from it, one field at a time, until a setting exists that no screen can reach.
+`DotSettingsPanel` reads the `@export` annotations the config already has (keys, types, ranges, enum choices, groups) and builds the controls, so a screen never drifts from the config. It skips `sensitive_keys()`, since secrets end up in screenshots. Edits are held until `apply()`, and an invalid set is rolled back entirely.
 
-So this reads the config and builds the controls. It honours `sensitive_keys()`, for the same reason `DotConfig` refuses secrets from the environment and argv: they end up in screenshots and pasted bug reports.
+## Chat window
 
-Edits are held until `apply()`, and **an invalid set is rolled back entirely**. Applying half of them leaves the config in a state nobody chose and the player cannot tell which half survived.
-
-## `DotChatWindow` is a chat box, and knows nothing about chat
-
-A log that fades when the box is closed and holds while it is open, a line to type in, and an action that opens it — `Y` by default, because that is where this genre has put it for twenty-five years.
-
-It takes coloured fragments to draw and emits the string somebody typed. Point `submitted` at whatever your send path already is, feed arriving lines back through `add_message`, and connect `opened` and `closed` to whatever suspends your controller:
+It knows nothing about chat: it takes coloured fragments to draw and emits the string somebody typed. `open_action` is an `InputMap` action (`Y` by default), so players rebind it.
 
 ```gdscript
 var chat := DotChatWindow.new()
@@ -89,36 +68,28 @@ chat.closed.connect(func() -> void: controller.suspended = false)
 add_child(chat)
 ```
 
-**That last pair is not optional.** A focused `LineEdit` keeps typed keys out of `_unhandled_input`, but it cannot do a thing about `Input.is_action_pressed`, which is polled straight off the device and does not care what consumed the event. Without it, typing "sw" walks the player backwards.
-
-Long lines wrap at word boundaries, because a chat line is as long as the server's limit and an unwrapped one runs out of the box and across the screen. `max_lines` bounds drawn **rows** rather than messages, and the box's height is derived from it — a log allowed more rows than it is tall draws the overflow through the field somebody is typing in.
-
-**The binding is the player's.** `open_action` is an `InputMap` action, so it is rebindable through `DotBindingsPanel` or storable in a settings document as text through `DotInputBinding`. Nothing here hardcodes a key.
+Connect `opened` and `closed` to whatever suspends your controller. A focused `LineEdit` keeps keys out of `_unhandled_input` but not out of `Input.is_action_pressed`, so without it typing "sw" walks the player backwards. Long lines wrap at word boundaries, and `max_lines` counts drawn rows, not messages.
 
 ## Widgets pull
 
-A health bar wired to a `health_changed` signal misses the change that happened before it was created, and fires four times when four things change in one tick. A `DotHudWidget` holds a `Callable` that reads the value, on a throttle of ten times a second by default, which is faster than anyone can read, with an immediate path for anything where lateness is a lie.
+A `DotHudWidget` holds a `Callable` that reads the value, by default ten times a second. A bar wired to a signal misses changes that happened before it existed, and fires repeatedly when several things change in one tick. There is an immediate path for anything where lateness would be wrong.
 
-## The crosshair does the projection
+## Testing
 
-`gap_pixels()` is `half_viewport_height / tan(fov/2)`, the focal length in pixels, times `tan(spread)`. A crosshair that opens by an arbitrary amount is worse than a fixed one: it tells the player something confident and wrong about where their shots will go, and a crosshair that assumes a 90° field of view is wrong at every other setting.
+Import the project once, then run `examples/ui_selftest.tscn` and `examples/form_selftest.tscn` headless with Godot. They run offline, render nothing and exit non-zero on failure. Further docs are in [docs/](docs/README.md).
 
-## Validating
+## Credits
 
-```bash
-godot --headless --path . --import
-find . -name '*.gd' -not -path './.godot/*' | while read f; do
-    godot --headless --path . --check-only --script "res://${f#./}"
-done
-godot --headless --path . res://examples/ui_selftest.tscn
-```
+The one exception to "no art" is an optional weapon icon sheet. `DotIconSet` works without it; `DotWeaponIcons.stock()` adds it.
 
-`ui_selftest` and `form_selftest` run all offline, nothing rendered. They exit non-zero on any failure.
+| Asset | Author / source | Licence |
+| --- | --- | --- |
+| Weapon icon sheet (18 kB) | Jestan, [The Ultimate Weapons Pack](https://jestan.itch.io/weapons-pack) | CC0 1.0 |
 
-## Art credit
+The itch.io page says CC0, and the author confirms in its comment thread that the licence file inside the zip is outdated. Details in `addons/dot_ui/icons/jestan/CREDITS.md`.
 
-The one exception to "no art" is an optional 18 kB weapon icon sheet: Jestan's [The Ultimate Weapons Pack](https://jestan.itch.io/weapons-pack), CC0 1.0 (the itch.io page says so, and the author confirms in its comment thread that the licence file inside the zip is outdated). `DotIconSet` works with no sheet; `DotWeaponIcons.stock()` adds this one. Details in `addons/dot_ui/icons/jestan/CREDITS.md`.
+## Status and licence
 
-## Licence
+Part of the TMC **dot-\*** family of Godot addons. Written with Claude Code and maintained by `gamemann`. Every addon has headless tests, but little of this has been played by real users yet, so expect rough edges and please [open an issue](https://github.com/modcommunity/dot-ui/issues) when you hit one.
 
-MIT. See [LICENSE](LICENSE).
+MIT licence, see [LICENSE](LICENSE). The only closed part of the TMC platform is the web back end; you can use your own instead of TMC's.
