@@ -161,27 +161,10 @@ static func validate(d: Dictionary, value: Variant) -> DotResult:
 			else:
 				return _bad("Use a colour like #ff8800.")
 		"vector2", "vector3":
-			var n := vector_size(type)
-			var parts: Array = []
-			if value is Vector2 and n == 2:
-				parts = [value.x, value.y]
-			elif value is Vector3 and n == 3:
-				parts = [value.x, value.y, value.z]
-			elif value is Array and (value as Array).size() == n:
-				parts = value
-			else:
-				return _bad("Enter %d numbers." % n)
-			var nums: Array[float] = []
-			for i in n:
-				if not (parts[i] is int or parts[i] is float):
-					return _bad("%s: enter a number." % "XYZ"[i])
-				var c := float(parts[i])
-				if d.has("min") and c < float(d["min"]) - 0.0000001:
-					return _bad("%s: must be at least %s." % ["XYZ"[i], fmt(float(d["min"]))])
-				if d.has("max") and c > float(d["max"]) + 0.0000001:
-					return _bad("%s: must be at most %s." % ["XYZ"[i], fmt(float(d["max"]))])
-				nums.append(c)
-			v = Vector2(nums[0], nums[1]) if n == 2 else Vector3(nums[0], nums[1], nums[2])
+			var vec := _validate_vector(d, type, value)
+			if not vec.ok:
+				return vec
+			v = vec.value
 		"list":
 			if not value is Array:
 				return _bad("Must be a list.")
@@ -206,6 +189,31 @@ static func validate(d: Dictionary, value: Variant) -> DotResult:
 		elif verdict is String and verdict != "":
 			return _bad(verdict)
 	return DotResult.success(v)
+
+
+## The "vector2"/"vector3" branch of [method validate]: a vector or an array of [param type]'s size, each axis in min/max.
+static func _validate_vector(d: Dictionary, type: String, value: Variant) -> DotResult:
+	var n := vector_size(type)
+	var parts: Array = []
+	if value is Vector2 and n == 2:
+		parts = [value.x, value.y]
+	elif value is Vector3 and n == 3:
+		parts = [value.x, value.y, value.z]
+	elif value is Array and (value as Array).size() == n:
+		parts = value
+	else:
+		return _bad("Enter %d numbers." % n)
+	var nums: Array[float] = []
+	for i in n:
+		if not (parts[i] is int or parts[i] is float):
+			return _bad("%s: enter a number." % "XYZ"[i])
+		var c := float(parts[i])
+		if d.has("min") and c < float(d["min"]) - 0.0000001:
+			return _bad("%s: must be at least %s." % ["XYZ"[i], fmt(float(d["min"]))])
+		if d.has("max") and c > float(d["max"]) + 0.0000001:
+			return _bad("%s: must be at most %s." % ["XYZ"[i], fmt(float(d["max"]))])
+		nums.append(c)
+	return DotResult.success(Vector2(nums[0], nums[1]) if n == 2 else Vector3(nums[0], nums[1], nums[2]))
 
 
 ## Reads what a person typed into a number, JSON or list-item box.
