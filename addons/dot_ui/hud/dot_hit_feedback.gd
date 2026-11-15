@@ -2,19 +2,9 @@
 class_name DotHitFeedback
 extends Control
 
-## The hit marker and the damage numbers of one HUD, mounted and driven together. Eight
-## games built the same pair by hand (a full-rect, mouse-ignoring [DotDamageNumbers] and
-## [DotHitMarker] added under the HUD) and each wrote the same `confirm_hit` that flashes
-## one and feeds the other; this is that, once.
-##
-## [codeblock]
-## var fx := DotHitFeedback.mount(hud_root)        # in the HUD's build
-## fx.confirm_hit(victim, amount, point, killed, headshot)   # from the server's hit event
-## [/codeblock]
-##
-## [b]Call [method confirm_hit] only for a hit the authority applied[/b], never from a
-## prediction (see [DotHitMarker]). Both pieces stay reachable ([member marker],
-## [member numbers]) for a game that tunes colours or sizes.
+## The hit marker and damage numbers of one HUD, mounted and driven together (eight games built this pair by hand): [code]var fx := DotHitFeedback.mount(hud_root)[/code] in the HUD's build,
+## then [code]fx.confirm_hit(victim, amount, point, killed, headshot)[/code] from the server's hit event. [b]Call [method confirm_hit] only for a hit the authority applied[/b],
+## never from a prediction (see [DotHitMarker]). Both pieces stay reachable ([member marker], [member numbers]) for a game that tunes colours or sizes.
 
 var marker: DotHitMarker = null
 var numbers: DotDamageNumbers = null

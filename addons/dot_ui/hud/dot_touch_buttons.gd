@@ -1,18 +1,9 @@
 class_name DotTouchButtons
 extends DotHudPiece
 
-## Round on-screen buttons for a touch player, anchored to the bottom-right and drawn in the HUD theme.
-## It owns no game logic: [signal button_down] / [signal button_up] carry an id, and the game wires them to
-## whatever it does (dot-player-controller's [code]DotFpsTouchSampler.hold[/code], a weapon, a menu).
+## Round on-screen buttons for a touch player, anchored bottom-right in the HUD theme. No game logic: [signal button_down] / [signal button_up] carry an id the game wires to whatever
+## it does, e.g. [code]buttons.button_down.connect(func(id): sampler.hold(bit_for(id), true))[/code] after [code]buttons.set_buttons(DotTouchButtons.fps_stock())[/code], with [code]sampler.ignore_fn = buttons.contains_point[/code].
 ## Fingers are tracked by index, so a thumb on a button and another on the stick or the look side do not disturb each other.
-##
-## [codeblock]
-## var buttons := DotTouchButtons.new()
-## buttons.set_buttons(DotTouchButtons.fps_stock())
-## buttons.button_down.connect(func(id): sampler.hold(bit_for(id), true))
-## buttons.button_up.connect(func(id): sampler.hold(bit_for(id), false))
-## sampler.ignore_fn = buttons.contains_point
-## [/codeblock]
 
 signal button_down(id: StringName)
 signal button_up(id: StringName)

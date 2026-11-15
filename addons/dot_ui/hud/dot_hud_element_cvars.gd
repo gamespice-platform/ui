@@ -1,14 +1,9 @@
 class_name DotHudElementCvars
 extends RefCounted
 
-## The player's per-element HUD switches as client cvars: `cl_hud_show_<element>` (0 or 1) and
-## `cl_hud_scale`. Archived, never replicated. First slice of the shared HUD redesign.
-##
-## A game attaches the controls it has under the stock element ids ([constant ELEMENTS]) with
-## [method attach], binds a console with [method bind_console], and the cvars show and hide
-## them. An element the game never attaches costs nothing; its cvar still registers so a
-## config file written for one game loads in another. The perf panel is [code]perf[/code],
-## off by default; every other element is on.
+## The player's per-element HUD switches as client cvars, `cl_hud_show_<element>` (0 or 1) and `cl_hud_scale`; archived, never replicated. A game attaches the controls it has
+## under the stock element ids ([constant ELEMENTS]) with [method attach], binds a console with [method bind_console], and the cvars show and hide them. An element never attached
+## costs nothing, but its cvar still registers so a config file written for one game loads in another. The perf panel is [code]perf[/code], off by default; every other element is on.
 
 signal changed
 
