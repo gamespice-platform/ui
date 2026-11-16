@@ -211,7 +211,19 @@ func _build() -> void:
 	box.add_theme_constant_override("separation", 10)
 	add_child(box)
 	_box = box
+	_build_head(box)
+	_build_list(box)
+	_build_entry(box)
+	_build_foot(box)
 
+	resized.connect(_on_resized)
+	_compact = _wants_compact()
+	_place_entry()
+	_redraw()
+
+
+## The title row: eyebrow, title and the refresh button.
+func _build_head(box: VBoxContainer) -> void:
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 12)
 	box.add_child(head)
@@ -233,6 +245,9 @@ func _build() -> void:
 	_refresh.pressed.connect(func() -> void: refresh_requested.emit())
 	head.add_child(_refresh)
 
+
+## The search field and the scrolling list with its empty-state label.
+func _build_list(box: VBoxContainer) -> void:
 	_search = LineEdit.new()
 	_search.placeholder_text = "Search servers and maps"
 	_search.clear_button_enabled = true
@@ -261,6 +276,9 @@ func _build() -> void:
 	_empty.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	inner.add_child(_empty)
 
+
+## The row for typing an address by hand.
+func _build_entry(box: VBoxContainer) -> void:
 	var entry := HBoxContainer.new()
 	_entry = entry
 	entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -277,6 +295,9 @@ func _build() -> void:
 	_add.pressed.connect(_submit_address)
 	entry.add_child(_add)
 
+
+## The status line and the Join button.
+func _build_foot(box: VBoxContainer) -> void:
 	var foot := HBoxContainer.new()
 	_foot = foot
 	foot.add_theme_constant_override("separation", 12)
@@ -291,11 +312,6 @@ func _build() -> void:
 	_join.custom_minimum_size.x = 120.0
 	_join.pressed.connect(func() -> void: join_selected())
 	foot.add_child(_join)
-
-	resized.connect(_on_resized)
-	_compact = _wants_compact()
-	_place_entry()
-	_redraw()
 
 
 func _button(text: String, primary: bool) -> Button:
