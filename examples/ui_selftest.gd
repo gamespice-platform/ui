@@ -13,13 +13,13 @@ extends "selftest/stack_checks.gd"
 ## screen stack has to keep in agreement, a settings panel that must never show a
 ## secret, and a rebinder that must never leave an action bound to nothing.
 
-const CHECKS := 490
+const CHECKS := 509
 
 ## Sections entered against sections that ran to their last line, and against this. A
 ## runtime error inside a section aborts that function and nothing says so; a section that
 ## bailed out early after a failed guard is counted as not finished on purpose. The CHECKS
 ## total is the other half — see docs/testing.md.
-const SECTIONS := 34
+const SECTIONS := 35
 
 
 func _ready() -> void:
@@ -42,6 +42,7 @@ func _run() -> void:
 	_test_crosshair()
 	_test_feed()
 	_test_table()
+	_test_server_list()
 	_test_settings_panel()
 	_test_settings_apply()
 	_test_bindings()
@@ -892,6 +893,69 @@ func _test_feed() -> void:
 
 	feed.queue_free()
 	remove_child(feed)
+	_done()
+
+
+## The Gamespice look and the server list: rows by address, selecting is not joining, the
+## focused row survives a refresh, and a phone width stacks the columns.
+func _test_server_list() -> void:
+	_section("server list")
+
+	var look := DotUiGamespice.theme()
+	_check(look.is_type_variation(&"DotEyebrow", &"Label"), "the Gamespice theme has the eyebrow")
+	_check(look.get_stylebox("focus", "Button") is StyleBoxFlat, "and a focus ring for keyboard and pad")
+	_close(DotUiGamespice.fit_factor(Vector2(1280, 720), 1.0, Vector2(1280, 720), Vector2(460, 520), 16.0, 1.0), 1.0,
+		"a desktop window keeps the layout it was drawn for")
+
+	var list := DotServerList.new()
+	add_child(list)
+	var joined: Array[String] = []
+	var picked: Array[String] = []
+	list.join_requested.connect(func(address: String) -> void: joined.append(address))
+	list.selection_changed.connect(func(address: String) -> void: picked.append(address))
+	var rows: Array[Dictionary] = [
+		{"address": "a:1", "name": "Alpha", "map": "dust", "players": 3, "max_players": 16, "ping_ms": 40, "status": "online"},
+		{"address": "b:2", "name": "Bravo", "map": "orange", "players": 0, "max_players": 8, "ping_ms": 200, "status": "online"},
+		{"address": "c:3", "name": "", "map": "", "players": 0, "max_players": 0, "ping_ms": -1, "status": "offline"},
+		{"name": "no address"},
+	]
+	list.set_rows(rows)
+	_check(list.rows().size() == 3, "a row with no address is skipped", str(list.rows().size()))
+	_check(list.shown_count() == 3, "every row is on screen")
+	_check(not list.join_selected() and joined.is_empty(), "Join with nothing selected does nothing")
+
+	list.row_button("b:2").pressed.emit()
+	_check(list.selected_address() == "b:2" and picked.size() == 1 and picked[0] == "b:2", "pressing a row selects it", str(picked))
+	_check(joined.is_empty(), "and selecting is not joining")
+	_check(list.join_selected() and joined.size() == 1 and joined[0] == "b:2", "Join joins the selected row", str(joined))
+
+	var before := list.row_button("b:2")
+	rows[1]["ping_ms"] = 30
+	list.set_rows(rows)
+	_check(list.row_button("b:2") == before, "a refresh keeps the same row Button, so a focused row stays focused")
+	_check(before.get_combined_minimum_size().y >= list.row_height, "a row is at least a thumb high", str(before.get_combined_minimum_size()))
+
+	list.search("DUST")
+	_check(list.shown_count() == 1 and list.row_button("a:1") != null, "search filters by map, any case")
+	_check(list.selected_address() == "", "a filtered-out selection is cleared rather than joined blind")
+	list.search("")
+	list.max_rows = 2
+	list.set_rows(rows)
+	_check(list.shown_count() == 2, "max_rows limits the rows drawn", str(list.shown_count()))
+
+	list.size = Vector2(390, 600)
+	_check(list.is_compact(), "a phone width stacks the columns")
+	list.size = Vector2(1000, 600)
+	_check(not list.is_compact(), "a desktop width keeps them")
+	list.compact_below = 0.0
+	list.size = Vector2(300, 600)
+	_check(not list.is_compact(), "compact_below 0 never stacks")
+	list.size = Vector2(844, 390)
+	_check(list.is_short(), "a landscape phone puts the address box on the footer line")
+	list.size = Vector2(844, 700)
+	_check(not list.is_short(), "and a tall panel gives it its own line again")
+
+	list.queue_free()
 	_done()
 
 

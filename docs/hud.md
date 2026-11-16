@@ -53,6 +53,16 @@ An absent column `width` is an equal share; zero means "shrink to the content" a
 
 An icon column (`"kind": &"icon"`, a `Texture2D` per row) puts an avatar beside a name; a row with no picture keeps the column's width, so the columns after it do not shift.
 
+## The server list and the Gamespice look (API 24)
+
+`DotServerList` is the window dot-browser deliberately does not ship: a heading, a search, an address box, one focusable row per server and a Join button. Rows are dictionaries in `DotBrowserEntry.to_row()`'s keys, so it names nothing outside dot-core.
+
+- **Selecting is not joining.** A row press selects; Join joins. A list where a tap joins is a list where a mis-tap leaves the menu.
+- **Rows are kept by address and updated in place.** A refresh lands every second or so; rebuilding the rows would drop a pad's focus on every one.
+- **A phone width stacks the columns** (`compact_below`, 0 never). `max_rows` 0 draws every row.
+
+`DotUiGamespice` is the platform's look, opt-in: the tokens, the glass card, the focus ring, the primary button's glow, list rows and `fit_factor` (how far to scale a canvas so a card reads at desktop size on a phone). The web shell's `TmcShellStyle` and dot-menu's `gamespice` theme use the same values. `DotUiTheme.dark()` stays the default; nothing changes for a game that does not ask.
+
 ## The chat box
 
 `DotChatWindow`: a log that fades, a line to type in, and a key that opens it.
@@ -136,6 +146,6 @@ Decided 2026-10-11 by grepping every game's HUD for its own version (`dot-ui-hud
 - **Localisation.** Every string here is either a player-supplied name or a debug label. A game calls `tr()` (or dot-locale) on what it passes in.
 - **Gamepad focus navigation.** `DotScreen.initial_focus` grabs focus and Godot's own focus neighbours do the rest. A focus *ring* and edge-wrapping between containers is a real design problem and half of one is worse than none.
 - **A console.** dot-server has `DotConsole` and its command surface; the player's console is dot-console. Rendering it here would make dot-ui depend on dot-server.
-- **A server browser.** `DotTableView` is what one is built on; the query client and list model are dot-browser's.
+- **A server browser's model.** The query client and list model are dot-browser's; `DotServerList` is only the window, and takes the rows `DotBrowserEntry.to_row()` makes as dictionaries.
 - **Nine-patch or textured styling.** See "ships no art". A game assigns its own `Theme` and every widget here obeys it.
 - **Touch controls.** dot-player-controller ships `DotFpsTouchSampler`, which turns fingers into commands and deliberately ships no layout. The on-screen buttons are a game's design.

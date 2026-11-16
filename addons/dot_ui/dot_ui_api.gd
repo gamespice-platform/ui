@@ -41,5 +41,7 @@ extends RefCounted
 # 21: DotHitFeedback, the hit marker and damage numbers mounted and fed together (mount, confirm_hit).
 # 22: DotHudElementCvars (cl_hud_show_<element>, cl_hud_scale; perf panel off by default).
 # 23: DotHealthTag, the pill health bar and name over another player's head (update, face).
-const LEVEL := 23
+# 24: DotUiGamespice (Gamespice's tokens, card, focus ring, primary/ghost buttons, rows, fit_factor)
+#     and DotServerList (a focusable, phone-width server list that takes rows as dictionaries).
+const LEVEL := 24
 const OLDEST := 1
