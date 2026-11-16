@@ -36,6 +36,25 @@ func _test_settings_screen() -> void:
 		"with a focus path that resolves, which get_path() before the tree does not"
 	)
 
+	_check_settings_scroll(plain)
+
+	plain.panel._edited("port", 4242)
+	plain.apply()
+	_check(
+		direct.port == 4242,
+		"Apply writes straight through when the source IS the config (%d)" % direct.port
+	)
+	stack.pop()
+
+	await _check_settings_source(stack)
+
+	await _check_pause_screen(stack)
+
+	stack.clear()
+	stack.queue_free()
+	_done()
+
+func _check_settings_scroll(plain: DotSettingsScreen) -> void:
 	# THE CHECK A PICTURE HAD TO FIND FIRST.
 	#
 	# A `DotSettingsPanel` is as tall as the document it was handed, and `DotUiConfig` alone
@@ -79,14 +98,9 @@ func _test_settings_screen() -> void:
 		"with the panel inside it and the buttons outside, so they stay reachable"
 	)
 
-	plain.panel._edited("port", 4242)
-	plain.apply()
-	_check(
-		direct.port == 4242,
-		"Apply writes straight through when the source IS the config (%d)" % direct.port
-	)
-	stack.pop()
 
+
+func _check_settings_source(stack: DotScreenStack) -> void:
 	# And the two-step, which is the reason this screen exists. `to_config()` hands out a
 	# SNAPSHOT: a screen that called only `panel.apply()` would report success and change
 	# nothing, for ever, and every check above would still pass.
@@ -138,6 +152,9 @@ func _test_settings_screen() -> void:
 	_check(not orphan.build(null).ok, "a screen with nothing to edit is refused")
 	orphan.free()
 
+
+
+func _check_pause_screen(stack: DotScreenStack) -> void:
 	# The pause menu beside it, for the same reason: four games wrote the same forty lines.
 	var pause := DotPauseScreen.new()
 	pause.name = "Pause"
@@ -186,10 +203,6 @@ func _test_settings_screen() -> void:
 		"a pause menu with no buttons is refused, because it could not be left"
 	)
 	empty.free()
-
-	stack.clear()
-	stack.queue_free()
-	_done()
 
 
 ## The node a settings screen's panel is parented to.
@@ -266,6 +279,17 @@ func _test_bindings() -> void:
 	panel.refuse_conflicts = true
 	panel.bind_action(&"test_fire", free_key)
 
+	_check_bindings_saved(panel)
+
+	var sorted_panel := await _check_bindings_sorted()
+	_check_bindings_prefixes(sorted_panel)
+	sorted_panel.queue_free()
+	for name_str in ["probe_zulu", "probe_alpha", "probe_mike"]:
+		InputMap.erase_action(name_str)
+	_done()
+
+
+func _check_bindings_saved(panel: DotBindingsPanel) -> void:
 	# Persistence, through DotPaths so a web build's IndexedDB is flushed.
 	DotPaths.remove_tree(BINDINGS_FILE)
 	_check(panel.save().ok, "bindings save")
@@ -318,6 +342,9 @@ func _test_bindings() -> void:
 	for action in [&"test_fire", &"test_jump", &"test_use"]:
 		InputMap.erase_action(action)
 
+
+
+func _check_bindings_sorted() -> DotBindingsPanel:
 	# SORTED AS STRINGS, AND THE LABEL DROPS THE PREFIX.
 	#
 	# `Array.sort()` on a `StringName` compares interned POINTERS, so this method's own
@@ -361,7 +388,11 @@ func _test_bindings() -> void:
 		"and the label drops the prefix, which is the part that is not information (%s)"
 			% [label_texts]
 	)
+	return sorted_panel
 
+
+
+func _check_bindings_prefixes(sorted_panel: DotBindingsPanel) -> void:
 	# [b]A game's bindable actions are not all in one namespace.[/b] A first-person game's
 	# movement is `dot_fps_*` and its chat key is its own `<game>_chat`; a panel filtered on
 	# one prefix showed one of those and silently dropped the other, which is an action a
@@ -399,11 +430,6 @@ func _test_bindings() -> void:
 
 	two_panel.queue_free()
 	InputMap.erase_action("other_chat")
-
-	sorted_panel.queue_free()
-	for name_str in ["probe_zulu", "probe_alpha", "probe_mike"]:
-		InputMap.erase_action(name_str)
-	_done()
 
 
 # --- The binding codec -----------------------------------------------------
@@ -469,6 +495,12 @@ func _test_input_binding() -> void:
 		"a name typed by hand in any case still reads"
 	)
 
+	_check_binding_old_spellings()
+	_check_binding_replacement()
+	_done()
+
+
+func _check_binding_old_spellings() -> void:
 	# The old spelling. Every binding stored before the names says "Mouse 4" for the wheel
 	# up; reading it as anything else rebinds a player's previous-weapon key on upgrade.
 	var old_up := DotInputBinding.from_text("Mouse 4") as InputEventMouseButton
@@ -496,6 +528,8 @@ func _test_input_binding() -> void:
 	_check(DotInputBinding.from_text("Qwerty") == null, "and so is a word that is not a key")
 	_check(not DotInputBinding.is_bound("Qwerty"), "is_bound agrees")
 
+
+func _check_binding_replacement() -> void:
 	# The replacement rule. `action_add_event` on an action that already has one leaves
 	# BOTH bound, so a rebound key still works on its old one — invisible until a player
 	# rebinds crouch onto their forward key and both still fire.
@@ -537,4 +571,3 @@ func _test_input_binding() -> void:
 	)
 
 	InputMap.erase_action(&"probe_chat")
-	_done()
