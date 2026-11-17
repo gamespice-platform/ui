@@ -14,7 +14,7 @@ Also requires **dot-profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime
 | --- | --- |
 | [docs/README.md](docs/README.md) | the index |
 | [docs/screens.md](docs/screens.md) | the stack, screen ids, pause, the shared screens, the settings and bindings panels, `DotInputBinding` |
-| [docs/hud.md](docs/hud.md) | the theme, widgets, crosshair, table, chat box, ballot, the glance pieces and which arena pieces moved, what is deliberately not here |
+| [docs/hud.md](docs/hud.md) | the theme, widgets, crosshair, table, chat box, ballot, the glance pieces and which FC pieces moved, what is deliberately not here |
 | [docs/testing.md](docs/testing.md) | adding a check, or believing one; the screenshots |
 | [docs/history.md](docs/history.md) | the bugs, and how each looked |
 

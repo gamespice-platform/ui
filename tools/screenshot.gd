@@ -91,7 +91,7 @@ func _initialize() -> void:
 		# The glance pieces (DotVitals, DotAmmoCounter, DotScoreStrip, DotHitMarker,
 		# DotDamageNumbers, DotKeyPrompt, DotKeyHints) laid out the way game-fatal-contact lays them
 		# out, over a pale floor with a dark block, because pale ground is where the first
-		# arena HUD vanished. A cover stand-in down the right edge, where a client shell
+		# FC HUD vanished. A cover stand-in down the right edge, where a client shell
 		# draws its ballots, sits over a right-hand hint column: that column must be dimmed.
 		{"id": &"", "file": "hud_pieces.png", "pieces": "dark"},
 		# The same in DotUiTheme.light(): every colour from the theme, dark numbers ringed in
@@ -415,7 +415,7 @@ func _build_result() -> void:
 			{"id": "zombiezone", "label": "Zombie Zone", "votes": 0.0},
 			{"id": "g2gfast", "label": "g2gfast", "votes": 0.0},
 			{"id": "deathrun", "label": "Deathrun", "votes": 0.0},
-			{"id": "arena", "label": "Arena", "votes": 0.0},
+			{"id": "fc", "label": "FC", "votes": 0.0},
 			{"id": "__keep__", "label": "Don't change", "votes": 0.0},
 		],
 		"voters": {}, "people": {"u3": {"name": "quiet_one", "avatar": ""}},

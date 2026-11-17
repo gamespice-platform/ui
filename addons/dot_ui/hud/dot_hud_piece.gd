@@ -12,7 +12,7 @@ extends Control
 ## reads its game once a frame and hands them over.
 ##
 ## [b]Readable over a pale map.[/b] Bold text with a dark outline, on a dark translucent
-## plate. The first arena HUD drew thin regular-weight text straight over white prototype
+## plate. The first FC HUD drew thin regular-weight text straight over white prototype
 ## tiles, and health, ammunition and the key hints all but vanished.
 ##
 ## [b]Coloured by the theme, with defaults that need none.[/b] Each colour is looked up as

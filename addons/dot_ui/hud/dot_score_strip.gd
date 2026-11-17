@@ -111,7 +111,7 @@ func _side(rect: Rect2, fill: Color, tag: String, score: int) -> void:
 	# How much of the side's colour fills the plate is the theme's (`team_fill`): the dark HUD
 	# tints its own dark plate and draws the colour as the edge and a bar along the top, so
 	# two sides still read at a glance without two slabs of saturated paint over the world;
-	# the bright theme paints the plate, as the first arena HUD did.
+	# the bright theme paints the plate, as the first FC HUD did.
 	var k := clampf(float(number(&"team_fill")) / 100.0, 0.0, 1.0)
 	var plate := colour(&"plate")
 	var body := Color(plate.lerp(fill.darkened(0.15), k), lerpf(maxf(plate.a, 0.8), 0.9, k))
