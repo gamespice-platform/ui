@@ -519,6 +519,21 @@ func _chat_window_wrap() -> void:
 		"wrapping keeps every word, rather than truncating the end"
 	)
 
+	# One unbroken word wider than the box wraps by character, losing nothing.
+	early.clear()
+	early.feed().max_lines = 60
+	var url := "https://example.com/" + "a".repeat(400)
+	early.add_said("someone", url)
+	var url_joined := ""
+	for row in early.feed().lines():
+		for part in (row["parts"] as Array):
+			url_joined += str((part as Dictionary).get("text", ""))
+	_check(
+		early.line_count() > 2 and url_joined.contains(url),
+		"a long unbroken URL wraps across rows without losing a character (%d)" % early.line_count(),
+		"whitespace-only wrap let it run across the touch thumbstick"
+	)
+
 	# Rows are bounded by what the box is tall enough to draw, or the overflow is drawn
 	# straight through the field somebody is typing in.
 	early.clear()

@@ -758,6 +758,9 @@ func add_message(parts: Array) -> void:
 ## box and across the middle of the screen. A picture is the only thing that shows this;
 ## every assertion about the log passes either way.
 ##
+## [b]A word wider than the box is broken by character[/b], so a long URL stays inside
+## the panel (and off the touch thumbstick). No length limit applies.
+##
 ## [b]It wraps rather than truncating.[/b] The alternative loses the end of what somebody
 ## said, which is worse than an extra row: chat is the one place where the text IS the
 ## content, and a player cannot ask the log to repeat itself.
@@ -795,21 +798,47 @@ func _wrap(parts: Array) -> Array:
 
 	for entry in words:
 		var word := str(entry["text"])
+		var word_width := font.get_string_size(
+			word, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
+		).x
+
+		# A word wider than the whole box (a long URL, a held key) is broken by character
+		# so it wraps inside the panel instead of running across the screen and the touch
+		# controls. Whitespace-free text has nowhere else to break.
+		if word_width > limit:
+			if not row.is_empty():
+				rows.append(row)
+				row = []
+				row_width = 0.0
+
+			var chunk := ""
+			for ch in word:
+				var trial := chunk + ch
+				var trial_width := font.get_string_size(
+					trial, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
+				).x
+				if trial_width > limit and chunk != "":
+					rows.append([{"text": chunk, "colour": entry["colour"]}])
+					chunk = ch
+				else:
+					chunk = trial
+
+			word = chunk
+			word_width = font.get_string_size(
+				word, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
+			).x
+
 		var piece := word if row.is_empty() else " " + word
 		var piece_width := font.get_string_size(
 			piece, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
 		).x
 
-		# A word wider than the whole box goes on a line of its own and overflows it.
-		# Breaking inside a word would turn one long URL into something nobody can copy.
 		if not row.is_empty() and row_width + piece_width > limit:
 			rows.append(row)
 			row = []
 			row_width = 0.0
 			piece = word
-			piece_width = font.get_string_size(
-				piece, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
-			).x
+			piece_width = word_width
 
 		# Merged into the previous fragment when the colour matches, so a row of one
 		# person's words is one draw call rather than one per word.
