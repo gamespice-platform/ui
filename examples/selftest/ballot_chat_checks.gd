@@ -141,9 +141,9 @@ func _test_ballot_pointer(panel: DotBallotPanel, picked: Array) -> void:
 	_done()
 
 
-func _game_ballot(voters: Dictionary, ids: Array = ["wipeout", "zombie", "g2g", "deathrun", "fc", "__keep__"]) -> Dictionary:
+func _game_ballot(voters: Dictionary, ids: Array = ["wipeout", "zombie", "airdrift", "deathrun", "fc", "__keep__"]) -> Dictionary:
 	var labels := {
-		"wipeout": "Wipeout", "zombie": "Zombie Zone", "g2g": "g2gfast", "deathrun": "Deathrun",
+		"wipeout": "Wipeout", "zombie": "Zombie Zone", "airdrift": "Airdrift", "deathrun": "Deathrun",
 		"fc": "FC", "__keep__": "Don't change", "smash": "Smash Copter",
 	}
 	var options := []
@@ -649,7 +649,7 @@ func _ballot_avatar_rows_late(panel: DotBallotPanel) -> void:
 	# 5. The same options in another order: the vote follows the option, not the number.
 	panel.show_state(_game_ballot({}))
 	panel.choose(4)
-	panel.show_state(_game_ballot({"u9": 0}, ["fc", "wipeout", "zombie", "g2g", "deathrun", "__keep__"]))
+	panel.show_state(_game_ballot({"u9": 0}, ["fc", "wipeout", "zombie", "airdrift", "deathrun", "__keep__"]))
 	_frames(panel, 60)
 	_check(
 		str(panel._options[panel.choice_of("u9")]["id"]) == "fc" and _row_drawn(panel, "u9") == panel.choice_of("u9"),
@@ -658,9 +658,9 @@ func _ballot_avatar_rows_late(panel: DotBallotPanel) -> void:
 	)
 
 	# 6. Votes changing under everybody: every avatar settles on its own voter's row.
-	panel.show_state(_game_ballot({"u1": 0, "u2": 5, "u9": 0}, ["fc", "wipeout", "zombie", "g2g", "deathrun", "__keep__"]))
+	panel.show_state(_game_ballot({"u1": 0, "u2": 5, "u9": 0}, ["fc", "wipeout", "zombie", "airdrift", "deathrun", "__keep__"]))
 	_frames(panel, 10)
-	panel.show_state(_game_ballot({"u1": 3, "u2": 1, "u9": 5}, ["fc", "wipeout", "zombie", "g2g", "deathrun", "__keep__"]))
+	panel.show_state(_game_ballot({"u1": 3, "u2": 1, "u9": 5}, ["fc", "wipeout", "zombie", "airdrift", "deathrun", "__keep__"]))
 	_frames(panel, 90)
 	_check(
 		_row_drawn(panel, "u1") == 3 and _row_drawn(panel, "u2") == 1 and _row_drawn(panel, "u9") == 5,

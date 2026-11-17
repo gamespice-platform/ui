@@ -413,7 +413,7 @@ func _build_result() -> void:
 		"options": [
 			{"id": "wipeout", "label": "Wipeout", "votes": 0.0},
 			{"id": "zombiezone", "label": "Zombie Zone", "votes": 0.0},
-			{"id": "g2gfast", "label": "g2gfast", "votes": 0.0},
+			{"id": "airdrift", "label": "airdrift", "votes": 0.0},
 			{"id": "deathrun", "label": "Deathrun", "votes": 0.0},
 			{"id": "fc", "label": "FC", "votes": 0.0},
 			{"id": "__keep__", "label": "Don't change", "votes": 0.0},
