@@ -769,91 +769,9 @@ func add_message(parts: Array) -> void:
 ## tree, or before a theme resolves — because an unwrapped line is legible and a line
 ## wrapped by a guess is not.
 func _wrap(parts: Array) -> Array:
-	var font := get_theme_default_font()
 	var limit := _feed.size.x if _feed != null and _feed.size.x > 0.0 else width
+	return DotChatWrap.wrap(parts, get_theme_default_font(), get_theme_default_font_size(), limit)
 
-	if font == null or limit <= 0.0:
-		return [parts]
-
-	var font_size := get_theme_default_font_size()
-
-	# Words rather than fragments, each keeping the colour of the fragment it came from,
-	# so a wrap inside what somebody said does not take the speaker's colour with it.
-	var words: Array[Dictionary] = []
-
-	for part in parts:
-		var fragment: Dictionary = part
-		var colour: Variant = fragment.get("colour", Color.WHITE)
-		var text := str(fragment.get("text", ""))
-
-		for word in text.split(" ", false):
-			words.append({"text": word, "colour": colour})
-
-	if words.is_empty():
-		return [parts]
-
-	var rows: Array = []
-	var row: Array = []
-	var row_width := 0.0
-
-	for entry in words:
-		var word := str(entry["text"])
-		var word_width := font.get_string_size(
-			word, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
-		).x
-
-		# A word wider than the whole box (a long URL, a held key) is broken by character
-		# so it wraps inside the panel instead of running across the screen and the touch
-		# controls. Whitespace-free text has nowhere else to break.
-		if word_width > limit:
-			if not row.is_empty():
-				rows.append(row)
-				row = []
-				row_width = 0.0
-
-			var chunk := ""
-			for ch in word:
-				var trial := chunk + ch
-				var trial_width := font.get_string_size(
-					trial, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
-				).x
-				if trial_width > limit and chunk != "":
-					rows.append([{"text": chunk, "colour": entry["colour"]}])
-					chunk = ch
-				else:
-					chunk = trial
-
-			word = chunk
-			word_width = font.get_string_size(
-				word, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
-			).x
-
-		var piece := word if row.is_empty() else " " + word
-		var piece_width := font.get_string_size(
-			piece, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size
-		).x
-
-		if not row.is_empty() and row_width + piece_width > limit:
-			rows.append(row)
-			row = []
-			row_width = 0.0
-			piece = word
-			piece_width = word_width
-
-		# Merged into the previous fragment when the colour matches, so a row of one
-		# person's words is one draw call rather than one per word.
-		if not row.is_empty() and (row[row.size() - 1] as Dictionary)["colour"] == entry["colour"]:
-			var last: Dictionary = row[row.size() - 1]
-			last["text"] = str(last["text"]) + piece
-		else:
-			row.append({"text": piece, "colour": entry["colour"]})
-
-		row_width += piece_width
-
-	if not row.is_empty():
-		rows.append(row)
-
-	return rows
 
 
 ## Adds a one-colour line. What a system message is.
