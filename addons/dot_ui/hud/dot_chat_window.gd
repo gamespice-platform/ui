@@ -208,9 +208,6 @@ var channels: Array[Dictionary] = []
 ## script by path) the first time it is needed.
 var self_mute: Object = null
 
-const SELF_MUTE_SERVICE := &"dot_self_mute"
-const SELF_MUTE_SCRIPT := "res://addons/dot_chat/runtime/dot_chat_self_mute.gd"
-
 var _feed: DotFeedView = null
 var _entry: LineEdit = null
 var _prompt: Label = null
@@ -237,7 +234,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	if register_actions:
-		_register_actions()
+		DotChatParts.register_actions(self)
 
 	if place_bottom_left:
 		_place()
@@ -271,24 +268,6 @@ func _ensure_built() -> void:
 	_apply_open_state()
 
 
-func _register_actions() -> void:
-	if open_action != &"":
-		DotInputBinding.ensure_action(open_action, default_open_binding)
-	if team_action != &"" and default_team_binding != "":
-		DotInputBinding.ensure_action(team_action, default_team_binding)
-	if cycle_action != &"" and default_cycle_binding != "":
-		DotInputBinding.ensure_action(cycle_action, default_cycle_binding)
-
-	# What the keys ENDED UP as, not what was asked for: ensure_action keeps a binding the
-	# project or the player already has, so "Y does not open chat" is answered by this
-	# line saying chat is on T. DEBUG, once per window.
-	DotLog.debug(CHANNEL, "chat keys", {
-		"open": DotInputBinding.describe_action(open_action),
-		"team": DotInputBinding.describe_action(team_action),
-		"cycle": DotInputBinding.describe_action(cycle_action),
-	})
-
-
 func _place() -> void:
 	anchor_left = 0.0
 	anchor_right = 0.0
@@ -319,89 +298,28 @@ func _relayout_log() -> void:
 	_feed.offset_top = -(float(rows) * (line_height + line_gap) + entry_height)
 
 
-## Anchors and then offsets, in that order, because the anchor setter rewrites offsets.
-func _anchor(
-	control: Control,
-	a_left: float, a_top: float, a_right: float, a_bottom: float,
-	o_left: float, o_top: float, o_right: float, o_bottom: float
-) -> void:
-	control.anchor_left = a_left
-	control.anchor_top = a_top
-	control.anchor_right = a_right
-	control.anchor_bottom = a_bottom
-	control.offset_left = o_left
-	control.offset_top = o_top
-	control.offset_right = o_right
-	control.offset_bottom = o_bottom
-
-
 func _build() -> void:
-	_feed = DotFeedView.new()
-	_feed.name = "Log"
-	_feed.max_lines = max_lines
+	_feed = DotChatParts.make_feed(self, "Log", max_lines)
 	_feed.lifetime_sec = lifetime_sec
-	_feed.newest_last = true
-	_feed.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_feed.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_feed.line_height = line_height
-	_feed.line_gap = line_gap
-	_feed.outline_size = outline_size
-	# The log above the entry, both anchored to the BOTTOM of the box, and the log
-	# re-sized as lines arrive so the newest one always sits just above the entry and
-	# older ones climb away from it. Anchored to the top instead — which is what a feed
-	# does — a half-full log leaves a gap over the entry field and a full one draws
-	# through it.
-	#
-	# [b]Every offset is set, and all four of them AFTER the anchors.[/b] Assigning
-	# `anchor_right` RECOMPUTES the offsets to preserve the control's current rectangle,
-	# and a control built in code has no rectangle yet — so `anchor_right = 1.0` on a
-	# fresh Control sets `offset_right` to minus the parent's width and the thing stays
-	# nought pixels wide. It then draws nothing while every property about it reads
-	# correctly, which is what the first picture of this box showed: an entry field, and
-	# a log that was not there. This family has now paid for that trap seven times.
-	_anchor(_feed, 0.0, 1.0, 1.0, 1.0, 0.0, -(_log_height() + entry_height), 0.0, -entry_height)
 	add_child(_feed)
 	_feed.line_added.connect(func(_line: Dictionary) -> void: _relayout_log())
 	_feed.line_expired.connect(func(_line: Dictionary) -> void: _relayout_log())
 
-	# A second feed rather than the first one refilled. The closed log's lines carry the
-	# time each arrived, and that is what fades them; refilling it from the history on
-	# every open would restart every clock, and the lines a player had already seen go
-	# would come back for another ten seconds when they closed the box again.
-	_history_view = DotFeedView.new()
-	_history_view.name = "History"
-	_history_view.max_lines = history_lines
+	# A second feed rather than the first one refilled: the closed log's lines carry the time
+	# each arrived, which is what fades them, and refilling it would restart every clock.
+	_history_view = DotChatParts.make_feed(self, "History", history_lines)
 	_history_view.lifetime_sec = 0.0
 	_history_view.hold = true
-	_history_view.newest_last = true
-	_history_view.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_history_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_history_view.line_height = line_height
-	_history_view.line_gap = line_gap
-	_history_view.outline_size = outline_size
 	_history_view.visible = false
-	var tall := float(history_lines) * (line_height + line_gap)
-	_anchor(_history_view, 0.0, 1.0, 1.0, 1.0, 0.0, -(tall + entry_height), 0.0, -entry_height)
 	add_child(_history_view)
 	_history_view.draw.connect(_draw_backdrop)
 
-	var row := HBoxContainer.new()
-	row.name = "Entry"
-	_anchor(row, 0.0, 1.0, 1.0, 1.0, 0.0, -entry_height, 0.0, 0.0)
-	add_child(row)
-
-	_prompt = Label.new()
-	_prompt.name = "Prompt"
-	row.add_child(_prompt)
-
-	_entry = LineEdit.new()
-	_entry.name = "Line"
-	_entry.max_length = max_length
-	_entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_entry.caret_blink = true
+	var parts := DotChatParts.make_entry_row(self)
+	add_child(parts["row"])
+	_prompt = parts["prompt"]
+	_entry = parts["entry"]
 	_entry.text_submitted.connect(_on_submitted)
 	_entry.gui_input.connect(_on_entry_gui_input)
-	row.add_child(_entry)
 
 
 # --- Opening and closing ---------------------------------------------------
@@ -491,8 +409,8 @@ func _apply_open_state() -> void:
 			_show_history()
 
 	if _prompt != null:
-		_prompt.text = "%s: " % _label_of(_channel)
-		_prompt.add_theme_color_override("font_color", _colour_of(_channel))
+		_prompt.text = "%s: " % DotChatParts.label_of(channels, _channel)
+		_prompt.add_theme_color_override("font_color", DotChatParts.colour_of(channels, _channel))
 
 	if _entry != null:
 		_entry.visible = _open
@@ -503,25 +421,7 @@ func _apply_open_state() -> void:
 
 
 func _index_of(id: StringName) -> int:
-	for i in range(channels.size()):
-		if StringName(str(channels[i].get("id", &""))) == id:
-			return i
-	return -1
-
-
-func _label_of(id: StringName) -> String:
-	var index := _index_of(id)
-	return "Say" if index < 0 else str(channels[index].get("label", "Say"))
-
-
-func _colour_of(id: StringName) -> Color:
-	var index := _index_of(id)
-
-	if index < 0:
-		return Color(0.88, 0.90, 0.94)
-
-	var colour: Variant = channels[index].get("colour", Color(0.88, 0.90, 0.94))
-	return colour if colour is Color else Color(0.88, 0.90, 0.94)
+	return DotChatParts.index_of(channels, id)
 
 
 # --- Input -----------------------------------------------------------------
@@ -544,12 +444,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if _pressed(event, open_action):
 		get_viewport().set_input_as_handled()
-		open(_first_channel())
+		open(DotChatParts.first_channel(channels))
 		return
 
 	if _pressed(event, team_action):
 		get_viewport().set_input_as_handled()
-		open(_team_channel())
+		open(DotChatParts.team_channel(channels, _channel))
 
 
 ## The wheel scrolls the open history. In [method Node._input] rather than unhandled,
@@ -660,14 +560,8 @@ func _ran_locally(text: String) -> bool:
 func _self_mute() -> Object:
 	if not self_mute_enabled or Engine.is_editor_hint():
 		return null
-	if self_mute != null and is_instance_valid(self_mute):
-		return self_mute
-	self_mute = DotRegistry.get_service(SELF_MUTE_SERVICE)
-	if self_mute == null and ResourceLoader.exists(SELF_MUTE_SCRIPT):
-		var script: Variant = load(SELF_MUTE_SCRIPT)
-		if script is Script and (script as Script).can_instantiate():
-			var shared: Variant = (script as Script).call(&"shared")
-			self_mute = shared if shared is Object else null
+	if self_mute == null or not is_instance_valid(self_mute):
+		self_mute = DotChatParts.find_self_mute()
 	return self_mute
 
 
@@ -708,22 +602,6 @@ func _recall_step(direction: int) -> void:
 	_entry.caret_column = _entry.text.length()
 
 
-func _first_channel() -> StringName:
-	if channels.is_empty():
-		return &"all"
-
-	return StringName(str(channels[0].get("id", &"all")))
-
-
-## The channel marked `"team": true`, or the current one for a game with no teams.
-func _team_channel() -> StringName:
-	for entry in channels:
-		if bool(entry.get("team", false)):
-			return StringName(str(entry.get("id", &"all")))
-
-	return _channel
-
-
 # --- Lines -----------------------------------------------------------------
 
 ## Adds a line built from coloured fragments, as [DotFeedView] takes them.
@@ -749,25 +627,12 @@ func add_message(parts: Array) -> void:
 		_show_history()
 
 
-## Splits one line into as many as it takes to fit the box, at word boundaries.
+## Splits one line into as many rows as it takes to fit the box; see [DotChatWrap].
 ##
-## [b]Chat is the one feed that has to wrap.[/b] [DotFeedView] draws an entry as a single
-## run of text and does not clip it — which is right for a kill feed, where an entry is
-## two names and a weapon, and wrong for chat, where the server's own limit is 127
-## characters and the box is 460 pixels wide. Unwrapped, a normal sentence runs out of the
-## box and across the middle of the screen. A picture is the only thing that shows this;
-## every assertion about the log passes either way.
-##
-## [b]A word wider than the box is broken by character[/b], so a long URL stays inside
-## the panel (and off the touch thumbstick). No length limit applies.
-##
-## [b]It wraps rather than truncating.[/b] The alternative loses the end of what somebody
-## said, which is worse than an extra row: chat is the one place where the text IS the
-## content, and a player cannot ask the log to repeat itself.
-##
-## Falls back to the line as given when there is no font to measure with — outside the
-## tree, or before a theme resolves — because an unwrapped line is legible and a line
-## wrapped by a guess is not.
+## [b]Chat is the one feed that has to wrap, and it wraps rather than truncating[/b]: the
+## text IS the content, and a player cannot ask the log to repeat itself. [DotFeedView]
+## draws an entry as one run and does not clip it, which is right for a kill feed and
+## wrong for a 127-character line in a 460-pixel box.
 func _wrap(parts: Array) -> Array:
 	var limit := _feed.size.x if _feed != null and _feed.size.x > 0.0 else width
 	return DotChatWrap.wrap(parts, get_theme_default_font(), get_theme_default_font_size(), limit)
@@ -865,41 +730,9 @@ func history() -> Array:
 
 
 ## Draws the window of the history the scroll position says.
-##
-## [b]Rebuilt, not shifted.[/b] A view of twelve rows is twelve `add_line` calls, which
-## is nothing next to a frame, and a view built from the history every time cannot drift
-## out of step with it.
 func _show_history() -> void:
-	if _history_view == null:
-		return
-
-	var rows := _rows()
-	var end := rows.size() - _scroll
-	var start := maxi(0, end - history_lines)
-
-	_history_view.clear()
-
-	for i in range(start, end):
-		_history_view.add_line(rows[i])
-
-	# A reader scrolled back is told there is more below, in the last row, so they know
-	# the conversation did not stop where their view does.
-	if _scroll > 0 and _history_view.line_count() > 0:
-		var lines := _history_view.lines()
-		lines[lines.size() - 1] = {
-			"parts": [{
-				"text": "▼ %d newer — Page Down" % _scroll,
-				"colour": Color(0.70, 0.72, 0.78),
-			}],
-			"at_ms": Time.get_ticks_msec(),
-		}
-
-	# Sized to its rows, as [method _relayout_log] sizes the closed log: DotFeedView draws
-	# from its top edge, so a view twelve rows tall holding five drew them at the top with a
-	# gap over the entry, and the backdrop under the bottom of an empty box.
-	var shown := maxi(_history_view.line_count(), 1)
-	_history_view.offset_top = -(float(shown) * (line_height + line_gap) + entry_height)
-	_history_view.queue_redraw()
+	if _history_view != null:
+		DotChatParts.show_history(self, _history_view, _rows(), _scroll)
 
 
 func _draw_backdrop() -> void:
