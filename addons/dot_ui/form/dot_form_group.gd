@@ -35,7 +35,7 @@ func build(p_title: String, p_path: String, p_depth: int, p_tokens: DotFormToken
 	depth = p_depth
 	tokens = p_tokens
 	var inner := depth > 0
-	var sb := tokens.box(tokens.card_inner if inner else tokens.card, tokens.radius + (0 if inner else 4), tokens.border, 1, 0 if inner else 1)
+	var sb := tokens.box(tokens.card_inner if inner else tokens.card, tokens.radius + (0 if inner else 4), tokens.border, 1)
 	sb.content_margin_left = tokens.sp(2)
 	sb.content_margin_right = tokens.sp(2)
 	sb.content_margin_top = tokens.sp(2) if title != "" else tokens.sp(3)
