@@ -1,4 +1,4 @@
-[![dot-ui - GameSpice addon](docs/banner.png)](https://moddingcommunity.com/a/214-dot-ui)
+[![UI - GameSpice addon](docs/banner.png)](https://moddingcommunity.com/a/214-dot-ui)
 
 Screens, HUD and menus for a Godot 4 game, with no art assets. A screen stack that works out z-order, input blocking and mouse mode from one place, a settings panel generated from any `DotConfig`, a rebinder with conflict detection, and data-driven HUD widgets.
 
