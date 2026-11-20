@@ -1,4 +1,4 @@
-# dot-ui docs
+# GameSpice UI docs
 
 The reasoning behind the interface layer, one subject per file. [CLAUDE.md](../CLAUDE.md) has the short rules; these say why.
 

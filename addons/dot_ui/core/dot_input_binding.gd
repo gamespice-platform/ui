@@ -33,7 +33,7 @@ const CHANNEL := "ui.binding"
 ## What [method from_text] and [method to_text] call "nothing bound".
 const UNBOUND := ""
 
-## The mouse buttons that are written by name rather than as "Mouse N" (dot-ui API level 2).
+## The mouse buttons that are written by name rather than as "Mouse N" (GameSpice UI API level 2).
 ##
 ## [b]Why names.[/b] Godot numbers the wheel as mouse buttons 4 to 7 and the two side
 ## buttons as 8 and 9, so "Mouse 4" was the wheel turning up while every player reads it

@@ -6,7 +6,7 @@ extends DotHudPiece
 ## "Cancel slide [C]". Centred on this control's middle, on a plate; hidden while there is
 ## nothing to say.
 ##
-## [b]The key is the player's[/b]: the host passes the bound key's name (dot-ui's
+## [b]The key is the player's[/b]: the host passes the bound key's name (GameSpice UI's
 ## [method DotInputBinding.to_text] or [method DotBindingsPanel.event_name]), never a letter
 ## written into the game, because a rebound key the prompt still calls "E" is worse than no
 ## prompt.

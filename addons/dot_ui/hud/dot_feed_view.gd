@@ -4,7 +4,7 @@ extends Control
 
 ## A bounded, self-expiring list of lines. The kill feed, and the chat history.
 ##
-## [b]It takes dictionaries, not dot-match types.[/b] dot-ui does not import dot-match
+## [b]It takes dictionaries, not GameSpice Match types.[/b] GameSpice UI does not import GameSpice Match
 ## and does not know what a kill is; it knows how to show a bounded list of coloured
 ## fragments that time out. A game feeds it whatever it has, and the same class shows
 ## kills, chat and system messages.
@@ -105,8 +105,8 @@ func add_text(text: String, colour: Color = Color.WHITE) -> Dictionary:
 
 ## Adds a kill line from the pieces a kill feed has.
 ##
-## Takes strings and colours rather than a `DotKillFeed.Entry`, so dot-ui never names
-## a dot-match type. A game passes whatever its own feed holds.
+## Takes strings and colours rather than a `DotKillFeed.Entry`, so GameSpice UI never names
+## a GameSpice Match type. A game passes whatever its own feed holds.
 func add_kill(
 	killer_name: String,
 	killer_colour: Color,

@@ -14,7 +14,7 @@ extends Control
 ## draw and it emits the string somebody typed. A game hands [signal submitted] to
 ## whatever its send path already is — [code]DotClientChat.send[/code],
 ## [code]DotChatClient.compose[/code], a bridge's `say` — and feeds arriving lines back in
-## through [method add_message]. dot-ui still depends on dot-core and nothing else.
+## through [method add_message]. GameSpice UI still depends on GameSpice Core and nothing else.
 ##
 ## [codeblock]
 ## var chat := DotChatWindow.new()
@@ -186,8 +186,8 @@ signal channel_changed(channel: StringName)
 ## Channels the box can send on, in cycle order.
 ##
 ## `[{"id": StringName, "label": String, "colour": Color}]`. Dictionaries rather than
-## [code]DotChatChannel[/code] for the reason [DotFeedView] takes them: dot-ui does not
-## import dot-chat and does not know what a channel is. A game maps its own.
+## [code]DotChatChannel[/code] for the reason [DotFeedView] takes them: GameSpice UI does not
+## import GameSpice Chat and does not know what a channel is. A game maps its own.
 var channels: Array[Dictionary] = []
 
 ## Whether this box honours the player's own block list: `!sm` / `/sm` typed here run it and
@@ -196,15 +196,15 @@ var channels: Array[Dictionary] = []
 ## [b]The one piece of chat this box knows, and why it is here.[/b] `sm` must never reach the
 ## server, or the muted player could be told; every game in the family sends what this box
 ## emits, by a different path each, so the only place that stops it in all of them is the
-## place before [signal submitted]. The list itself is dot-chat's `DotChatSelfMute`, found
-## by registry name or by path and duck-typed, so dot-ui still depends on dot-core alone.
+## place before [signal submitted]. The list itself is GameSpice Chat's `DotChatSelfMute`, found
+## by registry name or by path and duck-typed, so GameSpice UI still depends on GameSpice Core alone.
 @export var self_mute_enabled: bool = true
 
 ## The colour of what `sm` answers.
 @export var self_mute_colour: Color = Color(0.72, 0.80, 0.90)
 
 ## The block list: anything with `claims_chat(text)`, `handle_chat(text)` and
-## `is_muted(name)`. Null finds the shared one (registry `dot_self_mute`, else dot-chat's
+## `is_muted(name)`. Null finds the shared one (registry `dot_self_mute`, else GameSpice Chat's
 ## script by path) the first time it is needed.
 var self_mute: Object = null
 
@@ -659,7 +659,7 @@ func add_said(
 		add_text(text, text_colour)
 		return
 
-	# A player the reader muted (`sm`). Here as well as in dot-chat's client, because
+	# A player the reader muted (`sm`). Here as well as in GameSpice Chat's client, because
 	# some games draw a line without one.
 	if is_self_muted(speaker):
 		return

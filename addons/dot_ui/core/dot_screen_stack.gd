@@ -111,7 +111,7 @@ func setup() -> DotResult:
 	# anchors and leaves the offsets alone, so a Control built in code keeps the zero
 	# size it was created with — the whole thing then lays out inside nothing and is
 	# invisible while being, by every property, correctly configured. The family has
-	# lost a day to this once already, and dot-ui had five of them.
+	# lost a day to this once already, and GameSpice UI had five of them.
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 

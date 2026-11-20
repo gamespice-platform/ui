@@ -4,7 +4,7 @@ extends DotHudWidget
 
 ## A crosshair that opens with the weapon's spread.
 ##
-## Drawn rather than a texture, for the reason the whole of dot-ui is: shipping art
+## Drawn rather than a texture, for the reason the whole of GameSpice UI is: shipping art
 ## imposes it. Four lines and a dot cover most of what a shooter wants, and a game with
 ## a designed crosshair replaces the node.
 ##

@@ -1,6 +1,6 @@
 extends "stack_checks.gd"
 
-## The settings screen, key-binding and input-binding sections of the dot-ui selftest.
+## The settings screen, key-binding and input-binding sections of the GameSpice UI selftest.
 
 
 # --- Bindings --------------------------------------------------------------
@@ -15,8 +15,8 @@ func _test_settings_screen() -> void:
 	add_child(stack)
 	stack.setup()
 
-	# A bare DotConfig first: the screen has to work without dot-settings existing at all,
-	# which is the case every project that has dot-ui and not dot-settings is in.
+	# A bare DotConfig first: the screen has to work without GameSpice Settings existing at all,
+	# which is the case every project that has GameSpice UI and not GameSpice Settings is in.
 	var direct := TestConfig.new()
 	var plain := DotSettingsScreen.new()
 	plain.name = "PlainSettings"
@@ -350,7 +350,7 @@ func _check_bindings_sorted() -> DotBindingsPanel:
 	# `Array.sort()` on a `StringName` compares interned POINTERS, so this method's own
 	# "sorted" was whatever order the names happened to be created in -- and unstable
 	# between builds, since it depends on which script interned each name first. It is the
-	# same trap that gave two peers two different wire ids for one message type in dot-net.
+	# same trap that gave two peers two different wire ids for one message type in GameSpice Net.
 	# A rendered frame of game-fatal-contact's rebinder is what showed it; nothing about the
 	# CONTENTS of the array could.
 	InputMap.add_action("probe_zulu")

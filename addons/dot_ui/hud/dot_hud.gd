@@ -38,7 +38,7 @@ const CHANNEL := "ui.hud"
 ## Below this the words are unreadable anyway; a frame that small gets overlap, not dust.
 @export_range(0.1, 1.0, 0.05) var fit_min: float = 0.5
 
-## The player's own HUD size (dot-menu's `hud_scale` setting), multiplying the fit: 1 is the
+## The player's own HUD size (GameSpice Menu's `hud_scale` setting), multiplying the fit: 1 is the
 ## design, 0.8 a smaller HUD, 1.25 a larger one. Set, it lays the HUD out by hand as
 ## [member fit_design] does, so a HUD with no design frame is scaled about its top-left
 ## corner over a rect the frame's size divided by it, and its anchors still reach the edges.
@@ -104,7 +104,7 @@ func fit_to_frame(frame: Vector2) -> void:
 ## [param inset] of its own units: top-left anchored, scaled, and sized to the frame divided
 ## by the scale, so its children's anchors still reach the frame's edges. What
 ## [method fit_to_frame] does to a [DotHud], for a game whose HUD root is a plain [Control]
-## under a [CanvasLayer] (dot-menu's `hud_scale` uses it). Public and static so a suite can
+## under a [CanvasLayer] (GameSpice Menu's `hud_scale` uses it). Public and static so a suite can
 ## lay one out on a frame it does not have.
 static func fit_control(control: Control, frame: Vector2, k: float, inset: float = 0.0) -> void:
 	if control == null or k <= 0.0:

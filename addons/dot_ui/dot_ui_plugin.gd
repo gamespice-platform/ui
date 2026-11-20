@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-## Editor entry point for dot-ui. Registers inspector types only.
+## Editor entry point for GameSpice UI. Registers inspector types only.
 ##
 ## No autoload, for the family's reason: a process may run two windows or a server and
 ## a client at once, and a singleton screen stack makes that impossible.

@@ -18,7 +18,7 @@ extends Control
 ## [b]Coloured by the theme, with defaults that need none.[/b] Each colour is looked up as
 ## a theme colour on the type [constant THEME_TYPE] ([constant COLOUR_KEYS]), and an absent
 ## one is the matching entry of [constant DEFAULTS]. `DotUiTheme.build()` fills every one
-## from its palette, dot-menu's themes through [method theme_from], live; a game with a
+## from its palette, GameSpice Menu's themes through [method theme_from], live; a game with a
 ## designed [Theme] sets the ones it cares about.
 ##
 ## [b]Scaled by the HUD, never laid out again.[/b] Every number here is in the HUD's own
@@ -35,7 +35,7 @@ extends Control
 
 ## The group every widget that holds screen space over a game joins
 ## ([constant DotBallotPanel.COVER_GROUP]). The same string, never the other constant, for
-## the reason a game spells it: a pack built against a newer dot-ui runs on the shell's.
+## the reason a game spells it: a pack built against a newer GameSpice UI runs on the shell's.
 const COVER_GROUP := "dot_hud_cover"
 
 ## The theme type every piece reads its colours from.
@@ -44,7 +44,7 @@ const THEME_TYPE := &"DotHudPiece"
 ## What each colour is without a theme: the dark HUD, deep translucent plates under bold
 ## white text ringed in black (Christian's first play test, 2026-10-11: the pale plates,
 ## white key caps and saturated score plates before this read as a toy over a pale map).
-## dot-menu's default theme draws the same; the old bright look is its "Arcade" theme.
+## GameSpice Menu's default theme draws the same; the old bright look is its "Arcade" theme.
 const DEFAULTS := {
 	&"plate": Color(0.025, 0.03, 0.05, 0.74),
 	&"plate_edge": Color(1.0, 1.0, 1.0, 0.12),
@@ -187,7 +187,7 @@ func number(key: StringName) -> int:
 ## the first play test found them pale and unreadable over pale maps in four games; a
 ## Label with its own colour override keeps it, and still gets the outline.
 ##
-## This is what dot-menu's themes hand a game's HUD root, and what [DotUiTheme] fills; a
+## This is what GameSpice Menu's themes hand a game's HUD root, and what [DotUiTheme] fills; a
 ## game sets it on the node above its pieces and every piece and Label below follows.
 static func theme_from(colours: Dictionary, constants: Dictionary = {}) -> Theme:
 	var t := Theme.new()

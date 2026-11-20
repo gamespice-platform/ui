@@ -4,7 +4,7 @@ extends Control
 
 ## Rows and columns. The scoreboard, the server browser, and a stats panel.
 ##
-## [b]It takes dictionaries, not dot-match types.[/b] dot-ui does not import dot-match:
+## [b]It takes dictionaries, not GameSpice Match types.[/b] GameSpice UI does not import GameSpice Match:
 ## a table is given columns and an array of rows, and a game maps its own records onto
 ## them. The same class shows a scoreboard, a server list and a ban list.
 ##

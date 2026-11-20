@@ -7,7 +7,7 @@ extends SceneTree
 ## and this family has shipped a 0 x 0 [Control] twice, a tab bar that hid two of its
 ## three tabs, and a silhouette that came out as a coloured bar, none of which any
 ## assertion could reach. The rule the games already follow is that an interface change
-## wants a frame rendered and looked at; dot-ui was the one place that could not.
+## wants a frame rendered and looked at; GameSpice UI was the one place that could not.
 ##
 ## Run it through `tools/screenshot.sh`, which uses `xvfb-run`. [b]Not `--headless`[/b]:
 ## that gives a null renderer and every frame it saves is empty, which is worse than no
@@ -365,7 +365,7 @@ func _build_ballot() -> void:
 	_ballot.local_voter = "u3"
 	_hud.add_child(_ballot)
 
-	# A stand-in picture, generated: dot-ui ships no art, and the point is to see a texture
+	# A stand-in picture, generated: GameSpice UI ships no art, and the point is to see a texture
 	# drawn where an initial would be.
 	var image := Image.create(32, 32, false, Image.FORMAT_RGBA8)
 	for y in 32:

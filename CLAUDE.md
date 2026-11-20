@@ -1,12 +1,12 @@
-# dot-ui
+# GameSpice UI
 
 Screens, HUD and menus with no art assets: a screen stack that owns z-order, input, mouse mode and pause; pause, settings and scoreboard screens; a settings panel and a rebinder; HUD widgets (stat bar, crosshair, feed, table, chat box, ballot) and the glance pieces (vitals, ammo, score strip and clock, hit marker, damage numbers, key prompt and hints); and a theme generated from a palette.
 
 Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is specific to the interface. The reasoning is in [docs/](docs/README.md). dot-menu builds the designed Escape menu and Tab scoreboard on top of this.
 
-**Depends on dot-core and nothing else, and names nothing outside it.** Widgets take strings, dictionaries and `Callable`s; a settings source is an untyped `Object`. A script that so much as mentions another addon's class fails to compile without it. [hud](docs/hud.md#ships-no-art-names-nothing-outside-dot-core)
+**Depends on GameSpice Core and nothing else, and names nothing outside it.** Widgets take strings, dictionaries and `Callable`s; a settings source is an untyped `Object`. A script that so much as mentions another addon's class fails to compile without it. [hud](docs/hud.md#ships-no-art-names-nothing-outside-dot-core)
 
-Also requires **dot-profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime`, split from dot-core): link `addons/dot_profile` next to `addons/dot_core`.
+Also requires **GameSpice Profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime`, split from GameSpice Core): link `addons/dot_profile` next to `addons/dot_core`.
 
 ## Read before
 
@@ -22,7 +22,7 @@ Also requires **dot-profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime
 
 | Path | What |
 | --- | --- |
-| `addons/dot_ui/core/` | `DotScreen`, `DotScreenStack`, `DotUiTheme`, `DotInputBinding`, `DotUiGamespice` (opt-in Gamespice tokens and styleboxes shared with the web shell and dot-menu, API 24) |
+| `addons/dot_ui/core/` | `DotScreen`, `DotScreenStack`, `DotUiTheme`, `DotInputBinding`, `DotUiGamespice` (opt-in Gamespice tokens and styleboxes shared with the web shell and GameSpice Menu, API 24) |
 | `addons/dot_ui/hud/` | `DotHud`, `DotHudWidget`, `DotStatBar`, `DotCrosshair` (`dynamic`, `set_spread`), `DotCrosshairCvars` (`cl_crosshair_*` client cvars, API 10), `DotHudElementCvars` (`cl_hud_show_<element>`, `cl_hud_scale`; perf panel off by default; API 22), `DotFeedView`, `DotTableView`, `DotChatWindow`, `DotBallotPanel`, `DotStarfield`; the glance pieces on `DotHudPiece`: `DotVitals`, `DotAmmoCounter`, `DotScoreStrip`, `DotHitMarker`, `DotDamageNumbers`, `DotKeyPrompt`, `DotKeyHints`, `DotWeaponIconPlate`, `DotStatusLines`, `DotHealthTag` (3D pill health bar and name over a player, API 23), `DotTouchButtons` (on-screen buttons for touch, `tools/touch_shot.sh`) |
 | `addons/dot_ui/icons/` | `DotIconSet` (icons by id or tag, per-profile overrides, flat), `DotWeaponIcons.stock()` (Jestan's CC0 sheet, `jestan/CREDITS.md`; API 12), `DotWeaponIconStyle` (a game's tag table, `cl_weapon_icons`, halo, menu card; API 13); [hud](docs/hud.md#weapon-icons) |
 | `addons/dot_ui/panels/` | `DotSettingsPanel`, `DotBindingsPanel`, `DotServerList` (rows from `DotBrowserEntry.to_row()` as dictionaries; select then Join; phone-width stacking; API 24; `tools/server_list_shot.sh`) |
@@ -77,7 +77,7 @@ Also requires **dot-profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime
 - A piece's font is a `font` a theme sets on the type `DotHudPiece`, looked up by name; never `has_theme_font`, which is true whenever any theme has a default font (the engine's does). [hud](docs/hud.md#the-glance-pieces)
 - A piece tests each `dot_hud_cover` member on its own against its footprint, never the merged rect, and the full-rect pieces (hit marker, damage numbers) default to `IGNORE`. [hud](docs/hud.md#the-glance-pieces)
 - `DotHud.fit_design` scales the whole HUD below the design frame and never lays it out again; zero keeps the full-rect anchoring. [hud](docs/hud.md#the-glance-pieces)
-- A new piece or a new public method on one is an API level (`dot_ui_api.gd`): a delivered pack runs on the shell's dot-ui. [hud](docs/hud.md#the-glance-pieces)
+- A new piece or a new public method on one is an API level (`dot_ui_api.gd`): a delivered pack runs on the shell's GameSpice UI. [hud](docs/hud.md#the-glance-pieces)
 
 ## Where a game plugs in
 
@@ -94,7 +94,7 @@ Also requires **dot-profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime
 | What a ballot choice does | `DotBallotPanel.chosen` |
 | Health, ammunition, the clock and scores, hit feedback, key prompts | the glance pieces' `show_*` / `flash` / `add`; `cover_mode`; theme colours on `DotHudPiece` |
 | Scaling a HUD on a small frame, or to the player's size | `DotHud.fit_design`, `fit_scale`, `fit_to_frame`; `user_scale`, `fit_control` |
-| A whole HUD layer's colours, switched live | `DotHudPiece.theme_from` on the layer's root (dot-menu's `follow_hud` does it per theme) |
+| A whole HUD layer's colours, switched live | `DotHudPiece.theme_from` on the layer's root (GameSpice Menu's `follow_hud` does it per theme) |
 | Keeping a game's HUD out from under a ballot | read the visible members of the `dot_hud_cover` group by that string ([hud](docs/hud.md#a-ballot-on-the-hud)) |
 
 Deliberately not here: screen transitions (`transition_sec` and `DotUiConfig.reduced_motion` are read by nothing; `DotWinnerReveal` has its own `reduced_motion`), localisation, gamepad focus rings, a console, a server browser, textured styling, touch layouts. [hud](docs/hud.md#deliberately-not-here)

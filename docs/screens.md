@@ -39,9 +39,9 @@ Pausing the tree pauses only the *local* simulation, which desynchronises it fro
 
 `DotPauseScreen` and `DotSettingsScreen`, in `screens/`, exist because four clients had each written the same forty lines (a centred `PanelContainer`, a heading, a column of `Button`s, a focus path) and differed only in the words on the buttons and the document the panel was bound to.
 
-Today game-hungario uses them; game-fatal-contact moved to dot-menu's `DotMenu` on 2026-10-10 (game-fatal-contact f9aeaf9), and the other games are on dot-menu's Escape menu too, which builds on this addon's primitives (`DotScreenStack`, `DotInputBinding`, `DotChatWindow`) and adds a designed look. **An extraction is finished when the last caller moves, and nothing in the extracted repository can tell you whether that happened.** The grep is `grep -rn 'extends DotScreen'` (and the screen class names) over the games.
+Today game-hungario uses them; game-fatal-contact moved to GameSpice Menu's `DotMenu` on 2026-10-10 (game-fatal-contact f9aeaf9), and the other games are on GameSpice Menu's Escape menu too, which builds on this addon's primitives (`DotScreenStack`, `DotInputBinding`, `DotChatWindow`) and adds a designed look. **An extraction is finished when the last caller moves, and nothing in the extracted repository can tell you whether that happened.** The grep is `grep -rn 'extends DotScreen'` (and the screen class names) over the games.
 
-**The settings source is an `Object` and is never named.** dot-ui depends on dot-core and nothing else, and a script that so much as *mentions* `DotSettingsManager` fails to compile in a project without dot-settings. The contract is two methods, `to_config()` and `absorb_config()`; that the screen also accepts a bare `DotConfig` is the proof the seam is real.
+**The settings source is an `Object` and is never named.** GameSpice UI depends on GameSpice Core and nothing else, and a script that so much as *mentions* `DotSettingsManager` fails to compile in a project without GameSpice Settings. The contract is two methods, `to_config()` and `absorb_config()`; that the screen also accepts a bare `DotConfig` is the proof the seam is real.
 
 **The two-step apply is the whole reason the screen exists.** `to_config()` hands out a *snapshot*: writing to it does not write to the manager. A screen that called only `DotSettingsPanel.apply()` would report success and change nothing, for ever, and every structural check passes either way. Only a check that edits a value, presses Apply and then reads the **manager** can tell the two apart.
 
@@ -53,7 +53,7 @@ Today game-hungario uses them; game-fatal-contact moved to dot-menu's `DotMenu` 
 
 ## The scoreboard screen
 
-`DotScoreboardScreen` is the Tab screen, shared: a title and a ranked `DotTableView`, with the **rows and the columns the game's** (`row_fn`, `columns`), because a deathmatch counts kills, an obstacle course points and an eating game mass. Transparent and non-blocking. game-hungario still has its own `ScoreboardScreen`, which predates it; dot-menu's Tab scoreboard is what the other games use, game-fatal-contact included since f9aeaf9.
+`DotScoreboardScreen` is the Tab screen, shared: a title and a ranked `DotTableView`, with the **rows and the columns the game's** (`row_fn`, `columns`), because a deathmatch counts kills, an obstacle course points and an eating game mass. Transparent and non-blocking. game-hungario still has its own `ScoreboardScreen`, which predates it; GameSpice Menu's Tab scoreboard is what the other games use, game-fatal-contact included since f9aeaf9.
 
 ## `DotSettingsPanel` must never show a secret
 
@@ -83,7 +83,7 @@ An absent `bindings` key in the file is a **failure**; a present-but-empty one i
 
 The vocabulary is deliberately the one `DotBindingsPanel.event_name` already draws on a button. Two spellings of one binding is a settings file that disagrees with the rebinding screen.
 
-**The wheel and the side buttons are written by name** (API level 2, `MOUSE_NAMES`): `Wheel up` / `down` / `left` / `right` for Godot's buttons 4 to 7, `Mouse back` / `Mouse forward` for 8 and 9. Godot's numbering made the wheel "Mouse 4", which every player reads as the thumb button. The side buttons cannot take "Mouse 4" / "Mouse 5" because `from_text` still reads that old spelling as the wheel: every binding stored before the names says it, and reading it any other way moves a player's key on upgrade. Names read case-blind; "Mouse N" reads for every N. A game that patched its own labels around "Mouse 4" checks `DotAddonApi.build_level("dot_ui") >= 2` before dropping the patch, because a delivered pack runs on the shell's dot-ui.
+**The wheel and the side buttons are written by name** (API level 2, `MOUSE_NAMES`): `Wheel up` / `down` / `left` / `right` for Godot's buttons 4 to 7, `Mouse back` / `Mouse forward` for 8 and 9. Godot's numbering made the wheel "Mouse 4", which every player reads as the thumb button. The side buttons cannot take "Mouse 4" / "Mouse 5" because `from_text` still reads that old spelling as the wheel: every binding stored before the names says it, and reading it any other way moves a player's key on upgrade. Names read case-blind; "Mouse N" reads for every N. A game that patched its own labels around "Mouse 4" checks `DotAddonApi.build_level("dot_ui") >= 2` before dropping the patch, because a delivered pack runs on the shell's GameSpice UI.
 
 **Keys are physical.** A binding stored as a keycode is stored in the player's current layout, and the same file on an AZERTY keyboard binds a key that is not where the label says.
 

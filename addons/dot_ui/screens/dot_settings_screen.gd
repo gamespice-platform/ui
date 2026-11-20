@@ -16,12 +16,12 @@ extends DotScreen
 ## tree's most expensive mistake. What is a game's own is which document it hands over and
 ## where the screen sits in its stack; the rest is the same everywhere and is here.
 ##
-## [b]The source is an [Object] and is never named.[/b] dot-ui depends on dot-core and
+## [b]The source is an [Object] and is never named.[/b] GameSpice UI depends on GameSpice Core and
 ## nothing else, and a script that so much as MENTIONS [code]DotSettingsManager[/code]
-## fails to compile in a project without dot-settings — which is most of them. The contract
+## fails to compile in a project without GameSpice Settings — which is most of them. The contract
 ## is two methods, [code]to_config()[/code] and [code]absorb_config()[/code], and that this
 ## screen also accepts a bare [DotConfig] is the proof the seam is real. Same shape as
-## dot-chat's backbone client.
+## GameSpice Chat's backbone client.
 ##
 ## [b]The two-step apply is the whole point.[/b] [code]to_config()[/code] hands out a
 ## SNAPSHOT — writing to it does not write to the manager — so a screen that called only

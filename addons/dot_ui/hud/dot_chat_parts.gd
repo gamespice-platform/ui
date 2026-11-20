@@ -90,7 +90,7 @@ static func show_history(window: DotChatWindow, view: DotFeedView, rows: Array, 
 	view.queue_redraw()
 
 
-## The shared block list: registry `dot_self_mute`, else dot-chat's script by path, else null.
+## The shared block list: registry `dot_self_mute`, else GameSpice Chat's script by path, else null.
 static func find_self_mute() -> Object:
 	var found: Object = DotRegistry.get_service(SELF_MUTE_SERVICE)
 

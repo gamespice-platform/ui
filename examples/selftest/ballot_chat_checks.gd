@@ -413,8 +413,8 @@ func _chat_window_input(window: DotChatWindow, said: Array[Dictionary]) -> void:
 
 func _chat_window_selfmute(window: DotChatWindow, said: Array[Dictionary]) -> void:
 	# `!sm` / `/sm`, the player's own block list: run here and never emitted, so it cannot
-	# reach the server and nobody is told. A stand-in for dot-chat's DotChatSelfMute, which
-	# dot-ui does not link.
+	# reach the server and nobody is told. A stand-in for GameSpice Chat's DotChatSelfMute, which
+	# GameSpice UI does not link.
 	var mutes := FakeSelfMute.new()
 	window.self_mute = mutes
 	for typed in ["!sm ada", "/SM"]:

@@ -5,9 +5,9 @@ Screens, HUD and menus for a Godot 4 game, with no art assets. A screen stack th
 ## Install
 
 1. Get [Godot 4.7](https://godotengine.org/download).
-2. Either use [dot-bootstrap](https://github.com/gamespice-platform/bootstrap), which clones every project and links the addons, or copy `addons/dot_ui/` and [dot-core](https://github.com/gamespice-platform/core)'s `addons/dot_core/` into your project and enable both in *Project > Project Settings > Plugins*.
+2. Either use [GameSpice Bootstrap](https://github.com/gamespice-platform/bootstrap), which clones every project and links the addons, or copy `addons/dot_ui/` and [GameSpice Core](https://github.com/gamespice-platform/core)'s `addons/dot_core/` into your project and enable both in *Project > Project Settings > Plugins*.
 
-dot-core is the only dependency.
+GameSpice Core is the only dependency.
 
 ## Use
 
@@ -28,7 +28,7 @@ health_bar.bind(func(): return health.health)
 
 `DotScreenStack` derives z-order, input blocking, mouse capture and the back key from one stack whenever it changes, so you do not get a pause menu that is visible but not focused or an escape key that closes two screens.
 
-dot-ui ships no textures, fonts or nine-patches and knows nothing about dot-match or dot-combat. The theme is generated from `StyleBoxFlat`s, the kill feed takes coloured string fragments and the scoreboard takes rows of dictionaries.
+GameSpice UI ships no textures, fonts or nine-patches and knows nothing about GameSpice Match or GameSpice Combat. The theme is generated from `StyleBoxFlat`s, the kill feed takes coloured string fragments and the scoreboard takes rows of dictionaries.
 
 ## What is in it
 
@@ -46,7 +46,7 @@ dot-ui ships no textures, fonts or nine-patches and knows nothing about dot-matc
 | `DotVitals`, `DotAmmoCounter`, `DotScoreStrip` | The glance HUD: health and armour, `magazine \| reserve`, the clock with optional score plates. |
 | `DotHitMarker`, `DotDamageNumbers` | Hit ticks (red on a kill) and numbers that rise off where a hit landed. |
 | `DotKeyPrompt`, `DotKeyHints` | "Open door [E]" and a column of keys, drawn from the player's binding. |
-| `DotBallotPanel` | A dot-vote ballot on the HUD, by number key, click or both, with a countdown and voters' avatars. Emits `chosen`. |
+| `DotBallotPanel` | A GameSpice Vote ballot on the HUD, by number key, click or both, with a countdown and voters' avatars. Emits `chosen`. |
 | `DotSettingsPanel` | Builds itself from a `DotConfig`. Never shows a secret. |
 | `DotBindingsPanel` | Rebinding with conflict detection, in a file that survives a restart. |
 | `DotInputBinding` | One binding as text (`"Y"`, `"Shift+A"`, `"Mouse 1"`) and back. |

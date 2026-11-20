@@ -4,7 +4,7 @@ extends RefCounted
 
 ## A drawn parallax starfield: a sky for a menu, or for a world.
 ##
-## [b]dot-ui ships no art, and this is what that costs and what it buys.[/b] The addon's
+## [b]GameSpice UI ships no art, and this is what that costs and what it buys.[/b] The addon's
 ## whole position is that a game should be able to look like something before it has an
 ## artist — the theme is built from [StyleBoxFlat]s, the crosshair is drawn, and so is
 ## this. A backdrop is where the absence of art shows first: a flat fill behind a menu is

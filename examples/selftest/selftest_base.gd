@@ -129,7 +129,7 @@ func _key(code: Key) -> InputEventKey:
 	return e
 
 
-## A plain RefCounted with `to_config()` and `absorb_config()`: the whole settings-source contract, with no DotSettingsManager, because dot-ui depends on dot-core only.
+## A plain RefCounted with `to_config()` and `absorb_config()`: the whole settings-source contract, with no DotSettingsManager, because GameSpice UI depends on GameSpice Core only.
 class FakeSettingsSource:
 	extends RefCounted
 

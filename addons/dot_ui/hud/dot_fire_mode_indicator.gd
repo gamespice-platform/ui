@@ -4,7 +4,7 @@ extends DotHudPiece
 
 ## The fire modes the held gun offers: "A" auto, one bullet semi, three burst; selected lit, others dim.
 ## A gun with one mode draws nothing. The host feeds it from `DotWeaponArsenal.fire_modes_available()`
-## and `fire_mode()` (this addon does not depend on dot-weapon).
+## and `fire_mode()` (this addon does not depend on GameSpice Weapon).
 
 const AUTO := &"auto"
 const SEMI := &"semi"

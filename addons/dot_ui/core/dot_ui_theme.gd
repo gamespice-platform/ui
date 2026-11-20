@@ -4,7 +4,7 @@ extends Resource
 
 ## Builds a whole [Theme] out of a palette and a scale, with no art assets.
 ##
-## [b]dot-ui ships no textures, no fonts and no nine-patches, and that is the point.[/b]
+## [b]GameSpice UI ships no textures, no fonts and no nine-patches, and that is the point.[/b]
 ## An addon that shipped art would impose its art on every game that installed it, and
 ## the first thing anyone does is replace it — so the theme is generated from
 ## [StyleBoxFlat]s at runtime. A game that wants a real theme assigns one and this

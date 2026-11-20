@@ -4,8 +4,8 @@ extends PanelContainer
 ## A server list a player can read on a phone and drive with a pad: a heading, a search,
 ## an address box, one focusable row per server and a Join button.
 ##
-## [b]Rows are dictionaries, so this names nothing outside dot-core.[/b] dot-browser ships no
-## window on purpose and says dot-ui gives its rows somewhere to go; this is that place.
+## [b]Rows are dictionaries, so this names nothing outside GameSpice Core.[/b] GameSpice Browser ships no
+## window on purpose and says GameSpice UI gives its rows somewhere to go; this is that place.
 ## [code]DotBrowserEntry.to_row()[/code] makes exactly the keys read here: [code]address[/code],
 ## [code]name[/code], [code]map[/code], [code]players[/code], [code]max_players[/code],
 ## [code]ping_ms[/code], [code]status[/code] ("online" or anything else) and [code]secure[/code].

@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Gamespice's look, opt-in: the platform's tokens and the few styleboxes a palette cannot
 ## express (the glass card, the primary button's glow, the focus ring), so the web shell,
-## dot-menu and a game's server list share one copy instead of three that nearly agree.
+## GameSpice Menu and a game's server list share one copy instead of three that nearly agree.
 ## The values are the site's own (globals.css and brand.md, hue 14). Dark only: the site's
 ## game stage is dark in both of its themes.
 ##
