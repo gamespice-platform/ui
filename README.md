@@ -7,7 +7,7 @@ Screens, HUD and menus for a Godot 4 game, with no art assets. A screen stack th
 1. Get [Godot 4.7](https://godotengine.org/download).
 2. Either use [GameSpice Bootstrap](https://github.com/gamespice-platform/bootstrap), which clones every project and links the addons, or copy `addons/dot_ui/` and [GameSpice Core](https://github.com/gamespice-platform/core)'s `addons/dot_core/` into your project and enable both in *Project > Project Settings > Plugins*.
 
-GameSpice Core is the only dependency.
+GameSpice Core and GameSpice Input are the dependencies (plus Profile). `DotInputBinding` forwards to Input's `DotInputText` and `DotInputMap` instead of keeping a second copy of the key-name and `InputMap` code; link `addons/dot_input` next to `addons/dot_core`.
 
 ## Use
 

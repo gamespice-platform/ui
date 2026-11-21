@@ -4,7 +4,7 @@ Screens, HUD and menus with no art assets: a screen stack that owns z-order, inp
 
 Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is specific to the interface. The reasoning is in [docs/](docs/README.md). dot-menu builds the designed Escape menu and Tab scoreboard on top of this.
 
-**Depends on GameSpice Core and GameSpice Input (`DotInputBinding` forwards to `DotInputText`/`DotInputMap`; link `addons/dot_input`), names nothing else outside them.** Widgets take strings, dictionaries and `Callable`s; a settings source is an untyped `Object`. A script that so much as mentions another addon's class fails to compile without it. [hud](docs/hud.md#ships-no-art-names-nothing-outside-dot-core)
+**Depends on GameSpice Core and GameSpice Input (`DotInputBinding` forwards to `DotInputText`/`DotInputMap`; link `addons/dot_input`), names nothing else outside them.** Input is an approved dependency (the owner moved input code into one addon so the key-name and `InputMap` code is not copied per addon). Widgets take strings, dictionaries and `Callable`s; a settings source is an untyped `Object`. A script that so much as mentions another addon's class fails to compile without it. [hud](docs/hud.md#ships-no-art-names-nothing-outside-dot-core)
 
 Also requires **GameSpice Profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime`, split from GameSpice Core): link `addons/dot_profile` next to `addons/dot_core`.
 
