@@ -4,7 +4,7 @@ Screens, HUD and menus with no art assets: a screen stack that owns z-order, inp
 
 Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is specific to the interface. The reasoning is in [docs/](docs/README.md). dot-menu builds the designed Escape menu and Tab scoreboard on top of this.
 
-**Depends on GameSpice Core and nothing else, and names nothing outside it.** Widgets take strings, dictionaries and `Callable`s; a settings source is an untyped `Object`. A script that so much as mentions another addon's class fails to compile without it. [hud](docs/hud.md#ships-no-art-names-nothing-outside-dot-core)
+**Depends on GameSpice Core and GameSpice Input (`DotInputBinding` forwards to `DotInputText`/`DotInputMap`; link `addons/dot_input`), names nothing else outside them.** Widgets take strings, dictionaries and `Callable`s; a settings source is an untyped `Object`. A script that so much as mentions another addon's class fails to compile without it. [hud](docs/hud.md#ships-no-art-names-nothing-outside-dot-core)
 
 Also requires **GameSpice Profile** (`DotProfileSet`, `DotProfile`, `DotProfileRuntime`, split from GameSpice Core): link `addons/dot_profile` next to `addons/dot_core`.
 
@@ -57,7 +57,7 @@ Also requires **GameSpice Profile** (`DotProfileSet`, `DotProfile`, `DotProfileR
 - Pause button ids are derived from labels, never a parallel list. [screens](docs/screens.md#the-pause-and-settings-screens)
 - `DotSettingsPanel` never shows a secret (`show_sensitive` off), commits text on submit/focus-out, and rolls back every edit on a failed `apply()`. [screens](docs/screens.md#dotsettingspanel-must-never-show-a-secret)
 - Bindings compare by physical keycode; an action left with no events resets to default; escape cancels capture; an absent `bindings` key is a failure; `ui_*` hidden. Sort `StringName`s as Strings. [screens](docs/screens.md#dotbindingspanel-three-things-a-naive-rebinder-gets-wrong)
-- `DotInputBinding.apply` replaces, never adds; `ensure_action` never overwrites a player's choice; its vocabulary is `event_name`'s. [screens](docs/screens.md#dotinputbinding-one-binding-as-a-short-string)
+- `DotInputBinding.apply` replaces, never adds; `ensure_action` never overwrites a player's choice; its vocabulary is `event_name`'s. A forwarder to GameSpice Input's `DotInputText`/`DotInputMap`, where the code lives. [screens](docs/screens.md#dotinputbinding-one-binding-as-a-short-string)
 - The wheel and side buttons are written by name (`Wheel up`, `Mouse back`), and the old `Mouse 4` must keep reading as the wheel; a rename here is an API level. [screens](docs/screens.md#dotinputbinding-one-binding-as-a-short-string)
 
 **Widgets**

@@ -79,6 +79,8 @@ An absent `bindings` key in the file is a **failure**; a present-but-empty one i
 
 ## `DotInputBinding`: one binding as a short string
 
+**The code lives in GameSpice Input** (`DotInputText` for event and text, `DotInputMap` for `InputMap` actions); `DotInputBinding` forwards every method to them so the games' calls keep working, and GameSpice UI now requires `addons/dot_input`.
+
 `"Y"`, `"Shift+A"`, `"Mouse 1"`, `"Wheel up"`, `"Mouse back"`, `"Pad 0"`, `"Axis 0+"`. `DotBindingsPanel` stores a whole screen's worth as dictionaries in a file of its own, which is right for a rebinder; a *single* binding that travels in a settings document needs a form a person can read in a JSON file and type by hand.
 
 The vocabulary is deliberately the one `DotBindingsPanel.event_name` already draws on a button. Two spellings of one binding is a settings file that disagrees with the rebinding screen.
