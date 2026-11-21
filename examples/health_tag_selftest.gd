@@ -4,7 +4,7 @@ extends Node
 ##
 ## godot --headless --path . res://examples/health_tag_selftest.tscn
 
-const CHECKS := 10
+const CHECKS := 14
 
 var _passed := 0
 var _failed := 0
@@ -47,6 +47,13 @@ func _run() -> void:
 	_check(tag.global_transform.basis.is_finite() and absf(tag.global_transform.basis.z.normalized().dot(Vector3.UP)) > 0.99, "faces a camera straight above without a degenerate basis")
 	tag.face(null)
 	_check(true, "a null camera is ignored")
+	tag.configure(0.6, 0.06, true)
+	_check(is_equal_approx(tag._bar.scale.x, 0.6) and is_equal_approx(tag._bar.scale.y, 0.06 / DotHealthTag.BAR_SIZE.y), "configure sizes the bar")
+	_check(tag._material.get_shader_parameter("modern") == 1.0 and tag._label_gap < 0.2, "configure picks the modern look and a tighter name gap")
+	tag.update(0.5, true, true, "Ann", true, 0.016, Color(0, 0, 0, 0), 1.0, 0.25)
+	_check(is_equal_approx(tag._material.get_shader_parameter("opacity"), 0.25) and is_equal_approx(tag._label.modulate.a, 0.25), "opacity fades the bar and the name")
+	tag.update(0.5, true, true, "Ann", true, 0.016)
+	_check(is_equal_approx(tag._material.get_shader_parameter("opacity"), 1.0), "opacity defaults to opaque")
 	var other := DotHealthTag.new()
 	_check(other._bar.mesh == tag._bar.mesh, "tags share one mesh")
 	other.free()
