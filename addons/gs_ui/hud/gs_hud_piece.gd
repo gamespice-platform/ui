@@ -36,7 +36,7 @@ extends Control
 ## The group every widget that holds screen space over a game joins
 ## ([constant GSBallotPanel.COVER_GROUP]). The same string, never the other constant, for
 ## the reason a game spells it: a pack built against a newer GameSpice UI runs on the shell's.
-const COVER_GROUP := "dot_hud_cover"
+const COVER_GROUP := "gs_hud_cover"
 
 ## The theme type every piece reads its colours from.
 const THEME_TYPE := &"GSHudPiece"

@@ -54,13 +54,13 @@ void fragment() {
 ## (a static would still hold them at exit and the suites' leak check would count them).
 static func _shared() -> Dictionary:
 	var root: Window = (Engine.get_main_loop() as SceneTree).root
-	if not root.has_meta(&"dot_health_tag_assets"):
+	if not root.has_meta(&"gs_health_tag_assets"):
 		var shader := Shader.new()
 		shader.code = SHADER_CODE
 		var quad := QuadMesh.new()
 		quad.size = BAR_SIZE
-		root.set_meta(&"dot_health_tag_assets", {"shader": shader, "mesh": quad})
-	return root.get_meta(&"dot_health_tag_assets")
+		root.set_meta(&"gs_health_tag_assets", {"shader": shader, "mesh": quad})
+	return root.get_meta(&"gs_health_tag_assets")
 
 var _bar: MeshInstance3D = null
 var _material: ShaderMaterial = null

@@ -3,7 +3,7 @@ extends RefCounted
 
 ## The stock weapon icon set: Jestan's CC0 pixel-art sprites by type tag (see icons/jestan/CREDITS.md).
 
-const SHEET := "res://addons/dot_ui/icons/jestan/ultimate_weapons_pack.png"
+const SHEET := "res://addons/gs_ui/icons/jestan/ultimate_weapons_pack.png"
 
 ## Type tag to the sprite's (column, row) in the sheet.
 const TAGS := {

@@ -58,13 +58,13 @@ signal dismissed()
 ## [b]A game names the group by its string, not by this constant[/b], so it still loads on a
 ## shell whose GameSpice UI predates the group: a delivered pack runs on the shell's addons, and a
 ## missing constant is a parse error where a missing group is just nothing to avoid.
-const COVER_GROUP := &"dot_hud_cover"
+const COVER_GROUP := &"gs_hud_cover"
 
 ## Rows drawn at most. A ballot is at most a handful; the number keys reach ten.
 const MAX_ROWS := 10
 
 ## The group of every node that frees the mouse for a modal of its own and says so with [code]pointer_mode_changed(on)[/code] and [code]is_pointer_mode()[/code]. A host that owns the mouse (GameSpice Game's client, [GSScreenStack]) reads it by name, so neither names the other.
-const POINTER_GROUP := &"dot_pointer_modal"
+const POINTER_GROUP := &"gs_pointer_modal"
 
 ## The key that frees the mouse for clicking, under [code]pointer[/code] or [code]both[/code].
 ##

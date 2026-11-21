@@ -4,7 +4,7 @@ extends Control
 
 ## A chat box: a log that fades, a line to type in, and a key that opens it.
 ##
-## [b]Why this is in dot-ui and not in dot-chat.[/b] dot-chat is the decision layer — who
+## [b]Why this is in gs-ui and not in gs-chat.[/b] gs-chat is the decision layer — who
 ## hears a line, what it may contain, what name is drawn beside it — and it ships no art
 ## on purpose. But every game in this family then wrote the same chat box, or, more often,
 ## wrote no chat box at all and shipped a game whose players could receive a line and
@@ -204,7 +204,7 @@ var channels: Array[Dictionary] = []
 @export var self_mute_colour: Color = Color(0.72, 0.80, 0.90)
 
 ## The block list: anything with `claims_chat(text)`, `handle_chat(text)` and
-## `is_muted(name)`. Null finds the shared one (registry `dot_self_mute`, else GameSpice Chat's
+## `is_muted(name)`. Null finds the shared one (registry `gs_self_mute`, else GameSpice Chat's
 ## script by path) the first time it is needed.
 var self_mute: Object = null
 

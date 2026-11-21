@@ -394,7 +394,7 @@ func _check_bindings_sorted() -> GSBindingsPanel:
 
 func _check_bindings_prefixes(sorted_panel: GSBindingsPanel) -> void:
 	# [b]A game's bindable actions are not all in one namespace.[/b] A first-person game's
-	# movement is `dot_fps_*` and its chat key is its own `<game>_chat`; a panel filtered on
+	# movement is `gs_fps_*` and its chat key is its own `<game>_chat`; a panel filtered on
 	# one prefix showed one of those and silently dropped the other, which is an action a
 	# player cannot discover on any screen.
 	InputMap.add_action("other_chat")

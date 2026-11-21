@@ -3,7 +3,7 @@ class_name GSUiConfig
 extends GSConfig
 
 ## Everything configurable about the interface. Layered like every [GSConfig]:
-## exported defaults, then a JSON file, then [code]DOT_UI_*[/code] environment
+## exported defaults, then a JSON file, then [code]GS_UI_*[/code] environment
 ## variables, then [code]--ui-*[/code] arguments.
 
 @export_group("Scale")
@@ -57,7 +57,7 @@ extends GSConfig
 @export_range(1, 12, 1) var feed_lines: int = 5
 
 ## Seconds a chat line stays up when the chat is not focused. GameSpice UI ships no chat
-## widget — a game's own reads this and [member chat_lines], as dot-2d-hungry's could.
+## widget — a game's own reads this and [member chat_lines], as gs-2d-hungry's could.
 @export_range(1.0, 120.0, 1.0) var chat_lifetime_sec: float = 12.0
 
 @export_range(1, 40, 1) var chat_lines: int = 8
@@ -73,7 +73,7 @@ extends GSConfig
 
 
 func env_prefix() -> String:
-	return "DOT_UI_"
+	return "GS_UI_"
 
 
 func cli_prefix() -> String:

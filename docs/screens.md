@@ -79,13 +79,13 @@ An absent `bindings` key in the file is a **failure**; a present-but-empty one i
 
 ## `GSInputBinding`: one binding as a short string
 
-**The code lives in GameSpice Input** (`GSInputText` for event and text, `GSInputMap` for `InputMap` actions); `GSInputBinding` forwards every method to them so the games' calls keep working, and GameSpice UI now requires `addons/dot_input`.
+**The code lives in GameSpice Input** (`GSInputText` for event and text, `GSInputMap` for `InputMap` actions); `GSInputBinding` forwards every method to them so the games' calls keep working, and GameSpice UI now requires `addons/gs_input`.
 
 `"Y"`, `"Shift+A"`, `"Mouse 1"`, `"Wheel up"`, `"Mouse back"`, `"Pad 0"`, `"Axis 0+"`. `GSBindingsPanel` stores a whole screen's worth as dictionaries in a file of its own, which is right for a rebinder; a *single* binding that travels in a settings document needs a form a person can read in a JSON file and type by hand.
 
 The vocabulary is deliberately the one `GSBindingsPanel.event_name` already draws on a button. Two spellings of one binding is a settings file that disagrees with the rebinding screen.
 
-**The wheel and the side buttons are written by name** (API level 2, `MOUSE_NAMES`): `Wheel up` / `down` / `left` / `right` for Godot's buttons 4 to 7, `Mouse back` / `Mouse forward` for 8 and 9. Godot's numbering made the wheel "Mouse 4", which every player reads as the thumb button. The side buttons cannot take "Mouse 4" / "Mouse 5" because `from_text` still reads that old spelling as the wheel: every binding stored before the names says it, and reading it any other way moves a player's key on upgrade. Names read case-blind; "Mouse N" reads for every N. A game that patched its own labels around "Mouse 4" checks `GSAddonApi.build_level("dot_ui") >= 2` before dropping the patch, because a delivered pack runs on the shell's GameSpice UI.
+**The wheel and the side buttons are written by name** (API level 2, `MOUSE_NAMES`): `Wheel up` / `down` / `left` / `right` for Godot's buttons 4 to 7, `Mouse back` / `Mouse forward` for 8 and 9. Godot's numbering made the wheel "Mouse 4", which every player reads as the thumb button. The side buttons cannot take "Mouse 4" / "Mouse 5" because `from_text` still reads that old spelling as the wheel: every binding stored before the names says it, and reading it any other way moves a player's key on upgrade. Names read case-blind; "Mouse N" reads for every N. A game that patched its own labels around "Mouse 4" checks `GSAddonApi.build_level("gs_ui") >= 2` before dropping the patch, because a delivered pack runs on the shell's GameSpice UI.
 
 **Keys are physical.** A binding stored as a keycode is stored in the player's current layout, and the same file on an AZERTY keyboard binds a key that is not where the label says.
 

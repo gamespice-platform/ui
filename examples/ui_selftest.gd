@@ -1,6 +1,6 @@
 extends "selftest/settings_binding_checks.gd"
 
-## Exercises everything in dot-ui, offline and headless.
+## Exercises everything in gs-ui, offline and headless.
 ##
 ## [codeblock]
 ## godot --headless --path . res://examples/ui_selftest.tscn
@@ -28,7 +28,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
-	print("dot-ui self-test")
+	print("gs-ui self-test")
 	print("")
 
 	_test_theme()
@@ -288,7 +288,7 @@ func _test_hud_piece() -> void:
 	var cover := Control.new()
 	cover.position = Vector2(100.0, 580.0)
 	cover.size = Vector2(300.0, 200.0)
-	cover.add_to_group("dot_hud_cover")
+	cover.add_to_group("gs_hud_cover")
 	add_child(cover)
 	_check(GSHudPiece.covered_rect(vitals).has_area(), "the cover is found by its group, in the piece's own space")
 	vitals.refresh_cover()

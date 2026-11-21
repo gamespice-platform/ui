@@ -22,14 +22,14 @@ extends RefCounted
 #    COLOUR_KEYS, DEFAULT_CONSTANTS, the keycap_edge colour and the team_fill constant (the
 #    defaults are now the dark HUD); GSHud.user_scale and fit_control().
 # 7: the schema form kit: GSUiForm, GSFormTokens, GSFormSchema, GSFormRow, GSFormGroup,
-#    GSFormSlider, GSFormToggle (addons/dot_ui/form/).
+#    GSFormSlider, GSFormToggle (addons/gs_ui/form/).
 # 8: the form kit's list reorder (GSFormRow.move_item, the schema key `reorder`) and
 #    gamepad text entry (GSFormKeypad, GSUiForm.open_keypad, keypad, gamepad_entry).
-# 9: GSWinnerReveal, the end-of-match winner and podium (addons/dot_ui/screens/).
+# 9: GSWinnerReveal, the end-of-match winner and podium (addons/gs_ui/screens/).
 # 10: GSCrosshair.dynamic and set_spread(); GSCrosshairCvars (cl_crosshair_* client cvars).
 # 11: GSFireModeIndicator (A / one bullet / three bullets for the held gun's fire modes).
 # 12: GSIconSet (icons by id or tag from a sheet, per-profile overrides, flat recolour) and
-#    GSWeaponIcons.stock(), Jestan's CC0 weapon sprites (addons/dot_ui/icons/).
+#    GSWeaponIcons.stock(), Jestan's CC0 weapon sprites (addons/gs_ui/icons/).
 # 13: GSWeaponIconStyle (a game's id-to-tag table, cl_weapon_icons / cl_weapon_icon_profile cvars, halo, menu card).
 # 14: GSCrosshair hides while the viewer is dead: hide_when_dead, alive_source, set_alive(), is_shown().
 # 15: GSCrosshair eases a closing gap: close_sec, ease_spread(), spread_shown(); cl_crosshair_ease.

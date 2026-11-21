@@ -7,7 +7,7 @@ extends RefCounted
 ## The implementation moved to [GSInputText] (event and text, pure) and [GSInputMap]
 ## (apply to [InputMap] actions) in GameSpice Input, where the rest of the input model
 ## lives. This class keeps the name every game already calls; new code names the GameSpice
-## Input classes directly. Requires GameSpice Input (`addons/dot_input`).
+## Input classes directly. Requires GameSpice Input (`addons/gs_input`).
 
 const CHANNEL := GSInputMap.CHANNEL
 const UNBOUND := GSInputText.UNBOUND

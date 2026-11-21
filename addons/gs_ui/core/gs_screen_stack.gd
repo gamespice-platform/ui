@@ -24,7 +24,7 @@ extends Control
 ## [/codeblock]
 
 const CHANNEL := "ui.stack"
-const SERVICE := &"dot_screen_stack"
+const SERVICE := &"gs_screen_stack"
 
 signal screen_pushed(id: StringName)
 signal screen_popped(id: StringName)
@@ -447,7 +447,7 @@ func wanted_mouse_mode() -> int:
 func _pointer_modal_open() -> bool:
 	if not is_inside_tree():
 		return false
-	for node in get_tree().get_nodes_in_group(&"dot_pointer_modal"):
+	for node in get_tree().get_nodes_in_group(&"gs_pointer_modal"):
 		if node.has_method(&"is_pointer_mode") and bool(node.call(&"is_pointer_mode")):
 			return true
 	return false

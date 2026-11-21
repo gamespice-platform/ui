@@ -24,7 +24,7 @@ func _check(cond: bool, what: String) -> void:
 
 
 func _run() -> void:
-	print("dot-ui health tag self-test")
+	print("gs-ui health tag self-test")
 	var tag := GSHealthTag.new()
 	add_child(tag)
 	tag.update(1.0, false, false, "", true, 0.016)

@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://addons/dot_ui/icons/jestan/ultimate_weapons_pack.png"
+source_file="res://addons/gs_ui/icons/jestan/ultimate_weapons_pack.png"
 dest_files=["res://.godot/imported/ultimate_weapons_pack.png-e55e55ad67b42ac20be8e845613387bd.ctex"]
 
 [params]

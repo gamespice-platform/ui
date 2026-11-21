@@ -34,9 +34,9 @@ func _test_ballot_panel() -> void:
 	_check(panel.visible and panel.is_open() and panel.option_count() == 3, "a state opens it with its options")
 	_check(panel.size.x > 100.0 and panel.size.y > 100.0, "and it has a size of its own (%s)" % str(panel.size))
 	# By the string a game uses, not the constant: see COVER_GROUP.
-	var covers := get_tree().get_nodes_in_group(&"dot_hud_cover").filter(
+	var covers := get_tree().get_nodes_in_group(&"gs_hud_cover").filter(
 		func(n: Node) -> bool: return n is Control and (n as Control).is_visible_in_tree())
-	_check(covers.has(panel), "an open panel is a visible member of the dot_hud_cover group, which is how a game makes room")
+	_check(covers.has(panel), "an open panel is a visible member of the gs_hud_cover group, which is how a game makes room")
 	_check(panel.seconds_left() > 19.0, "and counts the time it was told")
 	_check(
 		panel.row_rect(2).size.y > 0.0 and panel.row_rect(2).position.y > panel.row_rect(0).position.y,
@@ -190,7 +190,7 @@ func _test_pointer_recapture() -> void:
 	panel.local_voter = "u9"
 	add_child(panel)
 	panel.show_state(_ballot_state("both"))
-	_check(panel.is_in_group(&"dot_pointer_modal"), "the ballot is in the pointer-modal group a host reads")
+	_check(panel.is_in_group(&"gs_pointer_modal"), "the ballot is in the pointer-modal group a host reads")
 	panel._input(_key(panel.pointer_key))
 	_check(panel.is_pointer_mode(), "the ballot frees the mouse")
 	var outside := _click()

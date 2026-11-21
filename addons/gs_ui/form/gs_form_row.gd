@@ -541,11 +541,11 @@ func _drag_item(_at: Vector2, row: HBoxContainer) -> Variant:
 		preview.text = "  " + _item_edit(row).text
 		preview.add_theme_stylebox_override("normal", tokens.box(tokens.card_inner, tokens.radius - 2, tokens.accent, 1, 2))
 		(row.get_child(0) as Control).set_drag_preview(preview)
-	return {"dot_form_list": get_instance_id(), "from": row.get_index()}
+	return {"gs_form_list": get_instance_id(), "from": row.get_index()}
 
 
 func _can_drop_item(_at: Vector2, data: Variant, _row: HBoxContainer) -> bool:
-	return data is Dictionary and data.get("dot_form_list", 0) == get_instance_id()
+	return data is Dictionary and data.get("gs_form_list", 0) == get_instance_id()
 
 
 func _drop_item(_at: Vector2, data: Variant, row: HBoxContainer) -> void:

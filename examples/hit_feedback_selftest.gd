@@ -24,7 +24,7 @@ func _check(cond: bool, what: String) -> void:
 
 
 func _run() -> void:
-	print("dot-ui hit feedback self-test")
+	print("gs-ui hit feedback self-test")
 	var host := Control.new()
 	host.size = Vector2(400.0, 300.0)
 	add_child(host)

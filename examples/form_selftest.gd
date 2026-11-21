@@ -20,7 +20,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
-	print("dot-ui form self-test")
+	print("gs-ui form self-test")
 	_test_schema()
 	await _test_widgets()
 	await _test_validation()

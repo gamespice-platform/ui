@@ -328,13 +328,13 @@ func _build_cover_stand_in(hud: Control, frame: Vector2) -> void:
 	right_hints.show_hints([["Under a ballot", "F4"], ["Dimmed", "F5"]])
 	var cover := ColorRect.new()
 	cover.color = Color(0.1, 0.12, 0.2, 0.55)
-	cover.add_to_group("dot_hud_cover")
+	cover.add_to_group("gs_hud_cover")
 	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cover.position = Vector2(frame.x - 16.0 - minf(360.0, frame.x / 3.0), 110.0)
 	cover.size = Vector2(minf(360.0, frame.x / 3.0), frame.y * 0.45)
 	_pieces.add_child(cover)
 	var cover_label := Label.new()
-	cover_label.text = "cover stand-in\n(dot_hud_cover)"
+	cover_label.text = "cover stand-in\n(gs_hud_cover)"
 	cover_label.position = Vector2(12.0, 8.0)
 	cover.add_child(cover_label)
 

@@ -10,8 +10,8 @@ extends RefCounted
 ## sets `offset_right` to minus the parent's width and the thing stays nought pixels wide.
 ## It then draws nothing while every property about it reads correctly.
 
-const SELF_MUTE_SERVICE := &"dot_self_mute"
-const SELF_MUTE_SCRIPT := "res://addons/dot_chat/runtime/dot_chat_self_mute.gd"
+const SELF_MUTE_SERVICE := &"gs_self_mute"
+const SELF_MUTE_SCRIPT := "res://addons/gs_chat/runtime/gs_chat_self_mute.gd"
 
 
 ## Anchors to the bottom edge and then offsets, in that order.
@@ -90,7 +90,7 @@ static func show_history(window: GSChatWindow, view: GSFeedView, rows: Array, sc
 	view.queue_redraw()
 
 
-## The shared block list: registry `dot_self_mute`, else GameSpice Chat's script by path, else null.
+## The shared block list: registry `gs_self_mute`, else GameSpice Chat's script by path, else null.
 static func find_self_mute() -> Object:
 	var found: Object = GSRegistry.get_service(SELF_MUTE_SERVICE)
 

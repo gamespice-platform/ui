@@ -40,7 +40,7 @@ signal capture_ended()
 ##
 ## [b]A game's bindable actions are not all in one namespace, and assuming they were left
 ## a real one off every rebinding screen in this family.[/b] A first-person game's movement
-## is `dot_fps_*`, registered by GameSpice Player Controller; its chat key is its own
+## is `gs_fps_*`, registered by GameSpice Player Controller; its chat key is its own
 ## `<game>_chat`. A panel filtered on one prefix shows one of those and silently drops the
 ## other — and an action that appears on no rebinding screen is an action a player cannot
 ## discover, which is the same "produced correctly and reachable from nothing" this family

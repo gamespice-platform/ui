@@ -5,7 +5,7 @@ extends CanvasLayer
 ## top three rising, then [signal finished]. Skippable; [member reduced_motion] shows the final
 ## frame at once, with nothing moving. Driven by [method advance], so a test steps it exactly.
 
-const CHANNEL := "dot_ui.winner"
+const CHANNEL := "gs_ui.winner"
 
 ## Podium layout per place (first, second, third): column height as a share of the screen, offset from centre in column widths and gaps, and rise start time.
 const PODIUM_HEIGHTS: Array[float] = [0.3, 0.22, 0.16]

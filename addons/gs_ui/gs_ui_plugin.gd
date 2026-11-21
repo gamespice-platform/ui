@@ -7,25 +7,25 @@ extends EditorPlugin
 ## a client at once, and a singleton screen stack makes that impossible.
 ## [GSScreenStack] registers itself in [GSRegistry] instead.
 
-const _ICON := "res://addons/dot_ui/icon_placeholder.svg"
+const _ICON := "res://addons/gs_ui/icon_placeholder.svg"
 
 const _TYPES := [
-	["GSScreenStack", "Control", "res://addons/dot_ui/core/dot_screen_stack.gd"],
-	["GSScreen", "Control", "res://addons/dot_ui/core/dot_screen.gd"],
-	["GSHud", "Control", "res://addons/dot_ui/hud/dot_hud.gd"],
-	["GSStatBar", "Control", "res://addons/dot_ui/hud/dot_stat_bar.gd"],
-	["GSCrosshair", "Control", "res://addons/dot_ui/hud/dot_crosshair.gd"],
-	["GSFeedView", "Control", "res://addons/dot_ui/hud/dot_feed_view.gd"],
-	["GSTableView", "Control", "res://addons/dot_ui/hud/dot_table_view.gd"],
+	["GSScreenStack", "Control", "res://addons/gs_ui/core/gs_screen_stack.gd"],
+	["GSScreen", "Control", "res://addons/gs_ui/core/gs_screen.gd"],
+	["GSHud", "Control", "res://addons/gs_ui/hud/gs_hud.gd"],
+	["GSStatBar", "Control", "res://addons/gs_ui/hud/gs_stat_bar.gd"],
+	["GSCrosshair", "Control", "res://addons/gs_ui/hud/gs_crosshair.gd"],
+	["GSFeedView", "Control", "res://addons/gs_ui/hud/gs_feed_view.gd"],
+	["GSTableView", "Control", "res://addons/gs_ui/hud/gs_table_view.gd"],
 	[
 		"GSSettingsPanel",
 		"VBoxContainer",
-		"res://addons/dot_ui/panels/dot_settings_panel.gd",
+		"res://addons/gs_ui/panels/gs_settings_panel.gd",
 	],
 	[
 		"GSBindingsPanel",
 		"VBoxContainer",
-		"res://addons/dot_ui/panels/dot_bindings_panel.gd",
+		"res://addons/gs_ui/panels/gs_bindings_panel.gd",
 	],
 ]
 
