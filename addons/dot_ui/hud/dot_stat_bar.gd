@@ -1,6 +1,6 @@
 @tool
-class_name DotStatBar
-extends DotHudWidget
+class_name GSStatBar
+extends GSHudWidget
 
 ## A number, a bar, or both. Health, armour, ammunition, a capture progress ring.
 ##

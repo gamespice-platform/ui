@@ -1,4 +1,4 @@
-class_name DotServerList
+class_name GSServerList
 extends PanelContainer
 
 ## A server list a player can read on a phone and drive with a pad: a heading, a search,
@@ -6,7 +6,7 @@ extends PanelContainer
 ##
 ## [b]Rows are dictionaries, so this names nothing outside GameSpice Core.[/b] GameSpice Browser ships no
 ## window on purpose and says GameSpice UI gives its rows somewhere to go; this is that place.
-## [code]DotBrowserEntry.to_row()[/code] makes exactly the keys read here: [code]address[/code],
+## [code]GSBrowserEntry.to_row()[/code] makes exactly the keys read here: [code]address[/code],
 ## [code]name[/code], [code]map[/code], [code]players[/code], [code]max_players[/code],
 ## [code]ping_ms[/code], [code]status[/code] ("online" or anything else) and [code]secure[/code].
 ##
@@ -58,7 +58,7 @@ signal selection_changed(address: String)
 
 @export_group("Look")
 
-## Dress the list in [DotUiGamespice]. Off, it inherits whatever Theme its parent has and a
+## Dress the list in [GSUiGamespice]. Off, it inherits whatever Theme its parent has and a
 ## selected row is a pressed toggle.
 @export var gamespice: bool = true
 
@@ -204,8 +204,8 @@ func _reveal(target: Control) -> void:
 
 func _build() -> void:
 	if gamespice:
-		theme = DotUiGamespice.theme()
-		add_theme_stylebox_override("panel", DotUiGamespice.card())
+		theme = GSUiGamespice.theme()
+		add_theme_stylebox_override("panel", GSUiGamespice.card())
 
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
@@ -231,14 +231,14 @@ func _build_head(box: VBoxContainer) -> void:
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_theme_constant_override("separation", 2)
 	head.add_child(titles)
-	_eyebrow = DotUiGamespice.eyebrow(eyebrow_text) if gamespice else Label.new()
+	_eyebrow = GSUiGamespice.eyebrow(eyebrow_text) if gamespice else Label.new()
 	_eyebrow.visible = not eyebrow_text.is_empty()
 	if not gamespice:
 		_eyebrow.text = eyebrow_text
 	titles.add_child(_eyebrow)
 	_title = Label.new()
 	_title.text = title
-	_title.theme_type_variation = &"DotHeading"
+	_title.theme_type_variation = &"GSHeading"
 	titles.add_child(_title)
 	_refresh = _button("Refresh", false)
 	_refresh.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -271,7 +271,7 @@ func _build_list(box: VBoxContainer) -> void:
 	_empty.text = empty_text
 	_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_empty.theme_type_variation = &"DotDim"
+	_empty.theme_type_variation = &"GSDim"
 	_empty.custom_minimum_size.y = 64.0
 	_empty.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	inner.add_child(_empty)
@@ -304,7 +304,7 @@ func _build_foot(box: VBoxContainer) -> void:
 	box.add_child(foot)
 	_status = Label.new()
 	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_status.theme_type_variation = &"DotDim"
+	_status.theme_type_variation = &"GSDim"
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	foot.add_child(_status)
@@ -320,9 +320,9 @@ func _button(text: String, primary: bool) -> Button:
 	button.custom_minimum_size.y = 44.0
 	if gamespice:
 		if primary:
-			DotUiGamespice.primary(button)
+			GSUiGamespice.primary(button)
 		else:
-			DotUiGamespice.ghost(button)
+			GSUiGamespice.ghost(button)
 	return button
 
 
@@ -463,7 +463,7 @@ func _fill_row(button: Button, row: Dictionary) -> void:
 	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title_label.clip_text = true
 	if gamespice:
-		title_label.add_theme_font_override("font", DotUiGamespice.bold(0.4))
+		title_label.add_theme_font_override("font", GSUiGamespice.bold(0.4))
 	name_box.add_child(title_label)
 
 	if _compact:
@@ -500,12 +500,12 @@ func _cell(text: String, dim: bool, width: float) -> Label:
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.custom_minimum_size.x = width
 	if dim:
-		label.theme_type_variation = &"DotDim"
+		label.theme_type_variation = &"GSDim"
 	return label
 
 
 func _ping_colour(ping: int, online: bool) -> Color:
-	var tokens := DotUiGamespice.palette() if gamespice else DotUiTheme.dark()
+	var tokens := GSUiGamespice.palette() if gamespice else GSUiTheme.dark()
 	if not online or ping < 0:
 		return tokens.text_dim
 	if ping <= good_ping_ms:
@@ -520,7 +520,7 @@ func _restyle() -> void:
 		var button := _buttons[address] as Button
 		var on: bool = str(address) == _selected
 		if gamespice:
-			DotUiGamespice.row_button(button, on)
+			GSUiGamespice.row_button(button, on)
 		else:
 			button.toggle_mode = true
 			button.set_pressed_no_signal(on)

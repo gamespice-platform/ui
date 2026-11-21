@@ -1,5 +1,5 @@
 @tool
-class_name DotHudWidget
+class_name GSHudWidget
 extends Control
 
 ## Base for anything that shows a number the game already has.
@@ -46,7 +46,7 @@ func _ready() -> void:
 
 
 ## Binds a reader. Returns self, so a HUD is one chained expression.
-func bind(reader: Callable) -> DotHudWidget:
+func bind(reader: Callable) -> GSHudWidget:
 	source = reader
 	refresh()
 	return self

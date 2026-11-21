@@ -1,4 +1,4 @@
-class_name DotUiGamespice
+class_name GSUiGamespice
 extends RefCounted
 
 ## Gamespice's look, opt-in: the platform's tokens and the few styleboxes a palette cannot
@@ -7,7 +7,7 @@ extends RefCounted
 ## The values are the site's own (globals.css and brand.md, hue 14). Dark only: the site's
 ## game stage is dark in both of its themes.
 ##
-## Nothing uses it unless asked: [method DotUiTheme.dark] stays the default.
+## Nothing uses it unless asked: [method GSUiTheme.dark] stays the default.
 
 # No log channel: values and styleboxes, nothing that can fail.
 
@@ -45,9 +45,9 @@ const RADIUS := 12
 const CARD_RADIUS := 20
 
 
-## The palette as a [DotUiTheme], for a view to adjust before building.
-static func palette() -> DotUiTheme:
-	var t := DotUiTheme.new()
+## The palette as a [GSUiTheme], for a view to adjust before building.
+static func palette() -> GSUiTheme:
+	var t := GSUiTheme.new()
 	t.background = Color(GLASS_STRONG, 0.90)
 	t.surface = Color(PANEL_2, 0.92)
 	t.surface_hover = Color(PANEL_2.lightened(0.08), 0.96)
@@ -73,7 +73,7 @@ static func theme() -> Theme:
 	return dress(palette().build())
 
 
-## Adds the card, the focus ring and the eyebrow to a Theme [DotUiTheme] built. Public so a
+## Adds the card, the focus ring and the eyebrow to a Theme [GSUiTheme] built. Public so a
 ## view that changed the palette first ([method palette]) gets the same pieces.
 static func dress(t: Theme) -> Theme:
 	t.set_stylebox("panel", "PanelContainer", card())
@@ -84,11 +84,11 @@ static func dress(t: Theme) -> Theme:
 	t.set_color("font_pressed_color", "CheckBox", INK)
 	t.set_color("font_focus_color", "Button", INK)
 	t.set_color("selection_color", "LineEdit", Color(ACCENT, 0.35))
-	t.set_type_variation(&"DotEyebrow", &"Label")
-	t.set_color("font_color", "DotEyebrow", ACCENT_TEXT)
-	t.set_font_size("font_size", "DotEyebrow", 12)
-	t.set_font("font", "DotEyebrow", bold())
-	t.set_font("font", "DotHeading", bold())
+	t.set_type_variation(&"GSEyebrow", &"Label")
+	t.set_color("font_color", "GSEyebrow", ACCENT_TEXT)
+	t.set_font_size("font_size", "GSEyebrow", 12)
+	t.set_font("font", "GSEyebrow", bold())
+	t.set_font("font", "GSHeading", bold())
 	# Dialogs: the card, opaque, and a title bar to match.
 	# The window's border below is the card; the panel inside is flat, so the two do not
 	# draw a second outline and shadow inside the first (a frame showed the double edge).
@@ -225,7 +225,7 @@ static func ghost(button: Button) -> void:
 static func eyebrow(text: String) -> Label:
 	var label := Label.new()
 	label.text = text.to_upper()
-	label.theme_type_variation = &"DotEyebrow"
+	label.theme_type_variation = &"GSEyebrow"
 	return label
 
 

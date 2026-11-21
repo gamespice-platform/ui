@@ -1,7 +1,7 @@
-class_name DotFormSchema
+class_name GSFormSchema
 extends RefCounted
 
-## Turns a profile schema (as [method DotProfileSet.field] builds it) into form fields and checks values against them.
+## Turns a profile schema (as [method GSProfileSet.field] builds it) into form fields and checks values against them.
 
 const TYPES: Array[String] = ["int", "float", "string", "bool", "list", "dict", "any", "color", "vector2", "vector3"]
 
@@ -10,21 +10,21 @@ const SLIDER_MAX_SPAN := 100000.0
 
 
 ## Fills defaults (label, group, step, slider) and rejects a schema the form could not show.
-static func normalize(schema: Array) -> DotResult:
+static func normalize(schema: Array) -> GSResult:
 	var out: Array[Dictionary] = []
 	var seen := {}
 	for raw in schema:
 		if not raw is Dictionary:
-			return DotResult.fail(DotError.CODE_INVALID, "A schema entry must be a Dictionary.")
+			return GSResult.fail(GSError.CODE_INVALID, "A schema entry must be a Dictionary.")
 		var d: Dictionary = (raw as Dictionary).duplicate(true)
 		var key := str(d.get("name", ""))
 		if key == "":
-			return DotResult.fail(DotError.CODE_INVALID, "A schema entry has no name.")
+			return GSResult.fail(GSError.CODE_INVALID, "A schema entry has no name.")
 		if seen.has(key):
-			return DotResult.fail(DotError.CODE_INVALID, "Duplicate field '%s'." % key)
+			return GSResult.fail(GSError.CODE_INVALID, "Duplicate field '%s'." % key)
 		var type := str(d.get("type", "any"))
 		if not TYPES.has(type):
-			return DotResult.fail(DotError.CODE_INVALID, "Field '%s' has unknown type '%s'." % [key, type])
+			return GSResult.fail(GSError.CODE_INVALID, "Field '%s' has unknown type '%s'." % [key, type])
 		seen[key] = true
 		d["name"] = key
 		d["type"] = type
@@ -38,14 +38,14 @@ static func normalize(schema: Array) -> DotResult:
 		if not d.has("step"):
 			d["step"] = 1.0 if type == "int" else _auto_step(d)
 		if d.has("visible_if") and not (d["visible_if"] is Dictionary or d["visible_if"] is Callable):
-			return DotResult.fail(DotError.CODE_INVALID, "Field '%s': visible_if must be a Dictionary or a Callable." % key)
+			return GSResult.fail(GSError.CODE_INVALID, "Field '%s': visible_if must be a Dictionary or a Callable." % key)
 		out.append(d)
 	for d in out:
 		if d.has("visible_if") and d["visible_if"] is Dictionary:
 			for dep in d["visible_if"]:
 				if str(dep) == d["name"] or not seen.has(str(dep)):
-					return DotResult.fail(DotError.CODE_INVALID, "Field '%s': visible_if names '%s', which is not another field." % [d["name"], str(dep)])
-	return DotResult.success(out)
+					return GSResult.fail(GSError.CODE_INVALID, "Field '%s': visible_if names '%s', which is not another field." % [d["name"], str(dep)])
+	return GSResult.success(out)
 
 
 ## Whether a field's `visible_if` holds for [param values]: a Dictionary of key to value (or to an Array of allowed values), all of which must match, or a Callable taking the values.
@@ -57,7 +57,7 @@ static func is_shown(d: Dictionary, values: Dictionary) -> bool:
 		for dep in cond:
 			var want: Variant = cond[dep]
 			var have: Variant = values.get(str(dep))
-			var hit: bool = (want as Array).any(func(w: Variant) -> bool: return DotValue.same(w, have)) if want is Array else DotValue.same(want, have)
+			var hit: bool = (want as Array).any(func(w: Variant) -> bool: return GSValue.same(w, have)) if want is Array else GSValue.same(want, have)
 			if not hit:
 				return false
 	return true
@@ -125,7 +125,7 @@ static func fmt(n: float) -> String:
 
 
 ## Checks [param value] against the field; success carries the value coerced to the field's type.
-static func validate(d: Dictionary, value: Variant) -> DotResult:
+static func validate(d: Dictionary, value: Variant) -> GSResult:
 	var type: String = d["type"]
 	var v: Variant = value
 	match type:
@@ -183,16 +183,16 @@ static func validate(d: Dictionary, value: Variant) -> DotResult:
 				return _bad("Must be an object.")
 	if d.has("validator") and d["validator"] is Callable:
 		var verdict: Variant = (d["validator"] as Callable).call(v)
-		if verdict is DotResult:
-			if not (verdict as DotResult).ok:
-				return _bad((verdict as DotResult).error.message)
+		if verdict is GSResult:
+			if not (verdict as GSResult).ok:
+				return _bad((verdict as GSResult).error.message)
 		elif verdict is String and verdict != "":
 			return _bad(verdict)
-	return DotResult.success(v)
+	return GSResult.success(v)
 
 
 ## The "vector2"/"vector3" branch of [method validate]: a vector or an array of [param type]'s size, each axis in min/max.
-static func _validate_vector(d: Dictionary, type: String, value: Variant) -> DotResult:
+static func _validate_vector(d: Dictionary, type: String, value: Variant) -> GSResult:
 	var n := vector_size(type)
 	var parts: Array = []
 	if value is Vector2 and n == 2:
@@ -213,11 +213,11 @@ static func _validate_vector(d: Dictionary, type: String, value: Variant) -> Dot
 		if d.has("max") and c > float(d["max"]) + 0.0000001:
 			return _bad("%s: must be at most %s." % ["XYZ"[i], fmt(float(d["max"]))])
 		nums.append(c)
-	return DotResult.success(Vector2(nums[0], nums[1]) if n == 2 else Vector3(nums[0], nums[1], nums[2]))
+	return GSResult.success(Vector2(nums[0], nums[1]) if n == 2 else Vector3(nums[0], nums[1], nums[2]))
 
 
 ## Reads what a person typed into a number, JSON or list-item box.
-static func parse_text(d: Dictionary, raw: String) -> DotResult:
+static func parse_text(d: Dictionary, raw: String) -> GSResult:
 	var t := raw.strip_edges()
 	match d["type"]:
 		"int":
@@ -270,5 +270,5 @@ static func display(d: Dictionary, value: Variant) -> String:
 	return str(value)
 
 
-static func _bad(message: String) -> DotResult:
-	return DotResult.fail(DotError.CODE_INVALID, message)
+static func _bad(message: String) -> GSResult:
+	return GSResult.fail(GSError.CODE_INVALID, message)

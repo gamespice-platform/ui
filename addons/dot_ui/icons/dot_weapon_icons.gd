@@ -1,4 +1,4 @@
-class_name DotWeaponIcons
+class_name GSWeaponIcons
 extends RefCounted
 
 ## The stock weapon icon set: Jestan's CC0 pixel-art sprites by type tag (see icons/jestan/CREDITS.md).
@@ -18,9 +18,9 @@ const TAGS := {
 }
 
 
-## A fresh set with the stock sheet and every tag in [constant TAGS]; add [method DotIconSet.alias]es for your ids.
-static func stock() -> DotIconSet:
-	var set := DotIconSet.new()
+## A fresh set with the stock sheet and every tag in [constant TAGS]; add [method GSIconSet.alias]es for your ids.
+static func stock() -> GSIconSet:
+	var set := GSIconSet.new()
 	var sheet := load(SHEET) as Texture2D
 	if sheet == null:
 		return set

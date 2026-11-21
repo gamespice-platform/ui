@@ -1,5 +1,5 @@
 @tool
-class_name DotStarfield
+class_name GSStarfield
 extends RefCounted
 
 ## A drawn parallax starfield: a sky for a menu, or for a world.

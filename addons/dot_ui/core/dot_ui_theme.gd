@@ -1,5 +1,5 @@
 @tool
-class_name DotUiTheme
+class_name GSUiTheme
 extends Resource
 
 ## Builds a whole [Theme] out of a palette and a scale, with no art assets.
@@ -46,12 +46,12 @@ extends Resource
 @export var font: Font = null
 
 
-static func dark() -> DotUiTheme:
-	return DotUiTheme.new()
+static func dark() -> GSUiTheme:
+	return GSUiTheme.new()
 
 
-static func light() -> DotUiTheme:
-	var theme := DotUiTheme.new()
+static func light() -> GSUiTheme:
+	var theme := GSUiTheme.new()
 	theme.background = Color(0.94, 0.94, 0.96, 0.96)
 	theme.surface = Color(0.99, 0.99, 1.0, 1.0)
 	theme.surface_hover = Color(0.92, 0.93, 0.96, 1.0)
@@ -66,11 +66,11 @@ static func light() -> DotUiTheme:
 ##
 ## A palette and nothing more — same builder, same metrics discipline as [method dark].
 ## The reason it exists rather than each game hand-tinting nine colours: a neutral grey
-## card in front of [DotStarfield] reads as a screenshot of a different program pasted over
+## card in front of [GSStarfield] reads as a screenshot of a different program pasted over
 ## the game, and the fix for that is one palette shared by the menu and the HUD, not two
 ## that nearly agree.
-static func space() -> DotUiTheme:
-	var theme := DotUiTheme.new()
+static func space() -> GSUiTheme:
+	var theme := GSUiTheme.new()
 	theme.background = Color(0.055, 0.062, 0.100, 0.92)
 	theme.surface = Color(0.075, 0.085, 0.135, 0.92)
 	theme.surface_hover = Color(0.110, 0.130, 0.190, 0.95)
@@ -141,7 +141,7 @@ func _style_panel(theme: Theme, unit: float) -> void:
 	theme.set_stylebox("panel", "PanelContainer", _box(surface, unit, outline))
 
 	var transparent := StyleBoxEmpty.new()
-	theme.set_stylebox("panel", "DotHudPanel", transparent)
+	theme.set_stylebox("panel", "GSHudPanel", transparent)
 
 
 func _style_button(theme: Theme, unit: float) -> void:
@@ -171,23 +171,23 @@ func _style_label(theme: Theme, unit: float) -> void:
 	theme.set_color("font_color", "Label", text)
 	theme.set_font_size("font_size", "Label", int(round(float(font_size) * unit)))
 
-	# Type variations, so a heading is `theme_type_variation = &"DotHeading"` rather
+	# Type variations, so a heading is `theme_type_variation = &"GSHeading"` rather
 	# than a hand-set font size that stops scaling.
-	theme.set_type_variation(&"DotHeading", &"Label")
-	theme.set_color("font_color", "DotHeading", text)
+	theme.set_type_variation(&"GSHeading", &"Label")
+	theme.set_color("font_color", "GSHeading", text)
 	theme.set_font_size(
-		"font_size", "DotHeading", int(round(float(heading_size) * unit))
+		"font_size", "GSHeading", int(round(float(heading_size) * unit))
 	)
 
-	theme.set_type_variation(&"DotDim", &"Label")
-	theme.set_color("font_color", "DotDim", text_dim)
-	theme.set_font_size("font_size", "DotDim", int(round(float(font_size) * unit)))
+	theme.set_type_variation(&"GSDim", &"Label")
+	theme.set_color("font_color", "GSDim", text_dim)
+	theme.set_font_size("font_size", "GSDim", int(round(float(font_size) * unit)))
 
-	theme.set_type_variation(&"DotDanger", &"Label")
-	theme.set_color("font_color", "DotDanger", danger)
+	theme.set_type_variation(&"GSDanger", &"Label")
+	theme.set_color("font_color", "GSDanger", danger)
 
-	theme.set_type_variation(&"DotGood", &"Label")
-	theme.set_color("font_color", "DotGood", good)
+	theme.set_type_variation(&"GSGood", &"Label")
+	theme.set_color("font_color", "GSGood", good)
 
 	theme.set_color("default_color", "RichTextLabel", text)
 	theme.set_font_size(
@@ -234,15 +234,15 @@ func _style_containers(theme: Theme, unit: float) -> void:
 	theme.set_constant("margin_bottom", "MarginContainer", gap)
 
 
-## The glance pieces' colours ([DotHudPiece]) from the palette. The plate is the
+## The glance pieces' colours ([GSHudPiece]) from the palette. The plate is the
 ## background made see-through, because a HUD plate that hid the floor would be a panel;
 ## `ink` (the outline under every number) is the background too, so a light palette draws
 ## dark numbers ringed in light rather than in black. A dark palette gets dark key caps
 ## edged in its text and score plates tinted, not painted, with a side's colour; a light
-## one keeps light caps and painted plates. Not [method DotHudPiece.theme_from], which also
+## one keeps light caps and painted plates. Not [method GSHudPiece.theme_from], which also
 ## outlines every Label: right over a game, wrong in a menu built from this theme.
 func _style_hud_pieces(theme: Theme) -> void:
-	var t := DotHudPiece.THEME_TYPE
+	var t := GSHudPiece.THEME_TYPE
 	var dark := background.get_luminance() < 0.5
 	theme.set_color(&"plate", t, Color(background.darkened(0.3) if dark else background, 0.74 if dark else 0.62))
 	theme.set_color(&"plate_edge", t, Color(outline, 0.35))

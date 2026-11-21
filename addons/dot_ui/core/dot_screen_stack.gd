@@ -1,5 +1,5 @@
 @tool
-class_name DotScreenStack
+class_name GSScreenStack
 extends Control
 
 ## The screen stack: what is open, in what order, and who gets input.
@@ -10,7 +10,7 @@ extends Control
 ## scoreboard that captures the mouse, or an escape key that closes two screens at
 ## once. All four are derived here from one stack.
 ##
-## [b]No autoload.[/b] It registers itself in [DotRegistry] under [constant SERVICE] so
+## [b]No autoload.[/b] It registers itself in [GSRegistry] under [constant SERVICE] so
 ## a screen anywhere in the tree can find it, and so a process running two windows can
 ## have two.
 ##
@@ -38,7 +38,7 @@ signal menu_state_changed(any_open: bool)
 
 @export_group("Configuration")
 
-@export var config: DotUiConfig = null
+@export var config: GSUiConfig = null
 
 @export var config_file: String = "user://cfg/ui.json"
 
@@ -47,7 +47,7 @@ signal menu_state_changed(any_open: bool)
 @export_group("Theme")
 
 ## Generated and applied on ready when [member theme] is not already set.
-@export var ui_theme: DotUiTheme = null
+@export var ui_theme: GSUiTheme = null
 
 @export_group("Service")
 
@@ -58,7 +58,7 @@ signal menu_state_changed(any_open: bool)
 @export_group("Mouse")
 
 ## Mouse mode when no screen is open. Usually captured, for a first-person game.
-@export var idle_mouse_mode: DotScreen.Mouse = DotScreen.Mouse.CAPTURED
+@export var idle_mouse_mode: GSScreen.Mouse = GSScreen.Mouse.CAPTURED
 
 ## Whether the stack sets the mouse mode at all.
 ##
@@ -67,7 +67,7 @@ signal menu_state_changed(any_open: bool)
 ## cursor that flickers.
 @export var manage_mouse: bool = true
 
-## id -> [DotScreen].
+## id -> [GSScreen].
 var _registered: Dictionary = {}
 
 ## Screen ids, bottom first.
@@ -83,18 +83,18 @@ func _ready() -> void:
 	var res := setup()
 
 	if not res.ok:
-		DotLog.result(CHANNEL, "screen stack setup", res)
+		GSLog.result(CHANNEL, "screen stack setup", res)
 
 
 func _exit_tree() -> void:
 	if _registered_name != &"":
-		DotRegistry.unregister_instance(_registered_name, self)
+		GSRegistry.unregister_instance(_registered_name, self)
 		_registered_name = &""
 
 
-func setup() -> DotResult:
+func setup() -> GSResult:
 	if config == null:
-		config = DotUiConfig.new()
+		config = GSUiConfig.new()
 
 	if load_layered_config:
 		var loaded := config.load_layered(config_file)
@@ -117,19 +117,19 @@ func setup() -> DotResult:
 
 	if theme == null:
 		if ui_theme == null:
-			ui_theme = DotUiTheme.dark()
+			ui_theme = GSUiTheme.dark()
 		theme = ui_theme.build(config.scale)
 
 	if register_service:
 		_registered_name = (
-			DotRegistry.scoped_name(SERVICE, service_scope)
+			GSRegistry.scoped_name(SERVICE, service_scope)
 			if service_scope != &""
 			else SERVICE
 		)
-		DotRegistry.register(_registered_name, self)
+		GSRegistry.register(_registered_name, self)
 
 	_apply_mouse()
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 # --- Registration ----------------------------------------------------------
@@ -139,20 +139,20 @@ func setup() -> DotResult:
 ## Reparenting rather than requiring the host to build the tree correctly: z-order is
 ## sibling order, so a screen that is not a child of the stack cannot be ordered by it,
 ## and the symptom is a menu that renders under the HUD.
-func register(screen: DotScreen) -> DotResult:
+func register(screen: GSScreen) -> GSResult:
 	if screen == null:
-		return DotResult.fail(DotError.CODE_INVALID, "No screen.")
+		return GSResult.fail(GSError.CODE_INVALID, "No screen.")
 
 	var id := screen.screen_id()
 
 	if id == &"":
-		return DotResult.fail(
-			DotError.CODE_INVALID, "A screen with an empty id."
+		return GSResult.fail(
+			GSError.CODE_INVALID, "A screen with an empty id."
 		)
 
 	if _registered.has(id) and _registered[id] != screen:
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"Two screens both call themselves '%s'." % id
 		)
 
@@ -170,7 +170,7 @@ func register(screen: DotScreen) -> DotResult:
 	if not screen.close_requested.is_connected(_on_close_requested):
 		screen.close_requested.connect(_on_close_requested.bind(id))
 
-	return DotResult.success(id)
+	return GSResult.success(id)
 
 
 func unregister(id: StringName) -> void:
@@ -178,7 +178,7 @@ func unregister(id: StringName) -> void:
 	_registered.erase(id)
 
 
-func screen(id: StringName) -> DotScreen:
+func screen(id: StringName) -> GSScreen:
 	return _registered.get(id)
 
 
@@ -196,12 +196,12 @@ func registered_ids() -> Array[StringName]:
 
 # --- Stack -----------------------------------------------------------------
 
-func push(id: StringName) -> DotResult:
+func push(id: StringName) -> GSResult:
 	var target := screen(id)
 
 	if target == null:
-		return DotResult.fail(
-			DotError.CODE_INVALID, "No screen registered as '%s'." % id
+		return GSResult.fail(
+			GSError.CODE_INVALID, "No screen registered as '%s'." % id
 		)
 
 	if _stack.has(id):
@@ -225,7 +225,7 @@ func push(id: StringName) -> DotResult:
 	if _stack.size() == 1:
 		menu_state_changed.emit(true)
 
-	return DotResult.success(id)
+	return GSResult.success(id)
 
 
 ## Pops the top screen, or a specific one.
@@ -233,23 +233,23 @@ func push(id: StringName) -> DotResult:
 ## Popping a screen that is not on top removes it from the middle of the stack rather
 ## than refusing: a screen closing itself in response to a game event does not know
 ## what has been opened over it, and refusing would leave a dead screen in the stack.
-func pop(id: StringName = &"") -> DotResult:
+func pop(id: StringName = &"") -> GSResult:
 	if _stack.is_empty():
-		return DotResult.fail(DotError.CODE_STATE, "Nothing is open.")
+		return GSResult.fail(GSError.CODE_STATE, "Nothing is open.")
 
 	var target_id := id if id != &"" else top_id()
 	var index := _stack.find(target_id)
 
 	if index < 0:
-		return DotResult.fail(
-			DotError.CODE_STATE, "'%s' is not open." % target_id
+		return GSResult.fail(
+			GSError.CODE_STATE, "'%s' is not open." % target_id
 		)
 
 	var target := screen(target_id)
 
 	if not target.can_pop():
-		return DotResult.fail(
-			DotError.CODE_FORBIDDEN, "'%s' refused to close." % target_id
+		return GSResult.fail(
+			GSError.CODE_FORBIDDEN, "'%s' refused to close." % target_id
 		)
 
 	var was_top := index == _stack.size() - 1
@@ -273,7 +273,7 @@ func pop(id: StringName = &"") -> DotResult:
 	if _stack.is_empty():
 		menu_state_changed.emit(false)
 
-	return DotResult.success(target_id)
+	return GSResult.success(target_id)
 
 
 ## Pops everything down to and including [param id], or everything.
@@ -297,7 +297,7 @@ func pop_to(id: StringName = &"") -> int:
 
 
 ## Replaces the top screen. What a menu that navigates rather than nests wants.
-func replace(id: StringName) -> DotResult:
+func replace(id: StringName) -> GSResult:
 	if not _stack.is_empty():
 		var res := pop()
 		if not res.ok:
@@ -310,11 +310,11 @@ func clear() -> int:
 	return pop_to()
 
 
-func _raise(id: StringName) -> DotResult:
+func _raise(id: StringName) -> GSResult:
 	var index := _stack.find(id)
 
 	if index < 0 or index == _stack.size() - 1:
-		return DotResult.success(id)
+		return GSResult.success(id)
 
 	var previous := top_id()
 
@@ -326,14 +326,14 @@ func _raise(id: StringName) -> DotResult:
 	_refresh()
 
 	top_changed.emit(id)
-	return DotResult.success(id)
+	return GSResult.success(id)
 
 
 func top_id() -> StringName:
 	return _stack[_stack.size() - 1] if not _stack.is_empty() else &""
 
 
-func top() -> DotScreen:
+func top() -> GSScreen:
 	var id := top_id()
 	return null if id == &"" else screen(id)
 
@@ -355,7 +355,7 @@ func open_ids() -> Array[StringName]:
 
 
 ## Opens a screen if it is closed, closes it if it is open. What a scoreboard key does.
-func toggle(id: StringName) -> DotResult:
+func toggle(id: StringName) -> GSResult:
 	return pop(id) if is_open(id) else push(id)
 
 
@@ -427,18 +427,18 @@ func wanted_mouse_mode() -> int:
 	var wanted := idle_mouse_mode
 	var current := top()
 
-	if current != null and current.mouse_mode != DotScreen.Mouse.INHERIT:
+	if current != null and current.mouse_mode != GSScreen.Mouse.INHERIT:
 		wanted = current.mouse_mode
 
-	if wanted != DotScreen.Mouse.VISIBLE and _pointer_modal_open():
-		wanted = DotScreen.Mouse.VISIBLE
+	if wanted != GSScreen.Mouse.VISIBLE and _pointer_modal_open():
+		wanted = GSScreen.Mouse.VISIBLE
 
 	match wanted:
-		DotScreen.Mouse.CAPTURED:
+		GSScreen.Mouse.CAPTURED:
 			return Input.MOUSE_MODE_CAPTURED
-		DotScreen.Mouse.CONFINED:
+		GSScreen.Mouse.CONFINED:
 			return Input.MOUSE_MODE_CONFINED
-		DotScreen.Mouse.INHERIT:
+		GSScreen.Mouse.INHERIT:
 			return -1
 	return Input.MOUSE_MODE_VISIBLE
 
@@ -509,7 +509,7 @@ func describe() -> Dictionary:
 		"registered": _registered.size(),
 		"open": open,
 		"top": String(top_id()),
-		"mouse": DotScreen.Mouse.keys()[idle_mouse_mode],
+		"mouse": GSScreen.Mouse.keys()[idle_mouse_mode],
 	}
 
 

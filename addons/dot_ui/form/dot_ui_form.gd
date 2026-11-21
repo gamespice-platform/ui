@@ -1,4 +1,4 @@
-class_name DotUiForm
+class_name GSUiForm
 extends PanelContainer
 
 ## A form built from a profile schema: grouped cards, a widget per type, search, per-key reset, dirty state with apply and revert.
@@ -16,7 +16,7 @@ signal reverted()
 @export var title := ""
 ## Below this width the rows stack and targets grow to touch size.
 @export var compact_below := 560.0
-## False leaves out the title, search and Apply bar and lets the cards take their full height, for a host (such as [DotSettingsPanel]) that scrolls and applies itself.
+## False leaves out the title, search and Apply bar and lets the cards take their full height, for a host (such as [GSSettingsPanel]) that scrolls and applies itself.
 @export var chrome := true
 ## Group names are split on this to nest cards ("Damage/Falloff").
 @export var group_separator := "/"
@@ -24,15 +24,15 @@ signal reverted()
 ## A controller's accept on a text box opens an on-screen keyboard; false leaves the box alone.
 @export var gamepad_entry := true
 
-var tokens: DotFormTokens = DotFormTokens.dark()
+var tokens: GSFormTokens = GSFormTokens.dark()
 
 var _schema: Array[Dictionary] = []
 var _fields := {}
 var _rows := {}
-var _groups: Array[DotFormGroup] = []
+var _groups: Array[GSFormGroup] = []
 var _group_rows := {}
 var _group_kids := {}
-var _tops: Array[DotFormGroup] = []
+var _tops: Array[GSFormGroup] = []
 var _baseline := {}
 var _current := {}
 var _errors := {}
@@ -62,10 +62,10 @@ func _init() -> void:
 
 
 ## Builds the widgets. [param values] are the current values; any key it lacks takes the schema default.
-func build(schema: Array, values: Dictionary = {}) -> DotResult:
-	var norm := DotFormSchema.normalize(schema)
+func build(schema: Array, values: Dictionary = {}) -> GSResult:
+	var norm := GSFormSchema.normalize(schema)
 	if not norm.ok:
-		return norm.wrap("DotUiForm.build")
+		return norm.wrap("GSUiForm.build")
 	_schema.clear()
 	for f in norm.value:
 		_schema.append(f)
@@ -82,10 +82,10 @@ func build(schema: Array, values: Dictionary = {}) -> DotResult:
 
 
 ## Replaces the baseline (what the server or file holds now); nothing is dirty afterwards.
-func set_values(values: Dictionary) -> DotResult:
+func set_values(values: Dictionary) -> GSResult:
 	var loaded := _load_values(values)
 	for key in _rows:
-		(_rows[key] as DotFormRow).show_value(_current[key])
+		(_rows[key] as GSFormRow).show_value(_current[key])
 	_errors.clear()
 	_refresh_state()
 	return loaded
@@ -100,7 +100,7 @@ func values() -> Dictionary:
 func changes() -> Dictionary:
 	var out := {}
 	for key in _current:
-		if not DotValue.same(_current[key], _baseline[key]):
+		if not GSValue.same(_current[key], _baseline[key]):
 			out[key] = _current[key]
 	return out
 
@@ -118,18 +118,18 @@ func errors() -> Dictionary:
 	return _errors.duplicate()
 
 
-func row(key: String) -> DotFormRow:
+func row(key: String) -> GSFormRow:
 	return _rows.get(key)
 
 
-## Sets a value as an edit; fails with [constant DotError.CODE_INVALID] when it does not validate.
-func set_value(key: String, value: Variant) -> DotResult:
+## Sets a value as an edit; fails with [constant GSError.CODE_INVALID] when it does not validate.
+func set_value(key: String, value: Variant) -> GSResult:
 	if not _fields.has(key):
-		return DotResult.fail(DotError.CODE_INVALID, "No field '%s'." % key)
-	var r := DotFormSchema.validate(_fields[key], value)
+		return GSResult.fail(GSError.CODE_INVALID, "No field '%s'." % key)
+	var r := GSFormSchema.validate(_fields[key], value)
 	if not r.ok:
 		return r.wrap(key)
-	(_rows[key] as DotFormRow).show_value(r.value)
+	(_rows[key] as GSFormRow).show_value(r.value)
 	_accept(key, r.value, "")
 	return r
 
@@ -138,8 +138,8 @@ func set_value(key: String, value: Variant) -> DotResult:
 func reset_key(key: String) -> void:
 	if not _fields.has(key):
 		return
-	var def: Variant = (_rows[key] as DotFormRow)._normal(_fields[key]["default"])
-	(_rows[key] as DotFormRow).show_value(def)
+	var def: Variant = (_rows[key] as GSFormRow)._normal(_fields[key]["default"])
+	(_rows[key] as GSFormRow).show_value(def)
 	_accept(key, def, "")
 	key_reset.emit(key)
 
@@ -148,20 +148,20 @@ func reset_key(key: String) -> void:
 func undo_key(key: String) -> void:
 	if not _fields.has(key):
 		return
-	(_rows[key] as DotFormRow).show_value(_baseline[key])
+	(_rows[key] as GSFormRow).show_value(_baseline[key])
 	_accept(key, _baseline[key], "")
 	key_undone.emit(key)
 
 
 ## Keeps the edits as the new baseline and emits [signal applied]; fails while any field is invalid.
-func apply() -> DotResult:
+func apply() -> GSResult:
 	if not _errors.is_empty():
-		return DotResult.fail(DotError.CODE_INVALID, "%d field(s) need fixing before apply." % _errors.size())
+		return GSResult.fail(GSError.CODE_INVALID, "%d field(s) need fixing before apply." % _errors.size())
 	var done := changes()
 	_baseline = _current.duplicate(true)
 	_refresh_state()
 	applied.emit(done)
-	return DotResult.success(done)
+	return GSResult.success(done)
 
 
 ## Drops every edit back to the baseline.
@@ -169,7 +169,7 @@ func revert() -> void:
 	_current = _baseline.duplicate(true)
 	_errors.clear()
 	for key in _rows:
-		(_rows[key] as DotFormRow).show_value(_current[key])
+		(_rows[key] as GSFormRow).show_value(_current[key])
 	_refresh_state()
 	validation_changed.emit(errors())
 	reverted.emit()
@@ -207,19 +207,19 @@ func filter() -> String:
 func visible_keys() -> PackedStringArray:
 	var out := PackedStringArray()
 	for f in _schema:
-		var r: DotFormRow = _rows[f["name"]]
+		var r: GSFormRow = _rows[f["name"]]
 		if r.is_visible_in_tree() or (r.visible and _group_shown(f["group"])):
 			out.append(f["name"])
 	return out
 
 
-func groups() -> Array[DotFormGroup]:
+func groups() -> Array[GSFormGroup]:
 	return _groups
 
 
 func focus_first() -> bool:
 	for f in _schema:
-		var r: DotFormRow = _rows[f["name"]]
+		var r: GSFormRow = _rows[f["name"]]
 		if r.visible and _group_shown(f["group"]) and r.editor() != null:
 			r.editor().grab_focus()
 			return true
@@ -227,7 +227,7 @@ func focus_first() -> bool:
 
 
 func focus_key(key: String) -> bool:
-	var r: DotFormRow = _rows.get(key)
+	var r: GSFormRow = _rows.get(key)
 	if r == null or r.editor() == null:
 		return false
 	r.editor().grab_focus()
@@ -235,19 +235,19 @@ func focus_key(key: String) -> bool:
 
 
 ## Opens the on-screen keyboard for [param edit] (a text box in this form); null when one is already open.
-func open_keypad(edit: LineEdit, numeric: bool = false) -> DotFormKeypad:
+func open_keypad(edit: LineEdit, numeric: bool = false) -> GSFormKeypad:
 	if keypad() != null:
 		return null
-	var pad := DotFormKeypad.new()
+	var pad := GSFormKeypad.new()
 	pad.name = "Keypad"
 	pad.open(self, edit, tokens, numeric)
 	return pad
 
 
 ## The open on-screen keyboard, or null.
-func keypad() -> DotFormKeypad:
+func keypad() -> GSFormKeypad:
 	for c in get_children():
-		if c is DotFormKeypad:
+		if c is GSFormKeypad:
 			return c
 	return null
 
@@ -270,34 +270,34 @@ func revert_button() -> Button:
 
 
 ## Swaps the look; rebuilds the widgets and keeps every edit.
-func set_tokens(t: DotFormTokens) -> void:
+func set_tokens(t: GSFormTokens) -> void:
 	tokens = t
 	_rebuild_now()
 
 
 func describe() -> String:
-	return "DotUiForm: %d fields, %d changed, %d invalid, filter '%s'" % [_schema.size(), changes().size(), _errors.size(), _filter]
+	return "GSUiForm: %d fields, %d changed, %d invalid, filter '%s'" % [_schema.size(), changes().size(), _errors.size(), _filter]
 
 
-func _load_values(values: Dictionary) -> DotResult:
+func _load_values(values: Dictionary) -> GSResult:
 	var problems := PackedStringArray()
 	for f in _schema:
 		var key: String = f["name"]
 		var v: Variant = values.get(key, f["default"])
-		var r := DotFormSchema.validate(f, v)
+		var r := GSFormSchema.validate(f, v)
 		if r.ok:
 			_baseline[key] = r.value
 		else:
 			problems.append("%s: %s" % [key, r.error.message])
-			var d := DotFormSchema.validate(f, f["default"])
+			var d := GSFormSchema.validate(f, f["default"])
 			_baseline[key] = d.value if d.ok else f["default"]
 	for key in values:
 		if not _fields.has(key):
 			problems.append("%s: not in the schema" % str(key))
 	_current = _baseline.duplicate(true)
 	if problems.is_empty():
-		return DotResult.success(null)
-	return DotResult.fail(DotError.CODE_INVALID, "; ".join(problems))
+		return GSResult.success(null)
+	return GSResult.fail(GSError.CODE_INVALID, "; ".join(problems))
 
 
 func _construct() -> void:
@@ -392,12 +392,12 @@ func _build_search_bar() -> HBoxContainer:
 	search_bar.add_child(_modified_chip)
 	return search_bar
 
-## One DotFormRow per schema field, in its group, plus the empty-state label.
+## One GSFormRow per schema field, in its group, plus the empty-state label.
 func _build_rows() -> void:
 	var by_path := {}
 	for f in _schema:
 		var parent := _ensure_group(str(f["group"]), by_path)
-		var r := DotFormRow.new()
+		var r := GSFormRow.new()
 		r.build(f, tokens)
 		r.show_value(_current[f["name"]])
 		r.edited.connect(_on_row_edited)
@@ -407,7 +407,7 @@ func _build_rows() -> void:
 			if gamepad_entry:
 				open_keypad(edit, numeric))
 		_rows[f["name"]] = r
-		r.visible = DotFormSchema.is_shown(f, _current)
+		r.visible = GSFormSchema.is_shown(f, _current)
 		parent.add_row(r)
 		(_group_rows[parent] as Array).append(r)
 	_empty = Label.new()
@@ -455,10 +455,10 @@ func _build_footer() -> PanelContainer:
 	return footer
 
 
-func _ensure_group(path: String, made: Dictionary) -> DotFormGroup:
+func _ensure_group(path: String, made: Dictionary) -> GSFormGroup:
 	if made.has(path):
 		return made[path]
-	var g := DotFormGroup.new()
+	var g := GSFormGroup.new()
 	var parts := path.split(group_separator, false) if path != "" else PackedStringArray()
 	var depth := maxi(0, parts.size() - 1)
 	g.build(parts[parts.size() - 1] if not parts.is_empty() else "", path, depth, tokens)
@@ -478,13 +478,13 @@ func _ensure_group(path: String, made: Dictionary) -> DotFormGroup:
 	return g
 
 
-func _filter_group(g: DotFormGroup) -> bool:
+func _filter_group(g: GSFormGroup) -> bool:
 	var shown := false
 	for r in _group_rows[g]:
-		var m := (r as DotFormRow).matches(_filter) and not (_only_modified and (r as DotFormRow).is_default() and not _errors.has((r as DotFormRow).key))
-		_matched[(r as DotFormRow).key] = m
-		(r as DotFormRow).visible = m and _condition_holds((r as DotFormRow).key)
-		shown = shown or (r as DotFormRow).visible
+		var m := (r as GSFormRow).matches(_filter) and not (_only_modified and (r as GSFormRow).is_default() and not _errors.has((r as GSFormRow).key))
+		_matched[(r as GSFormRow).key] = m
+		(r as GSFormRow).visible = m and _condition_holds((r as GSFormRow).key)
+		shown = shown or (r as GSFormRow).visible
 	for k in _group_kids[g]:
 		shown = _filter_group(k) or shown
 	g.visible = shown
@@ -493,14 +493,14 @@ func _filter_group(g: DotFormGroup) -> bool:
 
 
 func _condition_holds(key: String) -> bool:
-	return DotFormSchema.is_shown(_fields[key], _current)
+	return GSFormSchema.is_shown(_fields[key], _current)
 
 
 ## Shows or hides the rows whose `visible_if` changed with the values; a row that hides drops its invalid entry.
 func _apply_conditions() -> void:
 	var moved := false
 	for key in _rows:
-		var r: DotFormRow = _rows[key]
+		var r: GSFormRow = _rows[key]
 		var want: bool = _matched.get(key, true) and _condition_holds(key)
 		if want == r.visible:
 			continue
@@ -514,10 +514,10 @@ func _apply_conditions() -> void:
 			_regroup(g)
 
 
-func _regroup(g: DotFormGroup) -> bool:
+func _regroup(g: GSFormGroup) -> bool:
 	var shown := false
 	for r in _group_rows[g]:
-		shown = shown or (r as DotFormRow).visible
+		shown = shown or (r as GSFormRow).visible
 	for k in _group_kids[g]:
 		shown = _regroup(k) or shown
 	g.visible = shown
@@ -538,7 +538,7 @@ func _on_row_edited(key: String, value: Variant, error: String) -> void:
 func _accept(key: String, value: Variant, error: String) -> void:
 	var had := not _errors.is_empty()
 	if error == "":
-		var changed := not DotValue.same(_current.get(key), value)
+		var changed := not GSValue.same(_current.get(key), value)
 		_current[key] = value
 		_errors.erase(key)
 		if changed:
@@ -554,13 +554,13 @@ func _refresh_state() -> void:
 	_apply_conditions()
 	var ch := changes()
 	for key in _rows:
-		(_rows[key] as DotFormRow).set_modified(ch.has(key) or _errors.has(key))
+		(_rows[key] as GSFormRow).set_modified(ch.has(key) or _errors.has(key))
 	for g in _groups:
 		g.set_badge(_count_changed(g, ch))
 	var now := not ch.is_empty() or not _errors.is_empty()
 	var off := 0
 	for f in _schema:
-		if not DotValue.same(_current[f["name"]], (_rows[f["name"]] as DotFormRow)._normal(f["default"])):
+		if not GSValue.same(_current[f["name"]], (_rows[f["name"]] as GSFormRow)._normal(f["default"])):
 			off += 1
 	_sub.text = "%d settings, %d differ from default" % [_schema.size(), off]
 	_revert_btn.disabled = not now
@@ -579,10 +579,10 @@ func _refresh_state() -> void:
 		dirty_changed.emit(now)
 
 
-func _count_changed(g: DotFormGroup, ch: Dictionary) -> int:
+func _count_changed(g: GSFormGroup, ch: Dictionary) -> int:
 	var n := 0
 	for r in _group_rows[g]:
-		if ch.has((r as DotFormRow).key):
+		if ch.has((r as GSFormRow).key):
 			n += 1
 	for k in _group_kids[g]:
 		n += _count_changed(k, ch)
@@ -616,7 +616,7 @@ func _on_resized() -> void:
 
 func _apply_compact() -> void:
 	for key in _rows:
-		(_rows[key] as DotFormRow).set_compact(_compact)
+		(_rows[key] as GSFormRow).set_compact(_compact)
 
 
 func _rebuild_now() -> void:
@@ -625,7 +625,7 @@ func _rebuild_now() -> void:
 	var errs := _errors.duplicate()
 	_construct()
 	for key in _rows:
-		(_rows[key] as DotFormRow).show_value(keep[key])
+		(_rows[key] as GSFormRow).show_value(keep[key])
 	_current = keep
 	_errors = errs
 	_refresh_state()

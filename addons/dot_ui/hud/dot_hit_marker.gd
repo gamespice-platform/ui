@@ -1,6 +1,6 @@
 @tool
-class_name DotHitMarker
-extends DotHudPiece
+class_name GSHitMarker
+extends GSHudPiece
 
 ## Four ticks round the middle of this control: white on a hit, warm on a headshot, larger
 ## and in the theme's `low` colour on a kill, with a short pop outward as it appears and a

@@ -1,13 +1,13 @@
 @tool
-class_name DotKeyHints
-extends DotHudPiece
+class_name GSKeyHints
+extends GSHudPiece
 
 ## The keys worth knowing, one row each, top to bottom: a key drawn as a key and the words
 ## beside it. Left-aligned from this control's left edge by default, or right-aligned to
 ## its right edge ([member align_right]) for a hint column on the right.
 ##
 ## Rows are `[words, key]` pairs, the key being the player's binding as text (see
-## [DotKeyPrompt]).
+## [GSKeyPrompt]).
 
 @export var row_height: float = 28.0
 @export var font_size: int = 16

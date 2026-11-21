@@ -1,31 +1,31 @@
-class_name DotSettingsScreen
-extends DotScreen
+class_name GSSettingsScreen
+extends GSScreen
 
 ## A settings screen, generated from a document, with the way back wired up.
 ##
 ## [codeblock]
-## var screen := DotSettingsScreen.new()
+## var screen := GSSettingsScreen.new()
 ## screen.name = "Settings"
-## screen.build(presentation.settings)     # a DotSettingsManager, or any DotConfig
+## screen.build(presentation.settings)     # a GSSettingsManager, or any GSConfig
 ## stack.register(screen)
 ## [/codeblock]
 ##
 ## [b]It exists because the alternative was four copies of it.[/b] Every game in this
 ## family reached the same shape independently — a `PanelContainer`, a title, a
-## [DotSettingsPanel], and Apply / Revert / Back — and two copies of one thing is this
+## [GSSettingsPanel], and Apply / Revert / Back — and two copies of one thing is this
 ## tree's most expensive mistake. What is a game's own is which document it hands over and
 ## where the screen sits in its stack; the rest is the same everywhere and is here.
 ##
 ## [b]The source is an [Object] and is never named.[/b] GameSpice UI depends on GameSpice Core and
-## nothing else, and a script that so much as MENTIONS [code]DotSettingsManager[/code]
+## nothing else, and a script that so much as MENTIONS [code]GSSettingsManager[/code]
 ## fails to compile in a project without GameSpice Settings — which is most of them. The contract
 ## is two methods, [code]to_config()[/code] and [code]absorb_config()[/code], and that this
-## screen also accepts a bare [DotConfig] is the proof the seam is real. Same shape as
+## screen also accepts a bare [GSConfig] is the proof the seam is real. Same shape as
 ## GameSpice Chat's backbone client.
 ##
 ## [b]The two-step apply is the whole point.[/b] [code]to_config()[/code] hands out a
 ## SNAPSHOT — writing to it does not write to the manager — so a screen that called only
-## [method DotSettingsPanel.apply] would report success and change nothing, and would go on
+## [method GSSettingsPanel.apply] would report success and change nothing, and would go on
 ## reporting success for ever. Until this screen, the round trip had no caller anywhere in
 ## this family: the second half was written, tested, documented and consumed by nobody.
 
@@ -33,17 +33,17 @@ extends DotScreen
 signal applied(changed: PackedStringArray)
 
 ## Apply was pressed and the panel refused the edits.
-signal refused(result: DotResult)
+signal refused(result: GSResult)
 
 const CHANNEL := "ui.settings"
 
 ## The generated panel. Read it to drive a check; do not rebuild it.
-var panel: DotSettingsPanel = null
+var panel: GSSettingsPanel = null
 
 ## What the panel is bound to. A snapshot when [member source] is a manager.
-var config: DotConfig = null
+var config: GSConfig = null
 
-## The document this edits. Either a [DotConfig], or anything with `to_config()` and
+## The document this edits. Either a [GSConfig], or anything with `to_config()` and
 ## `absorb_config()`.
 var source: Object = null
 
@@ -57,18 +57,18 @@ var title_text: String = "Settings"
 ## both produce a screen a player can leave.
 var half_size: Vector2 = Vector2(340.0, 300.0)
 
-## Groups to show, or empty for all. Passed to [member DotSettingsPanel.only_groups].
+## Groups to show, or empty for all. Passed to [member GSSettingsPanel.only_groups].
 var groups: Array[String] = []
 
-## The id the stack registers this under. Set it before [method DotScreenStack.register].
+## The id the stack registers this under. Set it before [method GSScreenStack.register].
 ##
 ## [b]Configurable because a game legitimately has two of these.[/b] The player's own
-## settings and the interface's own [DotUiConfig] are different documents that both want
+## settings and the interface's own [GSUiConfig] are different documents that both want
 ## this screen, and a stack registers by id — so a second one under the same name is
 ## either refused or silently replaces the first, and a menu button then opens the wrong
 ## document with no error anywhere.
 ##
-## [b]Not [code]screen_id[/code], which is what it was called first.[/b] [DotScreen]
+## [b]Not [code]screen_id[/code], which is what it was called first.[/b] [GSScreen]
 ## already has a METHOD of that name, and a property cannot shadow an inherited method:
 ## GDScript refuses it with "Could not resolve external class member", which is reported
 ## against the file that USES it rather than the file that declares it — and the scene
@@ -82,17 +82,17 @@ func _screen_id() -> StringName:
 
 
 ## Builds the screen around [param p_source].
-func build(p_source: Object) -> DotResult:
+func build(p_source: Object) -> GSResult:
 	source = p_source
 
 	if source == null:
-		return DotResult.fail(
-			DotError.CODE_INVALID, "A settings screen needs something to edit."
+		return GSResult.fail(
+			GSError.CODE_INVALID, "A settings screen needs something to edit."
 		)
 
 	hides_below = false
 	blocks_input = true
-	mouse_mode = DotScreen.Mouse.VISIBLE
+	mouse_mode = GSScreen.Mouse.VISIBLE
 
 	var container := PanelContainer.new()
 	container.name = "Panel"
@@ -114,7 +114,7 @@ func build(p_source: Object) -> DotResult:
 	var heading := Label.new()
 	heading.name = "Title"
 	heading.text = title_text
-	heading.theme_type_variation = &"DotHeading"
+	heading.theme_type_variation = &"GSHeading"
 	column.add_child(heading)
 
 	_add_settings_scroll(column)
@@ -135,15 +135,15 @@ func build(p_source: Object) -> DotResult:
 	# The first control, by NAME, not `get_path()`: this runs before the screen is on a stack, so the node is not in the tree
 	# and `get_path()` pushes an error and returns nothing, leaving nothing focused.
 	initial_focus = NodePath("Panel/Column/Buttons/Apply")
-	return DotResult.success(self)
+	return GSResult.success(self)
 
 
 ## The scrolling settings panel inside the column; fills `panel`.
 func _add_settings_scroll(column: VBoxContainer) -> void:
 	# A SCROLL CONTAINER, and it is not a nicety.
 	#
-	# A `DotSettingsPanel` is as tall as the document it was handed, and a document is as
-	# long as somebody's `@export` list: `DotUiConfig` alone is eleven rows across four
+	# A `GSSettingsPanel` is as tall as the document it was handed, and a document is as
+	# long as somebody's `@export` list: `GSUiConfig` alone is eleven rows across four
 	# groups and comes out around 600 pixels. Without this the column simply grew past the
 	# panel and past the bottom of the screen, taking Apply, Revert and Back with it --
 	# a settings screen a player can read and cannot leave or save from.
@@ -159,7 +159,7 @@ func _add_settings_scroll(column: VBoxContainer) -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
 
-	panel = DotSettingsPanel.new()
+	panel = GSSettingsPanel.new()
 	panel.name = "Settings"
 	# Held until Apply. A live panel validates a half-edited document, which can
 	# legitimately be invalid on its way to being valid -- a port typed one digit at a
@@ -181,10 +181,10 @@ func apply() -> void:
 
 	if not wrote.ok:
 		refused.emit(wrote)
-		DotLog.result(CHANNEL, "settings", wrote)
+		GSLog.result(CHANNEL, "settings", wrote)
 		return
 
-	# A bare DotConfig IS the document, so the panel writing into it is the whole of it.
+	# A bare GSConfig IS the document, so the panel writing into it is the whole of it.
 	# A manager handed out a copy, and this is the half that makes it real.
 	if source == config:
 		applied.emit(PackedStringArray())
@@ -194,7 +194,7 @@ func apply() -> void:
 		# Said out loud rather than silently skipped: a source with `to_config` and no way
 		# back is a screen whose Apply button cannot work, and the only symptom otherwise
 		# is a setting that goes back to what it was.
-		DotLog.warn(CHANNEL, "the settings source cannot take the values back", {
+		GSLog.warn(CHANNEL, "the settings source cannot take the values back", {
 			"source": source.get_class(),
 		})
 		return
@@ -203,7 +203,7 @@ func apply() -> void:
 	var keys := changed as PackedStringArray if changed is PackedStringArray \
 		else PackedStringArray()
 	applied.emit(keys)
-	DotLog.info(CHANNEL, "settings applied", {"changed": ", ".join(keys)})
+	GSLog.info(CHANNEL, "settings applied", {"changed": ", ".join(keys)})
 
 
 ## Re-reads the source. Called on every push.
@@ -216,24 +216,24 @@ func _on_push() -> void:
 		var _ignored := _rebind()
 
 
-func _rebind() -> DotResult:
-	if source is DotConfig:
-		config = source as DotConfig
+func _rebind() -> GSResult:
+	if source is GSConfig:
+		config = source as GSConfig
 	elif source.has_method("to_config"):
 		var made: Variant = source.call("to_config")
 
-		if not (made is DotConfig):
-			return DotResult.fail(
-				DotError.CODE_UNSUPPORTED,
-				"to_config() did not answer with a DotConfig.",
+		if not (made is GSConfig):
+			return GSResult.fail(
+				GSError.CODE_UNSUPPORTED,
+				"to_config() did not answer with a GSConfig.",
 				type_string(typeof(made))
 			)
 
-		config = made as DotConfig
+		config = made as GSConfig
 	else:
-		return DotResult.fail(
-			DotError.CODE_UNSUPPORTED,
-			"That source is neither a DotConfig nor something with to_config().",
+		return GSResult.fail(
+			GSError.CODE_UNSUPPORTED,
+			"That source is neither a GSConfig nor something with to_config().",
 			source.get_class()
 		)
 

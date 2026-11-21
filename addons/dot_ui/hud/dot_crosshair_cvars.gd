@@ -1,4 +1,4 @@
-class_name DotCrosshairCvars
+class_name GSCrosshairCvars
 extends RefCounted
 
 ## The player's own crosshair as client cvars (`cl_crosshair_*`, archived, never replicated).
@@ -71,12 +71,12 @@ func bind_console(local: Object) -> bool:
 
 
 ## The crosshair the cvars drive; set by the HUD.
-var target: DotCrosshair = null
+var target: GSCrosshair = null
 
 
 func _set_and_apply(cvar: String, value: String) -> Variant:
 	if not set_cvar(cvar, value):
-		return DotResult.fail(DotError.CODE_INVALID, "unreadable value: " + value)
+		return GSResult.fail(GSError.CODE_INVALID, "unreadable value: " + value)
 	if target != null and is_instance_valid(target):
 		apply_to(target)
 	return null
@@ -87,7 +87,7 @@ static func _text(number: float) -> String:
 
 
 ## Copies the cvars onto [param crosshair].
-func apply_to(crosshair: DotCrosshair) -> void:
+func apply_to(crosshair: GSCrosshair) -> void:
 	var style := int(values[&"style"])
 	crosshair.visible = values[&"show"] > 0.5
 	crosshair.length = 0.0 if style == 2 else float(values[&"size"])

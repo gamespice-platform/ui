@@ -22,11 +22,11 @@ const OUT_DIR := "res://screenshots"
 ## empty viewport and looks exactly like a screen that failed to draw.
 const SETTLE := 3
 
-var _stack: DotScreenStack = null
-var _hud: DotHud = null
-var _chat: DotChatWindow = null
-var _ballot: DotBallotPanel = null
-var _result: DotBallotPanel = null
+var _stack: GSScreenStack = null
+var _hud: GSHud = null
+var _chat: GSChatWindow = null
+var _ballot: GSBallotPanel = null
+var _result: GSBallotPanel = null
 var _pieces: Control = null
 var _shots: Array[Dictionary] = []
 var _at := 0
@@ -35,10 +35,10 @@ var _done := false
 
 
 func _initialize() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	DirAccess.make_dir_recursive_absolute(OUT_DIR)
 
-	_stack = DotScreenStack.new()
+	_stack = GSScreenStack.new()
 	_stack.name = "Stack"
 	_stack.register_service = false
 	# Off, because there is nobody here to take the mouse back from.
@@ -51,7 +51,7 @@ func _initialize() -> void:
 	# that fits at "Resume" and clips at "Rock the vote" is exactly the kind of thing only
 	# a picture shows -- and `TabBar.clip_tabs` already cost this family two unreachable
 	# tabs for the same reason.
-	var pause := DotPauseScreen.new()
+	var pause := GSPauseScreen.new()
 	pause.name = "Pause"
 	pause.build(PackedStringArray([
 		"Resume", "Settings", "Interface", "Servers", "Rock the vote", "Leave",
@@ -61,9 +61,9 @@ func _initialize() -> void:
 	# The settings screen over a real config with one of every editor kind in it: a
 	# checkbox, a spin box, a line edit and an option button. A panel that laid one of
 	# those out at zero height would still pass every check in the suite.
-	var settings := DotSettingsScreen.new()
+	var settings := GSSettingsScreen.new()
 	settings.name = "Settings"
-	settings.build(DotUiConfig.new())
+	settings.build(GSUiConfig.new())
 	_stack.register(settings)
 
 	_build_hud()
@@ -88,13 +88,13 @@ func _initialize() -> void:
 		# show their avatar on that row. A game vote with one player on it does exactly this,
 		# and a frame of it once showed the avatar a row short of the marked choice.
 		{"id": &"", "file": "ballot_result.png", "result": true},
-		# The glance pieces (DotVitals, DotAmmoCounter, DotScoreStrip, DotHitMarker,
-		# DotDamageNumbers, DotKeyPrompt, DotKeyHints) laid out the way game-fatal-contact lays them
+		# The glance pieces (GSVitals, GSAmmoCounter, GSScoreStrip, GSHitMarker,
+		# GSDamageNumbers, GSKeyPrompt, GSKeyHints) laid out the way game-fatal-contact lays them
 		# out, over a pale floor with a dark block, because pale ground is where the first
 		# FC HUD vanished. A cover stand-in down the right edge, where a client shell
 		# draws its ballots, sits over a right-hand hint column: that column must be dimmed.
 		{"id": &"", "file": "hud_pieces.png", "pieces": "dark"},
-		# The same in DotUiTheme.light(): every colour from the theme, dark numbers ringed in
+		# The same in GSUiTheme.light(): every colour from the theme, dark numbers ringed in
 		# light.
 		{"id": &"", "file": "hud_pieces_light.png", "pieces": "light"},
 		# The same HUD fitted to 854x480 (drawn in the top-left of the 1280x800 window,
@@ -106,19 +106,19 @@ func _initialize() -> void:
 ## A HUD with every widget this addon ships on it.
 ##
 ## [b]A HUD is the one interface surface in this family nothing had ever looked at.[/b]
-## `DotStatBar`, `DotCrosshair` and `DotFeedView` are drawn entirely in `_draw` and by
+## `GSStatBar`, `GSCrosshair` and `GSFeedView` are drawn entirely in `_draw` and by
 ## `Label`s this addon builds, and every check about them is a number or a property — the
 ## bar's eased value, the crosshair's computed gap, the feed's opacity at a given
 ## millisecond. All correct, and none of them says whether the thing is legible.
 func _build_hud() -> void:
-	_hud = DotHud.new()
+	_hud = GSHud.new()
 	_hud.name = "Hud"
-	_hud.config = DotUiConfig.new()
+	_hud.config = GSUiConfig.new()
 	root.add_child(_hud)
 
 	_add_hud_bars()
 
-	var crosshair := DotCrosshair.new()
+	var crosshair := GSCrosshair.new()
 	crosshair.name = "Crosshair"
 	crosshair.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -126,7 +126,7 @@ func _build_hud() -> void:
 	crosshair.bind(func() -> float: return 0.04)
 	crosshair.refresh()
 
-	var feed := DotFeedView.new()
+	var feed := GSFeedView.new()
 	feed.name = "Feed"
 	feed.position = Vector2(880.0, 40.0)
 	feed.custom_minimum_size = Vector2(360.0, 160.0)
@@ -152,7 +152,7 @@ func _add_hud_bars() -> void:
 	# the state worth looking at and it is the one a fixture picked at random will miss:
 	# the default threshold is 0.25, and a bar at 0.28 draws in the ordinary colour and
 	# looks exactly like a bar whose low colour does not work.
-	var health := DotStatBar.new()
+	var health := GSStatBar.new()
 	health.name = "Health"
 	health.max_value = 100.0
 	health.suffix = " HP"
@@ -166,7 +166,7 @@ func _add_hud_bars() -> void:
 	health.bind(func() -> float: return 18.0)
 	health.refresh()
 
-	var armour := DotStatBar.new()
+	var armour := GSStatBar.new()
 	armour.name = "Armour"
 	armour.max_value = 100.0
 	armour.suffix = " AR"
@@ -183,12 +183,12 @@ func _add_hud_chat() -> void:
 	# Moved up off the bottom-left corner, because that is where the chat box goes by
 	# default and the first picture of the two together was a stat bar drawn through a
 	# line of chat. Which is a real warning for a game, not only for this fixture: see
-	# `DotChatWindow.place_bottom_left`.
+	# `GSChatWindow.place_bottom_left`.
 	#
 	# The chat box, with the traffic a real one has: a long handle, a line long enough to
 	# reach the right edge, a system line with no speaker, and a team line in the team
 	# colour. A box that lays out correctly for "hi" is a box nobody has looked at.
-	_chat = DotChatWindow.new()
+	_chat = GSChatWindow.new()
 	_chat.name = "Chat"
 	_chat.register_actions = false
 	# Nothing expires in a screenshot. Under software rendering a frame takes the better
@@ -213,7 +213,7 @@ func _add_hud_chat() -> void:
 
 
 ## The glance pieces over a pale floor, the way game-fatal-contact places them. [param kind] is
-## "dark" (no theme: the defaults), "light" (DotUiTheme.light()) or "small" (fitted to
+## "dark" (no theme: the defaults), "light" (GSUiTheme.light()) or "small" (fitted to
 ## 854x480).
 func _build_pieces(kind: String) -> void:
 	if _pieces != null:
@@ -227,58 +227,58 @@ func _build_pieces(kind: String) -> void:
 
 	_build_floor(frame)
 
-	var hud := DotHud.new()
+	var hud := GSHud.new()
 	hud.name = "PiecesHud"
-	hud.config = DotUiConfig.new()
+	hud.config = GSUiConfig.new()
 	hud.fit_design = Vector2(1280.0, 720.0)
 	if kind == "light":
-		hud.theme = DotUiTheme.light().build()
+		hud.theme = GSUiTheme.light().build()
 	_pieces.add_child(hud)
 	hud.fit_to_frame(frame)
 
-	var vitals := DotVitals.new()
+	var vitals := GSVitals.new()
 	_place(hud, vitals, Control.PRESET_BOTTOM_LEFT, Rect2(0.0, -84.0, 380.0, 76.0))
 	# Under the 0.25 threshold, with armour: the low colour is the state worth seeing.
 	vitals.show_vitals(18.0, 100.0, 45.0, 100.0)
 	# The same piece at full health, and at 89 with 89 armour: two bars that agree must still read as two things.
-	var full := DotVitals.new()
+	var full := GSVitals.new()
 	_place(hud, full, Control.PRESET_BOTTOM_LEFT, Rect2(0.0, -160.0, 380.0, 60.0))
 	full.show_vitals(100.0, 100.0)
-	var both := DotVitals.new()
+	var both := GSVitals.new()
 	_place(hud, both, Control.PRESET_BOTTOM_LEFT, Rect2(0.0, -250.0, 380.0, 76.0))
 	both.show_vitals(89.0, 100.0, 89.0, 100.0)
 
-	var ammo := DotAmmoCounter.new()
+	var ammo := GSAmmoCounter.new()
 	_place(hud, ammo, Control.PRESET_BOTTOM_RIGHT, Rect2(-300.0, -84.0, 290.0, 70.0))
 	ammo.show_ammo("Assault rifle", 7, 120, true)
 
 	# The three states of the fire-mode indicator, stacked above the ammo plate.
 	for i in range(3):
-		var fm := DotFireModeIndicator.new()
+		var fm := GSFireModeIndicator.new()
 		_place(hud, fm, Control.PRESET_BOTTOM_RIGHT, Rect2(-300.0, -122.0 - 32.0 * float(i), 290.0, 26.0))
 		fm.show_modes([&"auto", &"semi", &"burst"], [&"auto", &"semi", &"burst"][i])
 
-	var strip := DotScoreStrip.new()
+	var strip := GSScoreStrip.new()
 	_place(hud, strip, Control.PRESET_CENTER_TOP, Rect2(-260.0, 0.0, 520.0, 72.0))
 	strip.show_scores(23, 19, "BLUE", "RED", Color(0.22, 0.5, 0.95), Color(0.9, 0.24, 0.32))
-	strip.show_clock(DotScoreStrip.clock_text(47.0), true, "First to 25", "Team deathmatch")
+	strip.show_clock(GSScoreStrip.clock_text(47.0), true, "First to 25", "Team deathmatch")
 
-	var hints := DotKeyHints.new()
+	var hints := GSKeyHints.new()
 	_place(hud, hints, Control.PRESET_CENTER_LEFT, Rect2(62.0, -128.0, 220.0, 120.0))
 	hints.show_hints([["Scoreboard", "Tab"], ["Vote", "F3"], ["Chat", "Y"], ["Throw", "Mouse back"]])
 
 	_build_plate_and_status(hud)
 
-	var prompt := DotKeyPrompt.new()
+	var prompt := GSKeyPrompt.new()
 	_place(hud, prompt, Control.PRESET_CENTER, Rect2(-330.0, 120.0, 300.0, 36.0))
 	prompt.show_prompt("Open door", "E")
 
-	var marker := DotHitMarker.new()
+	var marker := GSHitMarker.new()
 	marker.kill_sec = 600.0
 	_place(hud, marker, Control.PRESET_FULL_RECT, Rect2())
 	marker.flash(true, false)
 
-	var numbers := DotDamageNumbers.new()
+	var numbers := GSDamageNumbers.new()
 	numbers.life_sec = 600.0
 	_place(hud, numbers, Control.PRESET_FULL_RECT, Rect2())
 	var centre := hud.size * 0.5
@@ -322,7 +322,7 @@ func _build_floor(frame: Vector2) -> void:
 func _build_cover_stand_in(hud: Control, frame: Vector2) -> void:
 	# A client shell's ballot column, stand-in: in the cover group, over a right-hand hint
 	# column, which must come out dimmed.
-	var right_hints := DotKeyHints.new()
+	var right_hints := GSKeyHints.new()
 	right_hints.align_right = true
 	_place(hud, right_hints, Control.PRESET_CENTER_RIGHT, Rect2(-280.0, -60.0, 270.0, 90.0))
 	right_hints.show_hints([["Under a ballot", "F4"], ["Dimmed", "F5"]])
@@ -340,13 +340,13 @@ func _build_cover_stand_in(hud: Control, frame: Vector2) -> void:
 
 
 func _build_plate_and_status(hud: Control) -> void:
-	var icon_plate := DotWeaponIconPlate.new()
+	var icon_plate := GSWeaponIconPlate.new()
 	_place(hud, icon_plate, Control.PRESET_BOTTOM_RIGHT, Rect2(-460.0, -96.0, 150.0, 80.0))
-	icon_plate.show_icon(DotWeaponIcons.stock().texture_for(&"", &"rifle"), &"rifle")
+	icon_plate.show_icon(GSWeaponIcons.stock().texture_for(&"", &"rifle"), &"rifle")
 
-	var status := DotStatusLines.new()
+	var status := GSStatusLines.new()
 	_place(hud, status, Control.PRESET_TOP_LEFT, Rect2(24.0, 20.0, 300.0, 80.0))
-	status.show_lines(["Down, hold on for help", DotStatusLines.effect_text("Haste", 2, 12.0), {"text": "LAST LIFE", "colour": Color(1.0, 0.34, 0.3)}])
+	status.show_lines(["Down, hold on for help", GSStatusLines.effect_text("Haste", 2, 12.0), {"text": "LAST LIFE", "colour": Color(1.0, 0.34, 0.3)}])
 
 
 func _place(hud: Control, piece: Control, preset: Control.LayoutPreset, rect: Rect2) -> void:
@@ -359,7 +359,7 @@ func _place(hud: Control, piece: Control, preset: Control.LayoutPreset, rect: Re
 
 
 func _build_ballot() -> void:
-	_ballot = DotBallotPanel.new()
+	_ballot = GSBallotPanel.new()
 	_ballot.name = "Ballot"
 	_ballot.position = Vector2(40.0, 120.0)
 	_ballot.local_voter = "u3"
@@ -401,7 +401,7 @@ func _build_ballot() -> void:
 ## A six-row ballot the local player decides: a click on the last row, and the close that
 ## follows at once, as a server with one voter on it sends.
 func _build_result() -> void:
-	_result = DotBallotPanel.new()
+	_result = GSBallotPanel.new()
 	_result.name = "Result"
 	_result.position = Vector2(40.0, 120.0)
 	_result.local_voter = "u3"

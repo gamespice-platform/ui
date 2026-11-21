@@ -1,9 +1,9 @@
 @tool
-class_name DotWeaponIconPlate
-extends DotHudPiece
+class_name GSWeaponIconPlate
+extends GSHudPiece
 
 ## The carried weapon's sprite on a plate, kept to its aspect and right-aligned to this
-## control's right edge, so it sits beside a [DotAmmoCounter] on the same baseline. A weapon
+## control's right edge, so it sits beside a [GSAmmoCounter] on the same baseline. A weapon
 ## with no sprite draws nothing: the counter still names it.
 
 ## The sprite's height; its width follows the aspect up to [member max_width].

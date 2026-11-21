@@ -1,19 +1,19 @@
 @tool
-class_name DotHitFeedback
+class_name GSHitFeedback
 extends Control
 
-## The hit marker and damage numbers of one HUD, mounted and driven together (eight games built this pair by hand): [code]var fx := DotHitFeedback.mount(hud_root)[/code] in the HUD's build,
+## The hit marker and damage numbers of one HUD, mounted and driven together (eight games built this pair by hand): [code]var fx := GSHitFeedback.mount(hud_root)[/code] in the HUD's build,
 ## then [code]fx.confirm_hit(victim, amount, point, killed, headshot)[/code] from the server's hit event. [b]Call [method confirm_hit] only for a hit the authority applied[/b],
-## never from a prediction (see [DotHitMarker]). Both pieces stay reachable ([member marker], [member numbers]) for a game that tunes colours or sizes.
+## never from a prediction (see [GSHitMarker]). Both pieces stay reachable ([member marker], [member numbers]) for a game that tunes colours or sizes.
 
-var marker: DotHitMarker = null
-var numbers: DotDamageNumbers = null
+var marker: GSHitMarker = null
+var numbers: GSDamageNumbers = null
 
 
 ## A feedback layer full-rect and click-through under [param parent], with its two pieces.
 ## The numbers sit under the marker, as every game had them.
-static func mount(parent: Node) -> DotHitFeedback:
-	var fx := DotHitFeedback.new()
+static func mount(parent: Node) -> GSHitFeedback:
+	var fx := GSHitFeedback.new()
 	fx.name = "HitFeedback"
 	fx.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -23,10 +23,10 @@ static func mount(parent: Node) -> DotHitFeedback:
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	numbers = DotDamageNumbers.new()
+	numbers = GSDamageNumbers.new()
 	numbers.name = "DamageNumbers"
 	_fill(numbers)
-	marker = DotHitMarker.new()
+	marker = GSHitMarker.new()
 	marker.name = "HitMarker"
 	_fill(marker)
 

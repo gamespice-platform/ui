@@ -1,11 +1,11 @@
-class_name DotFormSlider
+class_name GSFormSlider
 extends Control
 
 ## A rounded slider: drag, touch, arrow keys and gamepad d-pad; the knob grows while held or focused.
 
 signal value_changed(v: float)
 
-var tokens: DotFormTokens = DotFormTokens.new()
+var tokens: GSFormTokens = GSFormTokens.new()
 var min_value := 0.0
 var max_value := 1.0
 var step := 0.01

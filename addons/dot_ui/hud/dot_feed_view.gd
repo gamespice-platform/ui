@@ -1,5 +1,5 @@
 @tool
-class_name DotFeedView
+class_name GSFeedView
 extends Control
 
 ## A bounded, self-expiring list of lines. The kill feed, and the chat history.
@@ -105,7 +105,7 @@ func add_text(text: String, colour: Color = Color.WHITE) -> Dictionary:
 
 ## Adds a kill line from the pieces a kill feed has.
 ##
-## Takes strings and colours rather than a `DotKillFeed.Entry`, so GameSpice UI never names
+## Takes strings and colours rather than a `GSKillFeed.Entry`, so GameSpice UI never names
 ## a GameSpice Match type. A game passes whatever its own feed holds.
 func add_kill(
 	killer_name: String,

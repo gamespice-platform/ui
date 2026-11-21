@@ -1,4 +1,4 @@
-class_name DotHudElementCvars
+class_name GSHudElementCvars
 extends RefCounted
 
 ## The player's per-element HUD switches as client cvars, `cl_hud_show_<element>` (0 or 1) and `cl_hud_scale`; archived, never replicated. A game attaches the controls it has
@@ -30,8 +30,8 @@ const SCALE_MAX := 2.0
 var visible_by_id: Dictionary = {}
 var scale: float = 1.0
 
-## The HUD whose [member DotHud.user_scale] the scale cvar drives; optional.
-var hud: DotHud = null
+## The HUD whose [member GSHud.user_scale] the scale cvar drives; optional.
+var hud: GSHud = null
 
 var _nodes: Dictionary = {}
 
@@ -95,7 +95,7 @@ func bind_console(local: Object) -> bool:
 
 func _set_and_apply(cvar: String, value: String) -> Variant:
 	if not set_cvar(cvar, value):
-		return DotResult.fail(DotError.CODE_INVALID, "unreadable value: " + value)
+		return GSResult.fail(GSError.CODE_INVALID, "unreadable value: " + value)
 	apply()
 	return null
 

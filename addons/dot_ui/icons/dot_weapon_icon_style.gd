@@ -1,4 +1,4 @@
-class_name DotWeaponIconStyle
+class_name GSWeaponIconStyle
 extends RefCounted
 
 ## A game's weapon pictures: the stock sprite sheet, the game's id-to-tag table, the player's overrides and the `cl_weapon_icons` cvars.
@@ -15,14 +15,14 @@ var sprites := false
 ## Where the player's overrides live (`{"id": path}` or per-profile nested documents).
 var overrides_path := "user://weapon_icons.json"
 
-var _set: DotIconSet = null
+var _set: GSIconSet = null
 var _menu: Dictionary = {}
 
 
 ## The shared set: stock sheet, [member tags] as aliases, and the player's overrides.
-func icon_set() -> DotIconSet:
+func icon_set() -> GSIconSet:
 	if _set == null:
-		_set = DotWeaponIcons.stock()
+		_set = GSWeaponIcons.stock()
 		for id in tags:
 			_set.alias(id, tags[id])
 		if FileAccess.file_exists(overrides_path):
@@ -108,11 +108,11 @@ func bind_console(local: Object) -> bool:
 		func() -> Variant: return String(style),
 		func(v: Variant) -> Variant:
 			if not set_style(StringName(str(v).strip_edges())):
-				return DotResult.fail(DotError.CODE_INVALID, "cl_weapon_icons is pixel, flat or silhouette")
-			return DotResult.success(String(style)))
+				return GSResult.fail(GSError.CODE_INVALID, "cl_weapon_icons is pixel, flat or silhouette")
+			return GSResult.success(String(style)))
 	local.call(&"add_var", &"cl_weapon_icon_profile", "Icon override profile from the overrides file; empty for the shared overrides.",
 		func() -> Variant: return String(icon_set().profile),
 		func(v: Variant) -> Variant:
 			set_profile(StringName(str(v).strip_edges()))
-			return DotResult.success(str(v)))
+			return GSResult.success(str(v)))
 	return true

@@ -1,7 +1,7 @@
-class_name DotChatWrap
+class_name GSChatWrap
 extends RefCounted
 
-## Word wrap for [DotChatWindow]: one line of coloured fragments in, rows that fit out.
+## Word wrap for [GSChatWindow]: one line of coloured fragments in, rows that fit out.
 ##
 ## Words keep the colour of the fragment they came from, so a wrap inside what somebody
 ## said does not take the speaker's colour with it. A word wider than the box (a long URL,

@@ -1,17 +1,17 @@
 extends Control
 
-## A weapon profile in a DotUiForm. T switches light and dark, Ctrl+F searches.
+## A weapon profile in a GSUiForm. T switches light and dark, Ctrl+F searches.
 ##
 ## With "-- --shots=dark,light,search,collapsed,reorder,keypad" it renders those frames into docs/ and quits.
 
 const OUT_DIR := "res://docs"
 
-var form: DotUiForm = null
+var form: GSUiForm = null
 var _light := false
 
 
 static func weapon_schema() -> Array:
-	var F := DotProfileSet.field
+	var F := GSProfileSet.field
 	return [
 		F.call("name", "string", "Service Pistol", {"group": "General", "required": true, "description": "Shown in the loadout and the kill feed.", "max_length": 32}),
 		F.call("rarity", "string", "common", {"group": "General", "enum": ["common", "uncommon", "rare", "epic"], "description": "Tints the card in the shop."}),
@@ -39,7 +39,7 @@ static func weapon_schema() -> Array:
 
 
 func _ready() -> void:
-	form = DotUiForm.new()
+	form = GSUiForm.new()
 	form.title = "Service Pistol"
 	form.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(form)
@@ -61,7 +61,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _set_light(on: bool) -> void:
 	_light = on
-	var t := DotFormTokens.light() if on else DotFormTokens.dark()
+	var t := GSFormTokens.light() if on else GSFormTokens.dark()
 	t.animate = form.tokens.animate
 	form.set_tokens(t)
 

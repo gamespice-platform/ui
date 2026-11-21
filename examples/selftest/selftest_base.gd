@@ -13,7 +13,7 @@ var _completed := 0
 
 ## A config with one of everything, including a secret, so the generated panel can be
 ## checked against something with a known shape.
-class TestConfig extends DotConfig:
+class TestConfig extends GSConfig:
 	@export_group("Network")
 	@export var port: int = 27015
 	@export_range(1, 240, 1) var tick_rate: int = 64
@@ -34,16 +34,16 @@ class TestConfig extends DotConfig:
 	func sensitive_keys() -> PackedStringArray:
 		return PackedStringArray(["rcon_password"])
 
-	func validate() -> DotResult:
+	func validate() -> GSResult:
 		if port < 1024:
-			return DotResult.fail(
-				DotError.CODE_INVALID, "Ports below 1024 need root."
+			return GSResult.fail(
+				GSError.CODE_INVALID, "Ports below 1024 need root."
 			)
-		return DotResult.success(null)
+		return GSResult.success(null)
 
 
 ## A screen that records every lifecycle call, so the ordering can be asserted.
-class TestScreen extends DotScreen:
+class TestScreen extends GSScreen:
 	var id: StringName = &"test"
 	var events: Array[String] = []
 	var refuse_pop: bool = false
@@ -98,18 +98,18 @@ func _group(title: String) -> void:
 
 
 ## A piece in the tree, laid out at [param rect] in this node's space.
-func _piece(piece: DotHudPiece, rect: Rect2) -> DotHudPiece:
+func _piece(piece: GSHudPiece, rect: Rect2) -> GSHudPiece:
 	piece.position = rect.position
 	piece.size = rect.size
 	add_child(piece)
 	return piece
 
 
-func _make_stack() -> DotScreenStack:
-	var stack := DotScreenStack.new()
+func _make_stack() -> GSScreenStack:
+	var stack := GSScreenStack.new()
 	stack.register_service = false
 	stack.manage_mouse = false
-	stack.config = DotUiConfig.new()
+	stack.config = GSUiConfig.new()
 	stack.config.allow_pause = false
 	add_child(stack)
 	return stack
@@ -129,20 +129,20 @@ func _key(code: Key) -> InputEventKey:
 	return e
 
 
-## A plain RefCounted with `to_config()` and `absorb_config()`: the whole settings-source contract, with no DotSettingsManager, because GameSpice UI depends on GameSpice Core only.
+## A plain RefCounted with `to_config()` and `absorb_config()`: the whole settings-source contract, with no GSSettingsManager, because GameSpice UI depends on GameSpice Core only.
 class FakeSettingsSource:
 	extends RefCounted
 
 	var stored: Dictionary = {"port": 111, "hostname": "before"}
 	var absorbed := 0
 
-	func to_config() -> DotConfig:
+	func to_config() -> GSConfig:
 		var cfg := TestConfig.new()
 		cfg.port = int(stored["port"])
 		cfg.hostname = str(stored["hostname"])
 		return cfg
 
-	func absorb_config(cfg: DotConfig) -> PackedStringArray:
+	func absorb_config(cfg: GSConfig) -> PackedStringArray:
 		absorbed += 1
 		var changed := PackedStringArray()
 		var typed := cfg as TestConfig

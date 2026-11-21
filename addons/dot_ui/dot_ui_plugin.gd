@@ -5,25 +5,25 @@ extends EditorPlugin
 ##
 ## No autoload, for the family's reason: a process may run two windows or a server and
 ## a client at once, and a singleton screen stack makes that impossible.
-## [DotScreenStack] registers itself in [DotRegistry] instead.
+## [GSScreenStack] registers itself in [GSRegistry] instead.
 
 const _ICON := "res://addons/dot_ui/icon_placeholder.svg"
 
 const _TYPES := [
-	["DotScreenStack", "Control", "res://addons/dot_ui/core/dot_screen_stack.gd"],
-	["DotScreen", "Control", "res://addons/dot_ui/core/dot_screen.gd"],
-	["DotHud", "Control", "res://addons/dot_ui/hud/dot_hud.gd"],
-	["DotStatBar", "Control", "res://addons/dot_ui/hud/dot_stat_bar.gd"],
-	["DotCrosshair", "Control", "res://addons/dot_ui/hud/dot_crosshair.gd"],
-	["DotFeedView", "Control", "res://addons/dot_ui/hud/dot_feed_view.gd"],
-	["DotTableView", "Control", "res://addons/dot_ui/hud/dot_table_view.gd"],
+	["GSScreenStack", "Control", "res://addons/dot_ui/core/dot_screen_stack.gd"],
+	["GSScreen", "Control", "res://addons/dot_ui/core/dot_screen.gd"],
+	["GSHud", "Control", "res://addons/dot_ui/hud/dot_hud.gd"],
+	["GSStatBar", "Control", "res://addons/dot_ui/hud/dot_stat_bar.gd"],
+	["GSCrosshair", "Control", "res://addons/dot_ui/hud/dot_crosshair.gd"],
+	["GSFeedView", "Control", "res://addons/dot_ui/hud/dot_feed_view.gd"],
+	["GSTableView", "Control", "res://addons/dot_ui/hud/dot_table_view.gd"],
 	[
-		"DotSettingsPanel",
+		"GSSettingsPanel",
 		"VBoxContainer",
 		"res://addons/dot_ui/panels/dot_settings_panel.gd",
 	],
 	[
-		"DotBindingsPanel",
+		"GSBindingsPanel",
 		"VBoxContainer",
 		"res://addons/dot_ui/panels/dot_bindings_panel.gd",
 	],

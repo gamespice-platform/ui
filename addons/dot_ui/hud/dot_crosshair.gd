@@ -1,6 +1,6 @@
 @tool
-class_name DotCrosshair
-extends DotHudWidget
+class_name GSCrosshair
+extends GSHudWidget
 
 ## A crosshair that opens with the weapon's spread.
 ##
@@ -58,7 +58,7 @@ extends DotHudWidget
 
 ## Hide the crosshair entirely. What aiming down a scope does.
 ##
-## Not `visible`: the crosshair is a [DotHudWidget] and keeps refreshing its spread
+## Not `visible`: the crosshair is a [GSHudWidget] and keeps refreshing its spread
 ## while scoped, so a game reading `gap_pixels()` for a scope reticle still gets an
 ## answer. (`hidden` is taken — [Control] already has one.)
 @export var suppressed: bool = false
@@ -113,9 +113,9 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
-## Called with the current spread in degrees, from `DotWeaponBallistics.spread_for()`.
+## Called with the current spread in degrees, from `GSWeaponBallistics.spread_for()`.
 ##
-## The widget's [member DotHudWidget.source] returns it, so a game binds one callable
+## The widget's [member GSHudWidget.source] returns it, so a game binds one callable
 ## and nothing else.
 func _on_value(current: Variant) -> void:
 	_target_degrees = float(current) if typeof(current) != TYPE_NIL else 0.0

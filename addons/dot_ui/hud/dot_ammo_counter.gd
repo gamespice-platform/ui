@@ -1,6 +1,6 @@
 @tool
-class_name DotAmmoCounter
-extends DotHudPiece
+class_name GSAmmoCounter
+extends GSHudPiece
 
 ## Bottom right: what is in hand, and `magazine | reserve` in big numbers under its name,
 ## right-aligned to this control's right edge. A weapon with no magazine shows its name

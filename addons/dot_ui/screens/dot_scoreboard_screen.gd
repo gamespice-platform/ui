@@ -1,6 +1,6 @@
 @tool
-class_name DotScoreboardScreen
-extends DotScreen
+class_name GSScoreboardScreen
+extends GSScreen
 
 ## The scoreboard a player holds Tab for: a title, and one row per player, ranked by the
 ## game. Every game in the family wants one; what is IN it is each game's.
@@ -8,14 +8,14 @@ extends DotScreen
 ## [b]The game supplies the rows, not a scoreboard object[/b] ([member row_fn]), because the
 ## numbers are not the same everywhere: a deathmatch has kills and deaths, an obstacle
 ## course points and the checkpoint reached, an eating game mass. [member columns] are the
-## game's too, defaulting to [method DotTableView.scoreboard_columns]; a column with
+## game's too, defaulting to [method GSTableView.scoreboard_columns]; a column with
 ## `"kind": &"icon"` draws the row's value as a picture (an avatar).
 ##
 ## [b]Transparent, and does not block input[/b], like game-fatal-contact's own: it is held down
 ## during a live game, so it must not stop the player moving or hide what they look at.
 ##
 ## [codeblock]
-## var board := DotScoreboardScreen.new()
+## var board := GSScoreboardScreen.new()
 ## board.title_text = "Wipeout - Course 3"
 ## board.columns = [{"key": &"avatar", "kind": &"icon", "width": 0.0}, ...]
 ## board.row_fn = func() -> Array[Dictionary]: return my_rows()
@@ -29,13 +29,13 @@ var title_text: String = "Scoreboard"
 ## on the player looking at it.
 var row_fn: Callable = Callable()
 
-## The table's columns. Empty uses [method DotTableView.scoreboard_columns].
+## The table's columns. Empty uses [method GSTableView.scoreboard_columns].
 var columns: Array[Dictionary] = []
 
 ## Seconds between refreshes while it is open.
 var refresh_sec: float = 0.5
 
-var table: DotTableView = null
+var table: GSTableView = null
 var _title: Label = null
 var _since: float = 0.0
 
@@ -48,7 +48,7 @@ func _ready() -> void:
 	blocks_input = false
 	hides_below = false
 	closable = true
-	mouse_mode = DotScreen.Mouse.INHERIT
+	mouse_mode = GSScreen.Mouse.INHERIT
 	_build()
 
 
@@ -81,11 +81,11 @@ func _build() -> void:
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(_title)
 
-	table = DotTableView.new()
+	table = GSTableView.new()
 	table.max_rows = 32
 	table.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(table)
-	table.set_columns(columns if not columns.is_empty() else DotTableView.scoreboard_columns())
+	table.set_columns(columns if not columns.is_empty() else GSTableView.scoreboard_columns())
 
 
 func _on_push() -> void:

@@ -1,14 +1,14 @@
-class_name DotTouchButtons
-extends DotHudPiece
+class_name GSTouchButtons
+extends GSHudPiece
 
 ## Round on-screen buttons for a touch player, anchored bottom-right in the HUD theme. No game logic: [signal button_down] / [signal button_up] carry an id the game wires to whatever
-## it does, e.g. [code]buttons.button_down.connect(func(id): sampler.hold(bit_for(id), true))[/code] after [code]buttons.set_buttons(DotTouchButtons.fps_stock())[/code], with [code]sampler.ignore_fn = buttons.contains_point[/code].
+## it does, e.g. [code]buttons.button_down.connect(func(id): sampler.hold(bit_for(id), true))[/code] after [code]buttons.set_buttons(GSTouchButtons.fps_stock())[/code], with [code]sampler.ignore_fn = buttons.contains_point[/code].
 ## Fingers are tracked by index, so a thumb on a button and another on the stick or the look side do not disturb each other.
 
 signal button_down(id: StringName)
 signal button_up(id: StringName)
 
-## Hidden unless [method DotPlatform.has_touch], so a game adds it unconditionally.
+## Hidden unless [method GSPlatform.has_touch], so a game adds it unconditionally.
 @export var only_on_touch: bool = true
 
 ## Extra radius a finger may miss by, as a fraction of the button's.
@@ -39,7 +39,7 @@ static func fps_stock() -> Array[Dictionary]:
 
 func _ready() -> void:
 	if only_on_touch and not Engine.is_editor_hint():
-		visible = DotPlatform.has_touch()
+		visible = GSPlatform.has_touch()
 	set_process_input(true)
 
 

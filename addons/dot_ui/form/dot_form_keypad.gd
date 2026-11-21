@@ -1,4 +1,4 @@
-class_name DotFormKeypad
+class_name GSFormKeypad
 extends Control
 
 ## An on-screen keyboard for one LineEdit, so a controller-only player can type: d-pad walks the keys, accept presses, X backspaces, Y types a space, shoulder shifts, Start confirms, cancel restores the text.
@@ -8,7 +8,7 @@ signal closed(accepted: bool)
 const LETTERS: Array[String] = ["1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm"]
 const SYMBOLS: Array[String] = ["1234567890", "!@#$%^&*()", "-_=+[]{}/\\", ":;'\"<>?.,"]
 
-var tokens: DotFormTokens = DotFormTokens.new()
+var tokens: GSFormTokens = GSFormTokens.new()
 var target: LineEdit = null
 var shifted := false
 var symbols := false
@@ -25,7 +25,7 @@ var _first: Button = null
 
 
 ## Shows the keypad over [param host] for [param edit]; edits land in the box live, so inline validation keeps working.
-func open(host: Control, edit: LineEdit, p_tokens: DotFormTokens, numeric: bool = false) -> void:
+func open(host: Control, edit: LineEdit, p_tokens: GSFormTokens, numeric: bool = false) -> void:
 	tokens = p_tokens
 	target = edit
 	_original = edit.text

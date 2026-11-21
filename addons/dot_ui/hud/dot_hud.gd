@@ -1,10 +1,10 @@
 @tool
-class_name DotHud
+class_name GSHud
 extends Control
 
 ## The always-on layer: crosshair, health, ammo, kill feed, chat.
 ##
-## Separate from [DotScreenStack] rather than being the bottom screen on it, because a
+## Separate from [GSScreenStack] rather than being the bottom screen on it, because a
 ## HUD is not a screen: it never takes focus, it never blocks input, and it should
 ## disappear when a menu that hides what is below it opens — which is three exceptions
 ## a screen would need.
@@ -15,7 +15,7 @@ const CHANNEL := "ui.hud"
 
 @export_group("Configuration")
 
-@export var config: DotUiConfig = null
+@export var config: GSUiConfig = null
 
 @export_group("Behaviour")
 
@@ -27,7 +27,7 @@ const CHANNEL := "ui.hud"
 
 @export_group("Fit")
 
-## The frame the HUD was laid out for, 1280x720 for the glance pieces ([DotHudPiece]).
+## The frame the HUD was laid out for, 1280x720 for the glance pieces ([GSHudPiece]).
 ## Zero (the default) anchors the HUD to the whole rect as before. Set, the HUD is placed by
 ## hand instead: on a frame smaller than this on either side the whole layer is scaled by
 ## [method fit_scale], never laid out again, so every piece and every distance between
@@ -51,7 +51,7 @@ var user_scale: float = 1.0:
 		if is_inside_tree() and not Engine.is_editor_hint():
 			_apply_safe_area()
 
-var _stack: DotScreenStack = null
+var _stack: GSScreenStack = null
 var _hidden_by_screen: bool = false
 var _hidden_by_game: bool = false
 
@@ -61,7 +61,7 @@ func _ready() -> void:
 		return
 
 	if config == null:
-		config = DotUiConfig.new()
+		config = GSUiConfig.new()
 
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# A HUD that stops mouse events is a HUD that eats the click that should have
@@ -94,7 +94,7 @@ func fit() -> float:
 ## 64 px). The inset is in the HUD's own units, so it scales with it.
 func fit_to_frame(frame: Vector2) -> void:
 	if config == null:
-		config = DotUiConfig.new()
+		config = GSUiConfig.new()
 	var k := (fit_scale(frame, fit_design, fit_min) if fit_design != Vector2.ZERO else 1.0) * user_scale
 	var inset := config.safe_area * config.scale
 	fit_control(self, frame, k, inset)
@@ -103,7 +103,7 @@ func fit_to_frame(frame: Vector2) -> void:
 ## Lays [param control] out over a frame [param frame] pixels at scale [param k], inset by
 ## [param inset] of its own units: top-left anchored, scaled, and sized to the frame divided
 ## by the scale, so its children's anchors still reach the frame's edges. What
-## [method fit_to_frame] does to a [DotHud], for a game whose HUD root is a plain [Control]
+## [method fit_to_frame] does to a [GSHud], for a game whose HUD root is a plain [Control]
 ## under a [CanvasLayer] (GameSpice Menu's `hud_scale` uses it). Public and static so a suite can
 ## lay one out on a frame it does not have.
 static func fit_control(control: Control, frame: Vector2, k: float, inset: float = 0.0) -> void:
@@ -123,7 +123,7 @@ func _apply_safe_area() -> void:
 		return
 
 	if config == null:
-		config = DotUiConfig.new()
+		config = GSUiConfig.new()
 	var inset := config.safe_area * config.scale
 	# Back from a player's own size to the design: full-rect anchoring again.
 	if scale != Vector2.ONE:
@@ -137,7 +137,7 @@ func _apply_safe_area() -> void:
 
 
 ## Follows a screen stack, hiding and showing itself.
-func bind_stack(stack: DotScreenStack) -> void:
+func bind_stack(stack: GSScreenStack) -> void:
 	if _stack != null and is_instance_valid(_stack):
 		if _stack.top_changed.is_connected(_on_top_changed):
 			_stack.top_changed.disconnect(_on_top_changed)
@@ -182,7 +182,7 @@ func _refresh_visibility() -> void:
 	var should_show := not (_hidden_by_screen or _hidden_by_game)
 
 	if should_show != visible:
-		DotLog.debug(CHANNEL, "hud shown" if should_show else "hud hidden", {
+		GSLog.debug(CHANNEL, "hud shown" if should_show else "hud hidden", {
 			"by_screen": _hidden_by_screen,
 			"by_game": _hidden_by_game,
 			"top": String(_stack.top_id()) if _stack != null and is_instance_valid(_stack) else "",
@@ -191,16 +191,16 @@ func _refresh_visibility() -> void:
 	visible = should_show
 
 
-## Every [DotHudWidget] below this node.
-func widgets() -> Array[DotHudWidget]:
-	var out: Array[DotHudWidget] = []
+## Every [GSHudWidget] below this node.
+func widgets() -> Array[GSHudWidget]:
+	var out: Array[GSHudWidget] = []
 	_collect(self, out)
 	return out
 
 
-func _collect(node: Node, out: Array[DotHudWidget]) -> void:
+func _collect(node: Node, out: Array[GSHudWidget]) -> void:
 	for child in node.get_children():
-		if child is DotHudWidget:
+		if child is GSHudWidget:
 			out.append(child)
 		_collect(child, out)
 

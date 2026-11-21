@@ -1,18 +1,18 @@
 [![UI - GameSpice addon](docs/banner.png)](https://moddingcommunity.com/a/11-gs-ui)
 
-Screens, HUD and menus for a Godot 4 game, with no art assets. A screen stack that works out z-order, input blocking and mouse mode from one place, a settings panel generated from any `DotConfig`, a rebinder with conflict detection, and data-driven HUD widgets.
+Screens, HUD and menus for a Godot 4 game, with no art assets. A screen stack that works out z-order, input blocking and mouse mode from one place, a settings panel generated from any `GSConfig`, a rebinder with conflict detection, and data-driven HUD widgets.
 
 ## Install
 
 1. Get [Godot 4.7](https://godotengine.org/download).
 2. Either use [GameSpice Bootstrap](https://github.com/gamespice-platform/bootstrap), which clones every project and links the addons, or copy `addons/dot_ui/` and [GameSpice Core](https://github.com/gamespice-platform/core)'s `addons/dot_core/` into your project and enable both in *Project > Project Settings > Plugins*.
 
-GameSpice Core and GameSpice Input are the dependencies (plus Profile). `DotInputBinding` forwards to Input's `DotInputText` and `DotInputMap` instead of keeping a second copy of the key-name and `InputMap` code; link `addons/dot_input` next to `addons/dot_core`.
+GameSpice Core and GameSpice Input are the dependencies (plus Profile). `GSInputBinding` forwards to Input's `GSInputText` and `GSInputMap` instead of keeping a second copy of the key-name and `InputMap` code; link `addons/dot_input` next to `addons/dot_core`.
 
 ## Use
 
 ```gdscript
-var stack := DotScreenStack.new()
+var stack := GSScreenStack.new()
 add_child(stack)
 stack.register(pause_menu)
 stack.register(settings_screen)
@@ -26,7 +26,7 @@ settings_panel.bind(server_config)
 health_bar.bind(func(): return health.health)
 ```
 
-`DotScreenStack` derives z-order, input blocking, mouse capture and the back key from one stack whenever it changes, so you do not get a pause menu that is visible but not focused or an escape key that closes two screens.
+`GSScreenStack` derives z-order, input blocking, mouse capture and the back key from one stack whenever it changes, so you do not get a pause menu that is visible but not focused or an escape key that closes two screens.
 
 GameSpice UI ships no textures, fonts or nine-patches and knows nothing about GameSpice Match or GameSpice Combat. The theme is generated from `StyleBoxFlat`s, the kill feed takes coloured string fragments and the scoreboard takes rows of dictionaries.
 
@@ -34,33 +34,33 @@ GameSpice UI ships no textures, fonts or nine-patches and knows nothing about Ga
 
 | Class | What it is |
 | --- | --- |
-| `DotScreenStack`, `DotScreen` | What is open, in what order, and who gets input. |
-| `DotUiTheme` | A whole `Theme` from a palette and a scale. |
-| `DotHud`, `DotHudWidget` | The always-on layer, and widgets that pull a value rather than being pushed. |
-| `DotStatBar` | Health, armour, ammo. |
-| `DotCrosshair` | Opens by the actual spread angle through the actual camera projection. |
-| `DotStarfield` | A parallax starfield drawn into any `CanvasItem`. |
-| `DotFeedView` | A self-expiring list of coloured fragments, for a kill feed or chat. |
-| `DotChatWindow` | A chat box: a fading log, a line to type in, and a key that opens it. |
-| `DotTableView` | Rows and columns: scoreboard, server browser, ban list. |
-| `DotVitals`, `DotAmmoCounter`, `DotScoreStrip` | The glance HUD: health and armour, `magazine \| reserve`, the clock with optional score plates. |
-| `DotHitMarker`, `DotDamageNumbers` | Hit ticks (red on a kill) and numbers that rise off where a hit landed. |
-| `DotKeyPrompt`, `DotKeyHints` | "Open door [E]" and a column of keys, drawn from the player's binding. |
-| `DotBallotPanel` | A GameSpice Vote ballot on the HUD, by number key, click or both, with a countdown and voters' avatars. Emits `chosen`. |
-| `DotSettingsPanel` | Builds itself from a `DotConfig`. Never shows a secret. |
-| `DotBindingsPanel` | Rebinding with conflict detection, in a file that survives a restart. |
-| `DotInputBinding` | One binding as text (`"Y"`, `"Shift+A"`, `"Mouse 1"`) and back. |
+| `GSScreenStack`, `GSScreen` | What is open, in what order, and who gets input. |
+| `GSUiTheme` | A whole `Theme` from a palette and a scale. |
+| `GSHud`, `GSHudWidget` | The always-on layer, and widgets that pull a value rather than being pushed. |
+| `GSStatBar` | Health, armour, ammo. |
+| `GSCrosshair` | Opens by the actual spread angle through the actual camera projection. |
+| `GSStarfield` | A parallax starfield drawn into any `CanvasItem`. |
+| `GSFeedView` | A self-expiring list of coloured fragments, for a kill feed or chat. |
+| `GSChatWindow` | A chat box: a fading log, a line to type in, and a key that opens it. |
+| `GSTableView` | Rows and columns: scoreboard, server browser, ban list. |
+| `GSVitals`, `GSAmmoCounter`, `GSScoreStrip` | The glance HUD: health and armour, `magazine \| reserve`, the clock with optional score plates. |
+| `GSHitMarker`, `GSDamageNumbers` | Hit ticks (red on a kill) and numbers that rise off where a hit landed. |
+| `GSKeyPrompt`, `GSKeyHints` | "Open door [E]" and a column of keys, drawn from the player's binding. |
+| `GSBallotPanel` | A GameSpice Vote ballot on the HUD, by number key, click or both, with a countdown and voters' avatars. Emits `chosen`. |
+| `GSSettingsPanel` | Builds itself from a `GSConfig`. Never shows a secret. |
+| `GSBindingsPanel` | Rebinding with conflict detection, in a file that survives a restart. |
+| `GSInputBinding` | One binding as text (`"Y"`, `"Shift+A"`, `"Mouse 1"`) and back. |
 
 ## Settings panel
 
-`DotSettingsPanel` reads the `@export` annotations the config already has (keys, types, ranges, enum choices, groups) and builds the controls, so a screen never drifts from the config. It skips `sensitive_keys()`, since secrets end up in screenshots. Edits are held until `apply()`, and an invalid set is rolled back entirely.
+`GSSettingsPanel` reads the `@export` annotations the config already has (keys, types, ranges, enum choices, groups) and builds the controls, so a screen never drifts from the config. It skips `sensitive_keys()`, since secrets end up in screenshots. Edits are held until `apply()`, and an invalid set is rolled back entirely.
 
 ## Chat window
 
 It knows nothing about chat: it takes coloured fragments to draw and emits the string somebody typed. `open_action` is an `InputMap` action (`Y` by default), so players rebind it.
 
 ```gdscript
-var chat := DotChatWindow.new()
+var chat := GSChatWindow.new()
 chat.submitted.connect(func(text: String, _channel: StringName) -> void:
     link.send_chat(text))
 chat.opened.connect(func(_c: StringName) -> void: controller.suspended = true)
@@ -72,7 +72,7 @@ Connect `opened` and `closed` to whatever suspends your controller. A focused `L
 
 ## Widgets pull
 
-A `DotHudWidget` holds a `Callable` that reads the value, by default ten times a second. A bar wired to a signal misses changes that happened before it existed, and fires repeatedly when several things change in one tick. There is an immediate path for anything where lateness would be wrong.
+A `GSHudWidget` holds a `Callable` that reads the value, by default ten times a second. A bar wired to a signal misses changes that happened before it existed, and fires repeatedly when several things change in one tick. There is an immediate path for anything where lateness would be wrong.
 
 ## Testing
 
@@ -80,7 +80,7 @@ Import the project once, then run `examples/ui_selftest.tscn` and `examples/form
 
 ## Credits
 
-The one exception to "no art" is an optional weapon icon sheet. `DotIconSet` works without it; `DotWeaponIcons.stock()` adds it.
+The one exception to "no art" is an optional weapon icon sheet. `GSIconSet` works without it; `GSWeaponIcons.stock()` adds it.
 
 | Asset | Author / source | Licence |
 | --- | --- | --- |

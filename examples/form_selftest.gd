@@ -11,11 +11,11 @@ var _passed := 0
 var _failed := 0
 var _entered := 0
 var _completed := 0
-var form: DotUiForm = null
+var form: GSUiForm = null
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	_run.call_deferred()
 
 
@@ -54,11 +54,11 @@ func _section(title: String) -> void:
 	print("- " + title)
 
 
-func _fresh(values: Dictionary = {}) -> DotUiForm:
+func _fresh(values: Dictionary = {}) -> GSUiForm:
 	if form != null:
 		form.queue_free()
 		await get_tree().process_frame
-	form = DotUiForm.new()
+	form = GSUiForm.new()
 	form.custom_minimum_size = Vector2(800, 600)
 	form.size = Vector2(800, 600)
 	add_child(form)
@@ -78,8 +78,8 @@ func _key(code: Key) -> InputEventKey:
 
 func _test_schema() -> void:
 	_section("schema")
-	var F := DotProfileSet.field
-	var norm := DotFormSchema.normalize([
+	var F := GSProfileSet.field
+	var norm := GSFormSchema.normalize([
 		F.call("max_health", "int", 100, {"min": 1, "max": 500, "unit": "hp"}),
 		F.call("mode", "string", "a", {"enum": ["a", "b"]}),
 		F.call("big", "int", 5, {"min": 0, "max": 1000000}),
@@ -88,32 +88,32 @@ func _test_schema() -> void:
 	var f: Array = norm.value
 	_check(f[0]["label"] == "Max health", "label is prettified from the name")
 	_check(f[0]["slider"] and not f[2]["slider"], "a huge span gets no slider")
-	_check(DotFormSchema.normalize([{"name": "x", "type": "wat"}]).error.code == DotError.CODE_INVALID, "unknown type is invalid")
-	_check(not DotFormSchema.normalize([{"name": "x", "type": "int"}, {"name": "x", "type": "int"}]).ok, "duplicate name fails")
-	_check(not DotFormSchema.normalize([5]).ok, "non-dictionary entry fails")
+	_check(GSFormSchema.normalize([{"name": "x", "type": "wat"}]).error.code == GSError.CODE_INVALID, "unknown type is invalid")
+	_check(not GSFormSchema.normalize([{"name": "x", "type": "int"}, {"name": "x", "type": "int"}]).ok, "duplicate name fails")
+	_check(not GSFormSchema.normalize([5]).ok, "non-dictionary entry fails")
 	var health: Dictionary = f[0]
-	_check(DotFormSchema.validate(health, 50).ok, "in range passes")
-	_check(not DotFormSchema.validate(health, 0).ok, "below min fails")
-	_check(not DotFormSchema.validate(health, 501).ok, "above max fails")
-	_check(not DotFormSchema.validate(health, 2.5).ok, "fraction in an int fails")
-	_check(DotFormSchema.parse_text(health, " 42 ").value == 42, "text parses to int")
-	_check(not DotFormSchema.parse_text(health, "4x").ok, "garbage text fails")
-	_check(not DotFormSchema.validate(f[1], "z").ok, "value outside enum fails")
+	_check(GSFormSchema.validate(health, 50).ok, "in range passes")
+	_check(not GSFormSchema.validate(health, 0).ok, "below min fails")
+	_check(not GSFormSchema.validate(health, 501).ok, "above max fails")
+	_check(not GSFormSchema.validate(health, 2.5).ok, "fraction in an int fails")
+	_check(GSFormSchema.parse_text(health, " 42 ").value == 42, "text parses to int")
+	_check(not GSFormSchema.parse_text(health, "4x").ok, "garbage text fails")
+	_check(not GSFormSchema.validate(f[1], "z").ok, "value outside enum fails")
 	var custom := {"type": "int", "validator": func(v: int) -> String: return "even only" if v % 2 == 1 else ""}
-	_check(DotFormSchema.validate(custom, 3).error.message == "even only", "custom validator message")
-	_check(DotFormSchema.validate(custom, 4).ok, "custom validator passes")
-	_check(DotFormSchema.parse_text({"type": "dict"}, "{\"a\": 1}").value["a"] == 1, "json text parses")
-	_check(not DotFormSchema.parse_text({"type": "dict"}, "{oops").ok, "bad json fails")
+	_check(GSFormSchema.validate(custom, 3).error.message == "even only", "custom validator message")
+	_check(GSFormSchema.validate(custom, 4).ok, "custom validator passes")
+	_check(GSFormSchema.parse_text({"type": "dict"}, "{\"a\": 1}").value["a"] == 1, "json text parses")
+	_check(not GSFormSchema.parse_text({"type": "dict"}, "{oops").ok, "bad json fails")
 	_done()
 
 
 func _test_widgets() -> void:
 	_section("a widget per type")
 	await _fresh()
-	_check(form.row("damage").editor() is DotFormSlider, "ranged float is a slider")
-	_check(form.row("magazine").editor() is DotFormSlider, "ranged int is a slider")
+	_check(form.row("damage").editor() is GSFormSlider, "ranged float is a slider")
+	_check(form.row("magazine").editor() is GSFormSlider, "ranged int is a slider")
 	_check(form.row("reserve").editor() is LineEdit, "slider:false is a number field")
-	_check(form.row("automatic").editor() is DotFormToggle, "bool is a toggle")
+	_check(form.row("automatic").editor() is GSFormToggle, "bool is a toggle")
 	_check(form.row("rarity").editor() is OptionButton, "enum is a dropdown")
 	_check(form.row("tint").editor() is ColorPickerButton, "color is a picker")
 	_check(form.row("name").editor() is LineEdit, "string is a text field")
@@ -128,7 +128,7 @@ func _test_widgets() -> void:
 		nested = nested or (g.depth == 1 and g.title == "Falloff")
 	_check(nested, "Damage/Falloff nests")
 	_check(form.row("damage").size.y > 0.0 and form.row("damage").size.x > 100.0, "a row has a real size")
-	var tog: DotFormToggle = form.row("automatic").editor()
+	var tog: GSFormToggle = form.row("automatic").editor()
 	var seen := []
 	form.value_changed.connect(func(k: String, v: Variant) -> void: seen.append([k, v]))
 	tog.flip()
@@ -146,11 +146,11 @@ func _test_validation() -> void:
 	_check(form.has_errors() and form.errors().has("magazine"), "the form knows")
 	_check(form.values()["magazine"] == 12, "an invalid entry never reaches values()")
 	_check(form.apply_button().disabled, "Apply is disabled while invalid")
-	_check(not form.apply().ok and form.apply().error.code == DotError.CODE_INVALID, "apply() fails with CODE_INVALID")
+	_check(not form.apply().ok and form.apply().error.code == GSError.CODE_INVALID, "apply() fails with CODE_INVALID")
 	_check(r.type_text("20") == "", "a valid value clears the error")
 	_check(not form.has_errors() and form.values()["magazine"] == 20, "and is accepted")
 	_check(form.row("name").type_text("") == "Required.", "required string")
-	_check(form.set_value("damage", 9999.0).error.code == DotError.CODE_INVALID, "set_value rejects out of range")
+	_check(form.set_value("damage", 9999.0).error.code == GSError.CODE_INVALID, "set_value rejects out of range")
 	_check(not form.set_value("nope", 1).ok, "set_value rejects unknown key")
 	_check(form.row("extra").type_text("{bad") != "", "bad JSON flags the field")
 	_check(form.row("extra").type_text("{\"a\": 2}") == "", "good JSON clears it")
@@ -294,7 +294,7 @@ func _test_navigation() -> void:
 	await _fresh()
 	_check(form.focus_first(), "focus_first lands somewhere")
 	_check(get_viewport().gui_get_focus_owner() == form.row("name").editor(), "on the first editor")
-	var slider: DotFormSlider = form.row("damage").editor()
+	var slider: GSFormSlider = form.row("damage").editor()
 	form.focus_key("damage")
 	_check(get_viewport().gui_get_focus_owner() == slider, "focus_key focuses a slider")
 	var before := slider.value
@@ -306,7 +306,7 @@ func _test_navigation() -> void:
 	_check(slider.value == 200.0, "End jumps to the max")
 	slider._gui_input(_key(KEY_HOME))
 	_check(slider.value == 1.0, "Home jumps to the min")
-	var tog: DotFormToggle = form.row("automatic").editor()
+	var tog: GSFormToggle = form.row("automatic").editor()
 	tog._gui_input(_key(KEY_ENTER))
 	_check(tog.pressed, "Enter flips a toggle")
 	var next := slider.find_next_valid_focus()
@@ -338,7 +338,7 @@ func _test_navigation() -> void:
 func _test_layout() -> void:
 	_section("layout, themes and tokens")
 	await _fresh()
-	var wide: DotFormRow = form.row("damage")
+	var wide: GSFormRow = form.row("damage")
 	_check(not wide._box.vertical, "wide rows sit side by side")
 	form.custom_minimum_size = Vector2.ZERO
 	form.size = Vector2(380, 700)
@@ -349,17 +349,17 @@ func _test_layout() -> void:
 	_check(form.row("damage").editor().size.x > 0.0, "and the editor still has width")
 	_check(form.tokens.touch, "narrow means touch-sized targets")
 	form.set_value("damage", 44.0)
-	form.set_tokens(DotFormTokens.light())
+	form.set_tokens(GSFormTokens.light())
 	await get_tree().process_frame
 	_check(form.values()["damage"] == 44.0 and form.is_dirty(), "switching theme keeps edits and dirty state")
 	_check(form.theme != null and form.theme.has_stylebox("normal", "LineEdit"), "the form carries its own theme")
-	var t := DotFormTokens.from_theme(DotUiTheme.space())
-	_check(t.accent == DotUiTheme.space().accent, "tokens follow a DotUiTheme")
-	_check(DotFormTokens.dark().sp(3) == 12 and DotFormTokens.new().px(10.0) == 10, "spacing tokens")
-	var t2 := DotFormTokens.dark()
+	var t := GSFormTokens.from_theme(GSUiTheme.space())
+	_check(t.accent == GSUiTheme.space().accent, "tokens follow a GSUiTheme")
+	_check(GSFormTokens.dark().sp(3) == 12 and GSFormTokens.new().px(10.0) == 10, "spacing tokens")
+	var t2 := GSFormTokens.dark()
 	t2.scale = 2.0
 	_check(t2.sp(3) == 24, "scale multiplies spacing")
-	var g: DotFormGroup = form.groups()[1]
+	var g: GSFormGroup = form.groups()[1]
 	g.set_open(false, false)
 	_check(g.reveal == 0.0 and g._clip.custom_minimum_size.y == 0.0, "a shut card has no body height")
 	g.set_open(true, false)
@@ -382,7 +382,7 @@ func _step(row_node: HBoxContainer, dir: int) -> Button:
 func _test_reorder() -> void:
 	_section("list reorder")
 	await _fresh({"tags": ["a", "b", "c"]})
-	var row: DotFormRow = form.row("tags")
+	var row: GSFormRow = form.row("tags")
 	var rows := row._item_rows()
 	_check(rows.size() == 3, "three item rows")
 	var down1 := _step(rows[1], 1)
@@ -417,11 +417,11 @@ func _test_reorder() -> void:
 	_check(_list_values("tags") == ["a", "b", "c"], "revert restores the order")
 	row.move_item(0, 1)
 	_check(form.apply().ok and form.changes().is_empty(), "apply keeps a reorder")
-	var typed := DotUiForm.new()
+	var typed := GSUiForm.new()
 	add_child(typed)
-	typed.build([DotProfileSet.field("ids", "list", [1, 2, 3], {"items": "int", "reorder": false})])
+	typed.build([GSProfileSet.field("ids", "list", [1, 2, 3], {"items": "int", "reorder": false})])
 	await get_tree().process_frame
-	var plain: DotFormRow = typed.row("ids")
+	var plain: GSFormRow = typed.row("ids")
 	_check(plain._item_rows()[0].get_child_count() == 2, "reorder:false leaves edit and remove only")
 	_check(plain.move_item(0, 1), "move_item still works from code")
 	_check(typed.values()["ids"] == [2, 1, 3], "and a typed list keeps its types")
@@ -436,7 +436,7 @@ func _joy(button: JoyButton) -> InputEventJoypadButton:
 	return e
 
 
-func _has_key(pad: DotFormKeypad, label: String) -> bool:
+func _has_key(pad: GSFormKeypad, label: String) -> bool:
 	for b in pad.find_children("*", "Button", true, false):
 		if (b as Button).text == label:
 			return true
@@ -512,10 +512,10 @@ func _test_keypad_modes(edit: LineEdit, a: InputEvent) -> void:
 	num.close(false)
 	await get_tree().process_frame
 	_check(not form.errors().has("magazine"), "cancel clears it")
-	var off := DotUiForm.new()
+	var off := GSUiForm.new()
 	off.gamepad_entry = false
 	add_child(off)
-	off.build([DotProfileSet.field("n", "string", "")])
+	off.build([GSProfileSet.field("n", "string", "")])
 	await get_tree().process_frame
 	off.row("n").editor().gui_input.emit(a)
 	_check(off.keypad() == null, "gamepad_entry=false never opens it")
@@ -527,9 +527,9 @@ func _test_keypad_modes(edit: LineEdit, a: InputEvent) -> void:
 	form.keypad().type("z")
 	_check(form.values()["tags"] == ["az"], "and edits flow to the list value")
 	form.keypad().close(true)
-	var sec := DotUiForm.new()
+	var sec := GSUiForm.new()
 	add_child(sec)
-	sec.build([DotProfileSet.field("pw", "string", "", {"secret": true})])
+	sec.build([GSProfileSet.field("pw", "string", "", {"secret": true})])
 	await get_tree().process_frame
 	var sp := sec.open_keypad(sec.row("pw").editor())
 	sp.type("hunter2")
@@ -560,12 +560,12 @@ func _test_conditional() -> void:
 	form.set_filter("recoil")
 	_check(form.visible_keys().is_empty(), "search does not show a row whose condition fails")
 	form.set_filter("")
-	var g := DotUiForm.new()
+	var g := GSUiForm.new()
 	add_child(g)
 	var made := g.build([
-		DotProfileSet.field("mode", "string", "a", {"enum": ["a", "b", "c"]}),
-		DotProfileSet.field("x", "int", 1, {"group": "Only", "visible_if": {"mode": ["b", "c"]}}),
-		DotProfileSet.field("y", "int", 1, {"visible_if": func(v: Dictionary) -> bool: return v["mode"] == "c" and v["x"] > 0}),
+		GSProfileSet.field("mode", "string", "a", {"enum": ["a", "b", "c"]}),
+		GSProfileSet.field("x", "int", 1, {"group": "Only", "visible_if": {"mode": ["b", "c"]}}),
+		GSProfileSet.field("y", "int", 1, {"visible_if": func(v: Dictionary) -> bool: return v["mode"] == "c" and v["x"] > 0}),
 	])
 	await get_tree().process_frame
 	_check(made.ok and g.groups().size() == 2 and not g.groups()[1].visible, "a card whose rows are all hidden hides")
@@ -575,9 +575,9 @@ func _test_conditional() -> void:
 	_check(g.visible_keys().has("y"), "a Callable condition gets the values")
 	g.revert()
 	_check(not g.visible_keys().has("x") and not g.visible_keys().has("y"), "revert re-evaluates the conditions")
-	_check(not g.build([DotProfileSet.field("p", "int", 1, {"visible_if": {"nope": 1}})]).ok, "visible_if naming no field is refused")
-	_check(not g.build([DotProfileSet.field("p", "int", 1, {"visible_if": {"p": 1}})]).ok, "visible_if naming itself is refused")
-	_check(not g.build([DotProfileSet.field("p", "int", 1, {"visible_if": "yes"})]).ok, "visible_if of another type is refused")
+	_check(not g.build([GSProfileSet.field("p", "int", 1, {"visible_if": {"nope": 1}})]).ok, "visible_if naming no field is refused")
+	_check(not g.build([GSProfileSet.field("p", "int", 1, {"visible_if": {"p": 1}})]).ok, "visible_if naming itself is refused")
+	_check(not g.build([GSProfileSet.field("p", "int", 1, {"visible_if": "yes"})]).ok, "visible_if of another type is refused")
 	g.queue_free()
 	_done()
 
@@ -598,11 +598,11 @@ func _test_vectors() -> void:
 	form.reset_key("muzzle_offset")
 	_check(form.values()["muzzle_offset"] == Vector3(0.0, 0.05, 0.4) and r._vec[2].text == "0.4", "reset restores the default and the boxes")
 	var d := {"type": "vector2", "min": -1.0, "max": 1.0}
-	_check(DotFormSchema.validate(d, Vector2(2, 0)).error.message == "X: must be at most 1.", "min and max apply per component")
-	_check(DotFormSchema.validate(d, [0.5, -1]).value == Vector2(0.5, -1.0), "an array of numbers is taken as a vector")
-	_check(not DotFormSchema.validate(d, Vector3.ZERO).ok and not DotFormSchema.validate(d, [1]).ok, "the wrong size or type is refused")
-	_check(DotFormSchema.parse_text(d, "0.5, 0.25").value == Vector2(0.5, 0.25), "text parses as comma-separated numbers")
-	_check(DotFormSchema.display(d, Vector2(1, 0.5)) == "1, 0.5", "and displays the same way")
+	_check(GSFormSchema.validate(d, Vector2(2, 0)).error.message == "X: must be at most 1.", "min and max apply per component")
+	_check(GSFormSchema.validate(d, [0.5, -1]).value == Vector2(0.5, -1.0), "an array of numbers is taken as a vector")
+	_check(not GSFormSchema.validate(d, Vector3.ZERO).ok and not GSFormSchema.validate(d, [1]).ok, "the wrong size or type is refused")
+	_check(GSFormSchema.parse_text(d, "0.5, 0.25").value == Vector2(0.5, 0.25), "text parses as comma-separated numbers")
+	_check(GSFormSchema.display(d, Vector2(1, 0.5)) == "1, 0.5", "and displays the same way")
 	form.set_value("recoil", Vector2(1, 2))
 	form.apply()
 	_check(not form.is_dirty() and form.values()["recoil"] == Vector2(1, 2), "apply makes a vector the baseline")
@@ -611,11 +611,11 @@ func _test_vectors() -> void:
 
 func _test_bad_input() -> void:
 	_section("bad input")
-	var f := DotUiForm.new()
+	var f := GSUiForm.new()
 	add_child(f)
 	var res := f.build([{"name": "a", "type": "nope"}])
-	_check(not res.ok and res.error.code == DotError.CODE_INVALID, "build fails cleanly on a bad schema")
-	var res2 := f.build([DotProfileSet.field("n", "int", 3, {"min": 0, "max": 5})], {"n": 99})
+	_check(not res.ok and res.error.code == GSError.CODE_INVALID, "build fails cleanly on a bad schema")
+	var res2 := f.build([GSProfileSet.field("n", "int", 3, {"min": 0, "max": 5})], {"n": 99})
 	_check(not res2.ok and f.values()["n"] == 3, "an invalid starting value falls back to the default")
 	f.queue_free()
 	_done()

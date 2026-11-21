@@ -1,6 +1,6 @@
 @tool
-class_name DotVitals
-extends DotHudPiece
+class_name GSVitals
+extends GSHudPiece
 
 ## Bottom left: health as a rounded bar with quarter ticks and its number in big type at the
 ## bar's end, armour as a thin bar under it with a smaller number when there is any, a
@@ -8,7 +8,7 @@ extends DotHudPiece
 ## a gold bar. On one plate, because white numbers on a white floor are an outline and
 ## nothing else.
 ##
-## [b]The bar eases and the number never does[/b], for the reason [DotStatBar] gives: a hit
+## [b]The bar eases and the number never does[/b], for the reason [GSStatBar] gives: a hit
 ## that takes a third of your health is legible as a slide and invisible as a jump, and a
 ## lagging number is a lie about the current value.
 ##

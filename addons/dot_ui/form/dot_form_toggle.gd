@@ -1,11 +1,11 @@
-class_name DotFormToggle
+class_name GSFormToggle
 extends Control
 
 ## A pill switch whose knob slides; clicks, touch, Enter and Space all flip it.
 
 signal toggled(on: bool)
 
-var tokens: DotFormTokens = DotFormTokens.new()
+var tokens: GSFormTokens = GSFormTokens.new()
 var pressed := false
 ## 0 (off) to 1 (on); the knob and colour follow it.
 var t := 0.0:

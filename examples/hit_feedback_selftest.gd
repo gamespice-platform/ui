@@ -1,6 +1,6 @@
 extends Node
 
-## DotHitFeedback, offline and headless.
+## GSHitFeedback, offline and headless.
 ##
 ## godot --headless --path . res://examples/hit_feedback_selftest.tscn
 
@@ -11,7 +11,7 @@ var _failed := 0
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	_run.call_deferred()
 
 
@@ -28,7 +28,7 @@ func _run() -> void:
 	var host := Control.new()
 	host.size = Vector2(400.0, 300.0)
 	add_child(host)
-	var fx := DotHitFeedback.mount(host)
+	var fx := GSHitFeedback.mount(host)
 	await get_tree().process_frame
 	_check(fx.get_parent() == host, "mounted under the host")
 	_check(fx.mouse_filter == Control.MOUSE_FILTER_IGNORE, "layer ignores the mouse")

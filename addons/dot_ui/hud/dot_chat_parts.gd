@@ -1,7 +1,7 @@
-class_name DotChatParts
+class_name GSChatParts
 extends RefCounted
 
-## The nodes inside a [DotChatWindow], and the two views it draws them with. Kept out of the
+## The nodes inside a [GSChatWindow], and the two views it draws them with. Kept out of the
 ## window so the window is the behaviour and this is the construction.
 ##
 ## [b]Every offset is set, and all four of them AFTER the anchors.[/b] Assigning
@@ -27,8 +27,8 @@ static func anchor_bottom_strip(control: Control, top: float, bottom: float) -> 
 
 
 ## A feed in the window's look, anchored above the entry and [param rows] tall.
-static func make_feed(window: DotChatWindow, node_name: String, rows: int) -> DotFeedView:
-	var feed := DotFeedView.new()
+static func make_feed(window: GSChatWindow, node_name: String, rows: int) -> GSFeedView:
+	var feed := GSFeedView.new()
 	feed.name = node_name
 	feed.max_lines = rows
 	feed.newest_last = true
@@ -43,7 +43,7 @@ static func make_feed(window: DotChatWindow, node_name: String, rows: int) -> Do
 
 
 ## The prompt and the line being typed in, in one row along the bottom.
-static func make_entry_row(window: DotChatWindow) -> Dictionary:
+static func make_entry_row(window: GSChatWindow) -> Dictionary:
 	var row := HBoxContainer.new()
 	row.name = "Entry"
 	anchor_bottom_strip(row, -window.entry_height, 0.0)
@@ -66,7 +66,7 @@ static func make_entry_row(window: DotChatWindow) -> Dictionary:
 ## [b]Rebuilt, not shifted.[/b] A view of twelve rows is twelve `add_line` calls, which is
 ## nothing next to a frame, and a view built from the history every time cannot drift out
 ## of step with it.
-static func show_history(window: DotChatWindow, view: DotFeedView, rows: Array, scroll: int) -> void:
+static func show_history(window: GSChatWindow, view: GSFeedView, rows: Array, scroll: int) -> void:
 	var end := rows.size() - scroll
 	var start := maxi(0, end - window.history_lines)
 
@@ -83,7 +83,7 @@ static func show_history(window: DotChatWindow, view: DotFeedView, rows: Array, 
 			"at_ms": Time.get_ticks_msec(),
 		}
 
-	# Sized to its rows: DotFeedView draws from its top edge, so a view twelve rows tall
+	# Sized to its rows: GSFeedView draws from its top edge, so a view twelve rows tall
 	# holding five drew them at the top with a gap over the entry.
 	var shown := maxi(view.line_count(), 1)
 	view.offset_top = -(float(shown) * (window.line_height + window.line_gap) + window.entry_height)
@@ -92,7 +92,7 @@ static func show_history(window: DotChatWindow, view: DotFeedView, rows: Array, 
 
 ## The shared block list: registry `dot_self_mute`, else GameSpice Chat's script by path, else null.
 static func find_self_mute() -> Object:
-	var found: Object = DotRegistry.get_service(SELF_MUTE_SERVICE)
+	var found: Object = GSRegistry.get_service(SELF_MUTE_SERVICE)
 
 	if found == null and ResourceLoader.exists(SELF_MUTE_SCRIPT):
 		var script: Variant = load(SELF_MUTE_SCRIPT)
@@ -138,18 +138,18 @@ static func team_channel(channels: Array[Dictionary], fallback: StringName) -> S
 
 
 ## Creates the open, team and cycle actions the project lacks, at the window's default bindings.
-static func register_actions(window: DotChatWindow) -> void:
+static func register_actions(window: GSChatWindow) -> void:
 	if window.open_action != &"":
-		DotInputBinding.ensure_action(window.open_action, window.default_open_binding)
+		GSInputBinding.ensure_action(window.open_action, window.default_open_binding)
 	if window.team_action != &"" and window.default_team_binding != "":
-		DotInputBinding.ensure_action(window.team_action, window.default_team_binding)
+		GSInputBinding.ensure_action(window.team_action, window.default_team_binding)
 	if window.cycle_action != &"" and window.default_cycle_binding != "":
-		DotInputBinding.ensure_action(window.cycle_action, window.default_cycle_binding)
+		GSInputBinding.ensure_action(window.cycle_action, window.default_cycle_binding)
 
 	# What the keys ENDED UP as, not what was asked for: ensure_action keeps a binding the
 	# project or the player already has, so "Y does not open chat" is answered by this line.
-	DotLog.debug(DotChatWindow.CHANNEL, "chat keys", {
-		"open": DotInputBinding.describe_action(window.open_action),
-		"team": DotInputBinding.describe_action(window.team_action),
-		"cycle": DotInputBinding.describe_action(window.cycle_action),
+	GSLog.debug(GSChatWindow.CHANNEL, "chat keys", {
+		"open": GSInputBinding.describe_action(window.open_action),
+		"team": GSInputBinding.describe_action(window.team_action),
+		"cycle": GSInputBinding.describe_action(window.cycle_action),
 	})

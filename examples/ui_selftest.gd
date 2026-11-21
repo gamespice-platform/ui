@@ -23,7 +23,7 @@ const SECTIONS := 35
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	_run.call_deferred()
 
 
@@ -67,7 +67,7 @@ func _run() -> void:
 	await _test_settings_screen()
 	await _test_scoreboard_screen()
 
-	DotPaths.remove_tree(BINDINGS_FILE)
+	GSPaths.remove_tree(BINDINGS_FILE)
 
 	print("")
 	print("%d passed, %d failed" % [_passed, _failed])
@@ -100,9 +100,9 @@ func _run() -> void:
 func _test_scoreboard_screen() -> void:
 	_section("scoreboard screen")
 
-	var stack := DotScreenStack.new()
+	var stack := GSScreenStack.new()
 	add_child(stack)
-	var board := DotScoreboardScreen.new()
+	var board := GSScoreboardScreen.new()
 	board.title_text = "Course 3"
 	var avatar := GradientTexture2D.new()
 	board.columns = [
@@ -138,7 +138,7 @@ func _test_scoreboard_screen() -> void:
 func _test_icon_set() -> void:
 	_section("icon set: tags, aliases, overrides, flat")
 
-	var set := DotWeaponIcons.stock()
+	var set := GSWeaponIcons.stock()
 	var pistol := set.texture_for(&"pistol") as AtlasTexture
 	_check(pistol != null and pistol.region.size.x > 0.0 and pistol.region.size.x <= 48.0, "a stock tag is a trimmed sprite")
 	_check(set.texture_for(&"nonsense") == null and not set.has_icon(&"nonsense"), "an unknown id has no icon, so the caller draws the name")
@@ -175,16 +175,16 @@ func _test_icon_set() -> void:
 					other += 1
 	_check(lit > 20 and other == 0, "flat redraws every opaque pixel in one colour")
 	var canvas := Control.new()
-	DotIconSet.pixel_perfect(canvas)
+	GSIconSet.pixel_perfect(canvas)
 	_check(canvas.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST, "pixel_perfect sets nearest filtering")
 	canvas.free()
-	_check(DotWeaponIcons.TAGS.size() == 30 and DotWeaponIcons.stock().texture_for(&"launcher") != null, "every stock tag is mapped")
+	_check(GSWeaponIcons.TAGS.size() == 30 and GSWeaponIcons.stock().texture_for(&"launcher") != null, "every stock tag is mapped")
 	_done()
 
 
 func _test_winner_reveal() -> void:
-	_section("DotWinnerReveal: name, podium, its time, a skip, and reduced motion")
-	var r := DotWinnerReveal.new()
+	_section("GSWinnerReveal: name, podium, its time, a skip, and reduced motion")
+	var r := GSWinnerReveal.new()
 	r.auto_process = false
 	add_child(r)
 	var ended: Array = []
@@ -221,11 +221,11 @@ func _test_winner_reveal() -> void:
 func _test_hud_piece() -> void:
 	_section("hud piece: theme and cover")
 
-	var vitals := _piece(DotVitals.new(), Rect2(0.0, 600.0, 380.0, 76.0)) as DotVitals
+	var vitals := _piece(GSVitals.new(), Rect2(0.0, 600.0, 380.0, 76.0)) as GSVitals
 	vitals.show_vitals(60.0, 100.0)
 	_check(vitals.mouse_filter == Control.MOUSE_FILTER_IGNORE, "a piece never takes the click that fires the weapon")
-	_check(vitals.colour(&"low") == DotHudPiece.DEFAULTS[&"low"], "with no theme a piece draws in the defaults")
-	var palette := DotUiTheme.light()
+	_check(vitals.colour(&"low") == GSHudPiece.DEFAULTS[&"low"], "with no theme a piece draws in the defaults")
+	var palette := GSUiTheme.light()
 	palette.danger = Color(0.7, 0.1, 0.6)
 	vitals.theme = palette.build()
 	_check(vitals.colour(&"low") == palette.danger, "with a theme, in the theme's colours")
@@ -233,49 +233,49 @@ func _test_hud_piece() -> void:
 	vitals.theme = null
 
 	# The default is the dark HUD (first play test, 2026-10-11): a dark plate, light words.
-	_check(DotHudPiece.DEFAULTS[&"plate"].get_luminance() < 0.1 and DotHudPiece.DEFAULTS[&"plate"].a >= 0.7,
+	_check(GSHudPiece.DEFAULTS[&"plate"].get_luminance() < 0.1 and GSHudPiece.DEFAULTS[&"plate"].a >= 0.7,
 		"the default plate is deep and dark, and opaque enough to read on a white wall")
-	_check(DotHudPiece.DEFAULTS[&"keycap"].get_luminance() < 0.3 and DotHudPiece.DEFAULTS[&"keycap_text"].get_luminance() > 0.8,
+	_check(GSHudPiece.DEFAULTS[&"keycap"].get_luminance() < 0.3 and GSHudPiece.DEFAULTS[&"keycap_text"].get_luminance() > 0.8,
 		"and a default key cap is a dark cap with a light letter, not a white tile")
-	_check(vitals.number(&"team_fill") == DotHudPiece.DEFAULT_CONSTANTS[&"team_fill"],
+	_check(vitals.number(&"team_fill") == GSHudPiece.DEFAULT_CONSTANTS[&"team_fill"],
 		"a constant with no theme is the default")
-	for key in DotHudPiece.COLOUR_KEYS:
-		if not DotHudPiece.DEFAULTS.has(key):
+	for key in GSHudPiece.COLOUR_KEYS:
+		if not GSHudPiece.DEFAULTS.has(key):
 			_check(false, "every colour key has a default: %s" % key)
 	# A layer theme from colours: every piece and every plain Label under the node follows it.
 	var layer := Control.new()
 	layer.size = Vector2(800.0, 700.0)
 	add_child(layer)
-	var lit := DotHudPiece.theme_from({&"plate": Color(0.9, 0.9, 0.9, 0.8), &"text": Color(0.1, 0.1, 0.1), &"ink": Color(1, 1, 1, 0.9)}, {&"team_fill": 100})
+	var lit := GSHudPiece.theme_from({&"plate": Color(0.9, 0.9, 0.9, 0.8), &"text": Color(0.1, 0.1, 0.1), &"ink": Color(1, 1, 1, 0.9)}, {&"team_fill": 100})
 	layer.theme = lit
-	var under := DotVitals.new()
+	var under := GSVitals.new()
 	layer.add_child(under)
 	var words := Label.new()
 	layer.add_child(words)
 	_check(under.colour(&"plate") == Color(0.9, 0.9, 0.9, 0.8) and under.colour(&"text") == Color(0.1, 0.1, 0.1),
 		"a layer theme reaches a piece under it")
-	_check(under.colour(&"low") == DotHudPiece.DEFAULTS[&"low"], "and a colour it leaves out is still the default")
+	_check(under.colour(&"low") == GSHudPiece.DEFAULTS[&"low"], "and a colour it leaves out is still the default")
 	_check(under.number(&"team_fill") == 100, "and its constants")
 	_check(words.get_theme_color(&"font_color") == Color(0.1, 0.1, 0.1) and words.get_theme_constant(&"outline_size") > 0
 		and words.get_theme_color(&"font_outline_color") == Color(1, 1, 1, 0.9),
 		"and a plain Label under it takes the text colour, outlined in the ink")
-	layer.theme = DotHudPiece.theme_from({&"plate": Color(0.02, 0.02, 0.04, 0.75)})
+	layer.theme = GSHudPiece.theme_from({&"plate": Color(0.02, 0.02, 0.04, 0.75)})
 	_check(under.colour(&"plate") == Color(0.02, 0.02, 0.04, 0.75), "a new layer theme is followed at once, nothing rebuilt")
 	layer.queue_free()
-	var built := DotUiTheme.dark().build()
+	var built := GSUiTheme.dark().build()
 	vitals.theme = built
 	_check(vitals.colour(&"keycap").get_luminance() < 0.4 and vitals.number(&"team_fill") < 100,
-		"DotUiTheme's dark palette gives dark caps and tinted score plates")
-	vitals.theme = DotUiTheme.light().build()
+		"GSUiTheme's dark palette gives dark caps and tinted score plates")
+	vitals.theme = GSUiTheme.light().build()
 	_check(vitals.number(&"team_fill") == 100, "and its light one painted plates, the bright look")
 	vitals.theme = null
 	# The engine's own theme has a default font, which made `has_theme_font` true for every
 	# name, so the pieces drew regular weight: the bold fallback is what no theme gives.
-	_check(vitals.font() == DotHudPiece.bold_font() and vitals._theme_font() == null,
+	_check(vitals.font() == GSHudPiece.bold_font() and vitals._theme_font() == null,
 		"with no theme font on the type, a piece draws bold, not the engine's regular weight")
 	var with_font := Theme.new()
 	var chosen := SystemFont.new()
-	with_font.set_font(&"font", DotHudPiece.THEME_TYPE, chosen)
+	with_font.set_font(&"font", GSHudPiece.THEME_TYPE, chosen)
 	vitals.theme = with_font
 	_check(vitals.font() == chosen, "and a font a theme sets on the type replaces it")
 	vitals.theme = null
@@ -290,11 +290,11 @@ func _test_hud_piece() -> void:
 	cover.size = Vector2(300.0, 200.0)
 	cover.add_to_group("dot_hud_cover")
 	add_child(cover)
-	_check(DotHudPiece.covered_rect(vitals).has_area(), "the cover is found by its group, in the piece's own space")
+	_check(GSHudPiece.covered_rect(vitals).has_area(), "the cover is found by its group, in the piece's own space")
 	vitals.refresh_cover()
 	_check(vitals.covered, "a cover over its footprint is seen")
 	_close(vitals.self_modulate.a, vitals.cover_alpha, "and the piece dims under it, so the ballot reads")
-	vitals.cover_mode = DotHudPiece.CoverMode.HIDE
+	vitals.cover_mode = GSHudPiece.CoverMode.HIDE
 	vitals.refresh_cover()
 	_close(vitals.self_modulate.a, 0.0, "or hides, when told to")
 	cover.visible = false
@@ -305,12 +305,12 @@ func _test_hud_piece() -> void:
 	vitals.refresh_cover()
 	_check(not vitals.covered, "nor does one beside the footprint, inside the control's rect or not")
 	cover.position = Vector2(100.0, 580.0)
-	vitals.cover_mode = DotHudPiece.CoverMode.IGNORE
+	vitals.cover_mode = GSHudPiece.CoverMode.IGNORE
 	vitals.refresh_cover()
 	_check(not vitals.covered and vitals.self_modulate.a == 1.0, "IGNORE draws through it")
 
-	var marker := DotHitMarker.new()
-	_check(marker.cover_mode == DotHudPiece.CoverMode.IGNORE,
+	var marker := GSHitMarker.new()
+	_check(marker.cover_mode == GSHudPiece.CoverMode.IGNORE,
 		"the crosshair's pieces ignore covers: their rect is the whole HUD, which always meets one")
 	marker.free()
 
@@ -323,21 +323,21 @@ func _test_hud_piece() -> void:
 func _test_hud_fit() -> void:
 	_section("hud fit")
 
-	_close(DotHud.fit_scale(Vector2(1280.0, 720.0)), 1.0, "1280x720 is drawn as designed")
-	_close(DotHud.fit_scale(Vector2(1920.0, 1080.0)), 1.0, "a larger frame does not grow the HUD")
-	_close(DotHud.fit_scale(Vector2(854.0, 480.0)), 480.0 / 720.0, "854x480 scales by the short side's share")
-	_close(DotHud.fit_scale(Vector2(720.0, 1280.0)), 720.0 / 1280.0, "a portrait frame by its width")
-	_close(DotHud.fit_scale(Vector2(320.0, 180.0)), 0.5, "never under half")
+	_close(GSHud.fit_scale(Vector2(1280.0, 720.0)), 1.0, "1280x720 is drawn as designed")
+	_close(GSHud.fit_scale(Vector2(1920.0, 1080.0)), 1.0, "a larger frame does not grow the HUD")
+	_close(GSHud.fit_scale(Vector2(854.0, 480.0)), 480.0 / 720.0, "854x480 scales by the short side's share")
+	_close(GSHud.fit_scale(Vector2(720.0, 1280.0)), 720.0 / 1280.0, "a portrait frame by its width")
+	_close(GSHud.fit_scale(Vector2(320.0, 180.0)), 0.5, "never under half")
 
-	var hud := DotHud.new()
-	hud.config = DotUiConfig.new()
+	var hud := GSHud.new()
+	hud.config = GSUiConfig.new()
 	hud.config.safe_area = 16.0
 	hud.fit_design = Vector2(1280.0, 720.0)
 	add_child(hud)
 	hud.fit_to_frame(Vector2(854.0, 480.0))
 	_close(hud.fit(), 480.0 / 720.0, "a HUD with a design frame scales itself")
 	_close(hud.position.x + (hud.size.x + 16.0) * hud.fit(), 854.0, "and still fills the frame, inset included", 0.5)
-	var ammo := DotAmmoCounter.new()
+	var ammo := GSAmmoCounter.new()
 	ammo.position = Vector2(100.0, 100.0)
 	ammo.size = Vector2(290.0, 70.0)
 	hud.add_child(ammo)
@@ -346,7 +346,7 @@ func _test_hud_fit() -> void:
 	_close(on_screen.size.x, ammo.footprint().size.x * hud.fit(), "a piece inside it is drawn at the HUD's scale", 0.5)
 	hud.fit_to_frame(Vector2(1600.0, 900.0))
 	_close(hud.fit(), 1.0, "and back at full size on a big frame")
-	var fm := DotFireModeIndicator.new()
+	var fm := GSFireModeIndicator.new()
 	fm.size = Vector2(200.0, 26.0)
 	fm.show_modes([&"burst", &"auto"], &"auto")
 	_check(fm.available == [&"auto", &"burst"] and fm.footprint().size.x == 88.0, "the fire-mode indicator draws only the modes on offer, in a fixed order")
@@ -364,7 +364,7 @@ func _test_hud_fit() -> void:
 	# A plain Control as a HUD root (most games: a full-rect Control under a CanvasLayer).
 	var root := Control.new()
 	add_child(root)
-	DotHud.fit_control(root, Vector2(1280.0, 720.0), 1.25)
+	GSHud.fit_control(root, Vector2(1280.0, 720.0), 1.25)
 	_close(root.scale.x, 1.25, "a plain HUD root is scaled")
 	_close(root.size.x * root.scale.x, 1280.0, "and sized so its anchors still reach the frame's edges", 0.5)
 	root.queue_free()
@@ -374,7 +374,7 @@ func _test_hud_fit() -> void:
 func _test_vitals() -> void:
 	_section("vitals")
 
-	var v := _piece(DotVitals.new(), Rect2(0.0, 0.0, 380.0, 76.0)) as DotVitals
+	var v := _piece(GSVitals.new(), Rect2(0.0, 0.0, 380.0, 76.0)) as GSVitals
 	# Under the 0.25 threshold: the state the low colour exists for.
 	v.show_vitals(18.0, 100.0)
 	_check(v.is_low() and v.number_text() == "18", "18 of 100 is low, and says 18")
@@ -426,7 +426,7 @@ func _test_vitals() -> void:
 func _test_ammo_counter() -> void:
 	_section("ammo counter")
 
-	var a := _piece(DotAmmoCounter.new(), Rect2(0.0, 0.0, 290.0, 70.0)) as DotAmmoCounter
+	var a := _piece(GSAmmoCounter.new(), Rect2(0.0, 0.0, 290.0, 70.0)) as GSAmmoCounter
 	_check(not a.footprint().has_area(), "nothing in hand draws nothing")
 	a.show_ammo("Rifle", 12, 90)
 	_check(a.count_text() == "12 | 90", "magazine | reserve")
@@ -449,23 +449,23 @@ func _test_ammo_counter() -> void:
 func _test_score_strip() -> void:
 	_section("score strip")
 
-	_check(DotScoreStrip.clock_text(0.0) == "0:00", "0:00 at the end")
-	_check(DotScoreStrip.clock_text(59.2) == "1:00", "rounded up, so it never says 0:00 with time left")
-	_check(DotScoreStrip.clock_text(61.0) == "1:01", "M:SS")
-	_check(DotScoreStrip.clock_text(3661.0) == "1:01:01", "H:MM:SS from an hour")
-	_check(DotScoreStrip.clock_text(-4.0) == "0:00", "never negative")
+	_check(GSScoreStrip.clock_text(0.0) == "0:00", "0:00 at the end")
+	_check(GSScoreStrip.clock_text(59.2) == "1:00", "rounded up, so it never says 0:00 with time left")
+	_check(GSScoreStrip.clock_text(61.0) == "1:01", "M:SS")
+	_check(GSScoreStrip.clock_text(3661.0) == "1:01:01", "H:MM:SS from an hour")
+	_check(GSScoreStrip.clock_text(-4.0) == "0:00", "never negative")
 
-	var s := _piece(DotScoreStrip.new(), Rect2(0.0, 0.0, 520.0, 72.0)) as DotScoreStrip
+	var s := _piece(GSScoreStrip.new(), Rect2(0.0, 0.0, 520.0, 72.0)) as GSScoreStrip
 	_check(not s.footprint().has_area(), "nothing handed over draws nothing")
-	s.show_clock(DotScoreStrip.clock_text(95.0), false, "", "")
+	s.show_clock(GSScoreStrip.clock_text(95.0), false, "", "")
 	var clock_only := s.footprint()
-	_check(not s.sides and is_equal_approx(clock_only.size.x, DotScoreStrip.CLOCK_W), "a game with no scores gets the clock alone")
+	_check(not s.sides and is_equal_approx(clock_only.size.x, GSScoreStrip.CLOCK_W), "a game with no scores gets the clock alone")
 	_close(clock_only.get_center().x, 260.0, "centred on the control's middle")
 	s.show_scores(12, 9, "BLUE", "RED", Color.BLUE, Color.RED)
 	_check(s.sides and s.footprint().size.x > clock_only.size.x * 2.0, "two sides put the plates either side of it")
 	s.show_clock("0:09", true, "First to 25", "Team deathmatch")
 	_check(s.under_text() == "First to 25   ·   Team deathmatch", "what wins and the mode, under them")
-	_check(s.footprint().size.y > DotScoreStrip.H, "and the footprint takes the line in")
+	_check(s.footprint().size.y > GSScoreStrip.H, "and the footprint takes the line in")
 	s.hide_scores()
 	_check(not s.sides, "a mode with no sides takes the plates down")
 	s.queue_free()
@@ -475,7 +475,7 @@ func _test_score_strip() -> void:
 func _test_hit_marker() -> void:
 	_section("hit marker")
 
-	var m := _piece(DotHitMarker.new(), Rect2(0.0, 0.0, 400.0, 300.0)) as DotHitMarker
+	var m := _piece(GSHitMarker.new(), Rect2(0.0, 0.0, 400.0, 300.0)) as GSHitMarker
 	_check(m.alpha() == 0.0 and not m.footprint().has_area(), "nothing until a hit")
 	m.flash()
 	_close(m.alpha(), 1.0, "a confirmed hit flashes it")
@@ -497,7 +497,7 @@ func _test_hit_marker() -> void:
 func _test_damage_numbers() -> void:
 	_section("damage numbers")
 
-	var d := _piece(DotDamageNumbers.new(), Rect2(0.0, 0.0, 400.0, 300.0)) as DotDamageNumbers
+	var d := _piece(GSDamageNumbers.new(), Rect2(0.0, 0.0, 400.0, 300.0)) as GSDamageNumbers
 	d.add_at(7, 20.0, Vector2(200.0, 150.0))
 	d.advance(0.1)
 	d.add_at(7, 15.0, Vector2(200.0, 150.0), true)
@@ -523,7 +523,7 @@ func _test_damage_numbers() -> void:
 func _test_key_prompt_and_hints() -> void:
 	_section("key prompt and hints")
 
-	var p := _piece(DotKeyPrompt.new(), Rect2(0.0, 0.0, 400.0, 40.0)) as DotKeyPrompt
+	var p := _piece(GSKeyPrompt.new(), Rect2(0.0, 0.0, 400.0, 40.0)) as GSKeyPrompt
 	p.show_prompt("Open door", "E")
 	_check(p.visible and p.text() == "Open door  E", "a prompt says what and which key")
 	_close(p.footprint().get_center().x, 200.0, "centred on its middle")
@@ -533,7 +533,7 @@ func _test_key_prompt_and_hints() -> void:
 	p.clear()
 	_check(not p.visible and not p.footprint().has_area(), "nothing to say hides it")
 
-	var h := _piece(DotKeyHints.new(), Rect2(0.0, 0.0, 300.0, 200.0)) as DotKeyHints
+	var h := _piece(GSKeyHints.new(), Rect2(0.0, 0.0, 300.0, 200.0)) as GSKeyHints
 	h.show_hints([["Scoreboard", "Tab"], ["Vote", "F3"], ["Chat", "Y"]])
 	var left := h.footprint()
 	_check(is_equal_approx(left.size.y, 3.0 * h.row_height), "a row per hint")
@@ -550,12 +550,12 @@ func _test_key_prompt_and_hints() -> void:
 func _test_touch_buttons() -> void:
 	_section("touch buttons")
 
-	DotPlatform.touch_override = 0
-	var b := _piece(DotTouchButtons.new(), Rect2(0.0, 0.0, 390.0, 844.0)) as DotTouchButtons
+	GSPlatform.touch_override = 0
+	var b := _piece(GSTouchButtons.new(), Rect2(0.0, 0.0, 390.0, 844.0)) as GSTouchButtons
 	_check(not b.visible, "hidden where there is no touch screen")
-	DotPlatform.touch_override = 1
+	GSPlatform.touch_override = 1
 	b.visible = true
-	b.set_buttons(DotTouchButtons.fps_stock())
+	b.set_buttons(GSTouchButtons.fps_stock())
 
 	var downs: Array[StringName] = []
 	var ups: Array[StringName] = []
@@ -575,9 +575,9 @@ func _test_touch_buttons() -> void:
 	_check(ups == [&"fire"] and not b.is_held(&"fire") and b.is_held(&"jump"), "lifting one finger releases only its button")
 	b._input(_touch_event(2, fire + Vector2(b.radius_of(&"fire") * 1.1, 0.0), true))
 	_check(b.is_held(&"fire"), "a finger a little outside the circle still hits (slop)")
-	b.set_buttons(DotTouchButtons.fps_stock())
+	b.set_buttons(GSTouchButtons.fps_stock())
 	_check(not b.is_held(&"jump") and ups.size() == 3, "replacing the buttons releases whatever was held")
-	DotPlatform.touch_override = -1
+	GSPlatform.touch_override = -1
 	b.queue_free()
 	_done()
 
@@ -595,7 +595,7 @@ func _touch_event(index: int, pos: Vector2, pressed: bool) -> InputEventScreenTo
 func _test_theme() -> void:
 	_section("theme")
 
-	var palette := DotUiTheme.dark()
+	var palette := GSUiTheme.dark()
 	var theme := palette.build(1.0)
 
 	_check(theme != null, "a theme is built from a palette alone")
@@ -609,7 +609,7 @@ func _test_theme() -> void:
 		"with a button style"
 	)
 	_check(
-		theme.is_type_variation(&"DotHeading", &"Label"),
+		theme.is_type_variation(&"GSHeading", &"Label"),
 		"and a heading variation, so a heading is not a hand-set font size"
 	)
 
@@ -627,7 +627,7 @@ func _test_theme() -> void:
 		"each build produces its own Theme rather than a shared one"
 	)
 
-	var light := DotUiTheme.light()
+	var light := GSUiTheme.light()
 	_check(
 		light.text.get_luminance() < light.surface.get_luminance(),
 		"the light palette is actually light"
@@ -733,8 +733,8 @@ func _test_hud() -> void:
 	_section("hud")
 
 	var stack := _make_stack()
-	var hud := DotHud.new()
-	hud.config = DotUiConfig.new()
+	var hud := GSHud.new()
+	hud.config = GSUiConfig.new()
 	add_child(hud)
 
 	_check(
@@ -785,7 +785,7 @@ func _test_hud() -> void:
 func _test_widget_throttle() -> void:
 	_section("hud widget")
 
-	var widget := DotHudWidget.new()
+	var widget := GSHudWidget.new()
 	var reads: Array[int] = []
 	var current := [7]
 
@@ -833,7 +833,7 @@ func _test_widget_throttle() -> void:
 func _test_feed() -> void:
 	_section("feed")
 
-	var feed := DotFeedView.new()
+	var feed := GSFeedView.new()
 	feed.max_lines = 3
 	feed.lifetime_sec = 5.0
 	feed.fade_sec = 1.0
@@ -901,13 +901,13 @@ func _test_feed() -> void:
 func _test_server_list() -> void:
 	_section("server list")
 
-	var look := DotUiGamespice.theme()
-	_check(look.is_type_variation(&"DotEyebrow", &"Label"), "the Gamespice theme has the eyebrow")
+	var look := GSUiGamespice.theme()
+	_check(look.is_type_variation(&"GSEyebrow", &"Label"), "the Gamespice theme has the eyebrow")
 	_check(look.get_stylebox("focus", "Button") is StyleBoxFlat, "and a focus ring for keyboard and pad")
-	_close(DotUiGamespice.fit_factor(Vector2(1280, 720), 1.0, Vector2(1280, 720), Vector2(460, 520), 16.0, 1.0), 1.0,
+	_close(GSUiGamespice.fit_factor(Vector2(1280, 720), 1.0, Vector2(1280, 720), Vector2(460, 520), 16.0, 1.0), 1.0,
 		"a desktop window keeps the layout it was drawn for")
 
-	var list := DotServerList.new()
+	var list := GSServerList.new()
 	add_child(list)
 	var joined: Array[String] = []
 	var picked: Array[String] = []
@@ -962,10 +962,10 @@ func _test_server_list() -> void:
 func _test_table() -> void:
 	_section("table")
 
-	var table := DotTableView.new()
+	var table := GSTableView.new()
 	add_child(table)
 
-	table.set_columns(DotTableView.scoreboard_columns())
+	table.set_columns(GSTableView.scoreboard_columns())
 	_check(table.columns.size() == 6, "the standard scoreboard columns exist")
 
 	var rows: Array[Dictionary] = []
@@ -1008,9 +1008,9 @@ func _test_table() -> void:
 	# kills, no deaths, no score, no ping -- with the data correct and `describe()`
 	# agreeing. Armed by putting the `0.0` default back: this check fails, and nothing
 	# about rows, columns or values does.
-	var widths := DotTableView.new()
+	var widths := GSTableView.new()
 	add_child(widths)
-	widths.set_columns(DotTableView.scoreboard_columns())
+	widths.set_columns(GSTableView.scoreboard_columns())
 	widths.set_rows([{&"name": "somebody", &"kills": 3, &"deaths": 1, &"assists": 0,
 		&"score": 3, &"ping": 40}])
 
@@ -1021,7 +1021,7 @@ func _test_table() -> void:
 	# children. It is an HBox rather than a `GridContainer` because a GridContainer gives
 	# every column the SAME width whatever ratio a cell asks for -- see `_ensure_grid`.
 	var grid := widths.get_node_or_null("Grid") as VBoxContainer
-	var wanted := DotTableView.scoreboard_columns().size()
+	var wanted := GSTableView.scoreboard_columns().size()
 	var expanding := 0
 	var ratios := PackedFloat32Array()
 
@@ -1062,7 +1062,7 @@ func _test_settings_panel() -> void:
 	_section("settings panel")
 
 	var config := TestConfig.new()
-	var panel := DotSettingsPanel.new()
+	var panel := GSSettingsPanel.new()
 	add_child(panel)
 
 	var res := panel.bind(config)
@@ -1070,13 +1070,13 @@ func _test_settings_panel() -> void:
 	_check(int(res.value) == 6, "with a control per editable key", str(res.value))
 
 	# The one that matters: a secret must never end up in a screenshot or a pasted
-	# bug report, which is the same reason DotConfig refuses them from argv.
+	# bug report, which is the same reason GSConfig refuses them from argv.
 	_check(
 		panel.editor_for("rcon_password") == null,
 		"and never one for a secret"
 	)
 
-	_check(panel.editor_for("friendly_fire") is DotFormToggle, "a bool is a toggle")
+	_check(panel.editor_for("friendly_fire") is GSFormToggle, "a bool is a toggle")
 	_check(panel.editor_for("port") is LineEdit, "an int without a range is a number entry")
 	_check(panel.editor_for("hostname") is LineEdit, "a string is a line edit")
 	_check(
@@ -1084,7 +1084,7 @@ func _test_settings_panel() -> void:
 		"and an enum is an option button"
 	)
 
-	var spin := panel.editor_for("tick_rate") as DotFormSlider
+	var spin := panel.editor_for("tick_rate") as GSFormSlider
 	_check(spin != null, "a range hint becomes a slider")
 	_close(spin.min_value, 1.0, "with the range's minimum")
 	_close(spin.max_value, 240.0, "and its maximum")
@@ -1098,7 +1098,7 @@ func _test_settings_panel() -> void:
 	)
 
 	# Group filtering.
-	var filtered := DotSettingsPanel.new()
+	var filtered := GSSettingsPanel.new()
 	filtered.only_groups = ["Gameplay"]
 	add_child(filtered)
 	var count := filtered.bind(config)
@@ -1116,7 +1116,7 @@ func _test_settings_apply() -> void:
 	_section("settings panel: applying")
 
 	var config := TestConfig.new()
-	var panel := DotSettingsPanel.new()
+	var panel := GSSettingsPanel.new()
 	panel.live = false
 	add_child(panel)
 	panel.bind(config)
@@ -1137,7 +1137,7 @@ func _test_settings_apply() -> void:
 	# nobody chose, and the player cannot tell which half survived.
 	var failures: Array[String] = []
 	panel.apply_failed.connect(
-		func(error: DotError) -> void: failures.append(error.message)
+		func(error: GSError) -> void: failures.append(error.message)
 	)
 
 	panel.form.set_value("port", 80)
@@ -1161,7 +1161,7 @@ func _test_settings_apply() -> void:
 	)
 
 	# Live mode writes through.
-	var live_panel := DotSettingsPanel.new()
+	var live_panel := GSSettingsPanel.new()
 	live_panel.live = true
 	add_child(live_panel)
 	live_panel.bind(config)
@@ -1177,7 +1177,7 @@ func _test_settings_apply() -> void:
 
 func _test_icon_style() -> void:
 	_section("weapon icon style: tags, cvars, filter")
-	var icons := DotWeaponIconStyle.new()
+	var icons := GSWeaponIconStyle.new()
 	icons.overrides_path = "user://no_such_weapon_icons.json"
 	icons.tags = {&"my_gun": &"pistol", &"my_fist": &""}
 	_check(icons.texture(&"my_gun") is AtlasTexture and icons.texture(&"my_gun") == icons.icon_set().texture_for(&"pistol"), "a mapped id draws its tag's sprite")
@@ -1189,9 +1189,9 @@ func _test_icon_style() -> void:
 	var local := _FakeLocal.new(seen)
 	_check(icons.bind_console(local) and seen.has(&"cl_weapon_icons") and seen.has(&"cl_weapon_icon_profile"), "bind_console registers both cvars")
 	var res: Variant = (seen[&"cl_weapon_icons"] as Callable).call("flat")
-	_check(icons.style == &"flat" and not (res is DotResult and not res.ok), "setting cl_weapon_icons switches the style")
+	_check(icons.style == &"flat" and not (res is GSResult and not res.ok), "setting cl_weapon_icons switches the style")
 	var bad: Variant = (seen[&"cl_weapon_icons"] as Callable).call("nope")
-	_check(bad is DotResult and not bad.ok and icons.style == &"flat", "a bad cvar value fails with a DotResult and changes nothing")
+	_check(bad is GSResult and not bad.ok and icons.style == &"flat", "a bad cvar value fails with a GSResult and changes nothing")
 	var canvas := Control.new()
 	icons.set_style(&"pixel")
 	icons.filter(canvas)

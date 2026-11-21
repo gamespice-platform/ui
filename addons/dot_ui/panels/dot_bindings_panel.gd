@@ -1,16 +1,16 @@
 @tool
-class_name DotBindingsPanel
+class_name GSBindingsPanel
 extends VBoxContainer
 
 ## Rebinding, with conflict detection and a file that survives a restart.
 ##
 ## Reads Godot's [InputMap] rather than a table of its own, so it always shows the
-## actions the game actually has — the same argument [DotSettingsPanel] makes about
-## reading a [DotConfig].
+## actions the game actually has — the same argument [GSSettingsPanel] makes about
+## reading a [GSConfig].
 ##
 ## [b]Three things this does that a naive rebinder does not.[/b] It refuses to leave an
 ## action with no binding at all, it detects conflicts before committing rather than
-## after, and it saves through [DotPaths] so a web build's IndexedDB is flushed. The
+## after, and it saves through [GSPaths] so a web build's IndexedDB is flushed. The
 ## first is the one that matters: an action bound to nothing is a control the player
 ## cannot use and cannot get back without deleting a file they cannot find.
 
@@ -28,7 +28,7 @@ signal capture_ended()
 
 @export_group("Configuration")
 
-@export var config: DotUiConfig = null
+@export var config: GSUiConfig = null
 
 @export_group("Filtering")
 
@@ -85,7 +85,7 @@ func _ready() -> void:
 		return
 
 	if config == null:
-		config = DotUiConfig.new()
+		config = GSUiConfig.new()
 
 	_snapshot_defaults()
 
@@ -99,9 +99,9 @@ func _snapshot_defaults() -> void:
 
 
 ## Builds a row per rebindable action.
-func build() -> DotResult:
+func build() -> GSResult:
 	if config == null:
-		config = DotUiConfig.new()
+		config = GSUiConfig.new()
 
 	_snapshot_defaults()
 	_buttons.clear()
@@ -139,7 +139,7 @@ func build() -> DotResult:
 		add_child(row)
 		built += 1
 
-	return DotResult.success(built)
+	return GSResult.success(built)
 
 
 ## Actions a player may rebind, sorted.
@@ -231,9 +231,9 @@ static func event_name(event: InputEvent) -> String:
 		var code := key.physical_keycode if key.physical_keycode != 0 else key.keycode
 		return OS.get_keycode_string(code)
 
-	# DotInputText's names, so this button and a settings file say the same word.
+	# GSInputText's names, so this button and a settings file say the same word.
 	if event is InputEventMouseButton or event is InputEventJoypadButton or event is InputEventJoypadMotion:
-		return DotInputText.to_text(event)
+		return GSInputText.to_text(event)
 
 	return event.as_text()
 
@@ -309,16 +309,16 @@ func _input(event: InputEvent) -> void:
 ## Returns a failure on a conflict, and changes nothing in that case. Checking before
 ## committing rather than after is what makes a refusal a no-op rather than something
 ## the caller has to undo.
-func bind_action(action: StringName, event: InputEvent) -> DotResult:
+func bind_action(action: StringName, event: InputEvent) -> GSResult:
 	if not InputMap.has_action(action):
-		return DotResult.fail(DotError.CODE_INVALID, "No action '%s'." % action)
+		return GSResult.fail(GSError.CODE_INVALID, "No action '%s'." % action)
 
 	if refuse_conflicts:
 		var clash := conflicting_action(action, event)
 
 		if clash != &"":
-			return DotResult.fail(
-				DotError.CODE_INVALID,
+			return GSResult.fail(
+				GSError.CODE_INVALID,
 				"That is already bound to %s."
 					% String(clash).replace("_", " ").capitalize()
 			)
@@ -332,7 +332,7 @@ func bind_action(action: StringName, event: InputEvent) -> DotResult:
 		button.text = describe_binding(action)
 
 	binding_changed.emit(action, event)
-	return DotResult.success(event)
+	return GSResult.success(event)
 
 
 ## The action already using [param event], or empty.
@@ -402,22 +402,22 @@ func reset_all() -> void:
 
 # --- Persistence -----------------------------------------------------------
 
-## Writes the rebindable actions' bindings to [member DotUiConfig.bindings_file].
+## Writes the rebindable actions' bindings to [member GSUiConfig.bindings_file].
 ##
-## Through [DotPaths.write_json], which does the temporary file, the rename and the
+## Through [GSPaths.write_json], which does the temporary file, the rename and the
 ## browser's IndexedDB flush — a web build that wrote directly would lose the file on
 ## the next load.
 ##
 ## Every caller in this family ignores the result -- a menu saves and moves on -- so
 ## the failure is logged here, where it cannot be skipped. WARN, because a player
 ## whose rebinding silently did not persist is somebody's support ticket.
-func save() -> DotResult:
+func save() -> GSResult:
 	var res := _save()
-	DotLog.result(CHANNEL, "bindings not saved", res, DotLog.Level.WARN)
+	GSLog.result(CHANNEL, "bindings not saved", res, GSLog.Level.WARN)
 	return res
 
 
-func _save() -> DotResult:
+func _save() -> GSResult:
 	var data := {}
 
 	for action in rebindable_actions():
@@ -430,7 +430,7 @@ func _save() -> DotResult:
 
 		data[String(action)] = events
 
-	return DotPaths.write_json(config.bindings_file, {"bindings": data}, true, true)
+	return GSPaths.write_json(config.bindings_file, {"bindings": data}, true, true)
 
 
 ## Applies a saved bindings file.
@@ -445,34 +445,34 @@ func _save() -> DotResult:
 ## A file that loads is DEBUG, with how many entries it skipped -- an action a newer
 ## build renamed is dropped rather than applied, which is right, and is also exactly
 ## the question "where did my key go" is asking.
-func load_saved() -> DotResult:
+func load_saved() -> GSResult:
 	_skipped_on_load = 0
 	var res := _load_saved()
 
 	if res.ok:
 		if FileAccess.file_exists(config.bindings_file):
-			DotLog.debug(CHANNEL, "bindings loaded", {
+			GSLog.debug(CHANNEL, "bindings loaded", {
 				"file": config.bindings_file,
 				"applied": res.value,
 				"skipped": _skipped_on_load,
 			})
 	else:
-		DotLog.result(CHANNEL, "saved bindings ignored", res, DotLog.Level.WARN)
+		GSLog.result(CHANNEL, "saved bindings ignored", res, GSLog.Level.WARN)
 
 	return res
 
 
-func _load_saved() -> DotResult:
+func _load_saved() -> GSResult:
 	if not FileAccess.file_exists(config.bindings_file):
-		return DotResult.success(0)
+		return GSResult.success(0)
 
-	var read := DotPaths.read_json(config.bindings_file)
+	var read := GSPaths.read_json(config.bindings_file)
 
 	if not read.ok:
 		return read.wrap("Could not read the saved bindings.")
 
 	if not (read.value is Dictionary):
-		return DotResult.fail(DotError.CODE_PARSE, "The bindings file is not an object.")
+		return GSResult.fail(GSError.CODE_PARSE, "The bindings file is not an object.")
 
 	var root: Dictionary = read.value
 
@@ -480,15 +480,15 @@ func _load_saved() -> DotResult:
 	# everything. The first must be refused rather than applied as "change nothing",
 	# or a file written by a different tool is silently accepted as valid.
 	if not root.has("bindings"):
-		return DotResult.fail(
-			DotError.CODE_PARSE, "The bindings file has no bindings section."
+		return GSResult.fail(
+			GSError.CODE_PARSE, "The bindings file has no bindings section."
 		)
 
 	var raw: Variant = root["bindings"]
 
 	if typeof(raw) != TYPE_DICTIONARY:
-		return DotResult.fail(
-			DotError.CODE_PARSE, "The bindings section is not an object."
+		return GSResult.fail(
+			GSError.CODE_PARSE, "The bindings section is not an object."
 		)
 
 	_snapshot_defaults()
@@ -532,7 +532,7 @@ func _load_saved() -> DotResult:
 	for action in _buttons.keys():
 		(_buttons[action] as Button).text = describe_binding(action)
 
-	return DotResult.success(applied)
+	return GSResult.success(applied)
 
 
 static func _encode(event: InputEvent) -> Dictionary:

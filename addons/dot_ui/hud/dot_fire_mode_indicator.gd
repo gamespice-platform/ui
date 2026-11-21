@@ -1,9 +1,9 @@
 @tool
-class_name DotFireModeIndicator
-extends DotHudPiece
+class_name GSFireModeIndicator
+extends GSHudPiece
 
 ## The fire modes the held gun offers: "A" auto, one bullet semi, three burst; selected lit, others dim.
-## A gun with one mode draws nothing. The host feeds it from `DotWeaponArsenal.fire_modes_available()`
+## A gun with one mode draws nothing. The host feeds it from `GSWeaponArsenal.fire_modes_available()`
 ## and `fire_mode()` (this addon does not depend on GameSpice Weapon).
 
 const AUTO := &"auto"

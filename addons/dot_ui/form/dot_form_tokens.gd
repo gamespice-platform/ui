@@ -1,4 +1,4 @@
-class_name DotFormTokens
+class_name GSFormTokens
 extends RefCounted
 
 ## The form kit's design tokens: palette, spacing, radius, type and elevation, and the Theme built from them.
@@ -36,12 +36,12 @@ var font_title := 24
 var _bold: Font = null
 
 
-static func dark() -> DotFormTokens:
-	return DotFormTokens.new()
+static func dark() -> GSFormTokens:
+	return GSFormTokens.new()
 
 
-static func light() -> DotFormTokens:
-	var t := DotFormTokens.new()
+static func light() -> GSFormTokens:
+	var t := GSFormTokens.new()
 	t.is_dark = false
 	t.bg = Color(0.945, 0.953, 0.968)
 	t.card = Color(1, 1, 1)
@@ -60,9 +60,9 @@ static func light() -> DotFormTokens:
 	return t
 
 
-## Tokens in the colours and corner of an existing [DotUiTheme], so the form sits with a game's own screens.
-static func from_theme(theme: DotUiTheme) -> DotFormTokens:
-	var t := DotFormTokens.light() if theme.text.v < 0.5 else DotFormTokens.dark()
+## Tokens in the colours and corner of an existing [GSUiTheme], so the form sits with a game's own screens.
+static func from_theme(theme: GSUiTheme) -> GSFormTokens:
+	var t := GSFormTokens.light() if theme.text.v < 0.5 else GSFormTokens.dark()
 	t.accent = theme.accent
 	t.danger = theme.danger
 	t.good = theme.good

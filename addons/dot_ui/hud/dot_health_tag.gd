@@ -1,5 +1,5 @@
 @tool
-class_name DotHealthTag
+class_name GSHealthTag
 extends Node3D
 
 ## The tag over another player's head: a slim glass pill health bar (one shader quad: rounded ends, a

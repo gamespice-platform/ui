@@ -4,7 +4,7 @@ The reasoning behind the interface layer, one subject per file. [CLAUDE.md](../C
 
 | File | What it covers |
 | --- | --- |
-| [screens.md](screens.md) | `DotScreenStack` and what it owns, pushing and popping, screen ids, pause, the pause/settings/scoreboard screens, `DotSettingsPanel`, `DotBindingsPanel`, `DotInputBinding` |
-| [hud.md](hud.md) | The generated theme and the no-dependency rule, pulled widgets, the stat bar, the crosshair, `DotTableView`, the chat box, outlines, the ballot, the glance pieces and which FC pieces moved here, what is deliberately not here |
+| [screens.md](screens.md) | `GSScreenStack` and what it owns, pushing and popping, screen ids, pause, the pause/settings/scoreboard screens, `GSSettingsPanel`, `GSBindingsPanel`, `GSInputBinding` |
+| [hud.md](hud.md) | The generated theme and the no-dependency rule, pulled widgets, the stat bar, the crosshair, `GSTableView`, the chat box, outlines, the ballot, the glance pieces and which FC pieces moved here, what is deliberately not here |
 | [testing.md](testing.md) | The suite, the 64 × 64 headless viewport, the screenshots, choosing fixtures |
 | [history.md](history.md) | The bugs, and how each looked |

@@ -1,9 +1,9 @@
 @tool
-class_name DotHudPiece
+class_name GSHudPiece
 extends Control
 
-## The base of the glance HUD's pieces ([DotVitals], [DotAmmoCounter], [DotScoreStrip],
-## [DotHitMarker], [DotDamageNumbers], [DotKeyPrompt], [DotKeyHints]): how they are drawn,
+## The base of the glance HUD's pieces ([GSVitals], [GSAmmoCounter], [GSScoreStrip],
+## [GSHitMarker], [GSDamageNumbers], [GSKeyPrompt], [GSKeyHints]): how they are drawn,
 ## where each says it draws, and what each does when something covers it.
 ##
 ## [b]Values in, never a game object.[/b] Every piece draws from plain values it is handed
@@ -17,14 +17,14 @@ extends Control
 ##
 ## [b]Coloured by the theme, with defaults that need none.[/b] Each colour is looked up as
 ## a theme colour on the type [constant THEME_TYPE] ([constant COLOUR_KEYS]), and an absent
-## one is the matching entry of [constant DEFAULTS]. `DotUiTheme.build()` fills every one
+## one is the matching entry of [constant DEFAULTS]. `GSUiTheme.build()` fills every one
 ## from its palette, GameSpice Menu's themes through [method theme_from], live; a game with a
 ## designed [Theme] sets the ones it cares about.
 ##
 ## [b]Scaled by the HUD, never laid out again.[/b] Every number here is in the HUD's own
-## units: a [DotHud] with a [member DotHud.fit_design] scales the whole layer on a frame
+## units: a [GSHud] with a [member GSHud.fit_design] scales the whole layer on a frame
 ## smaller than the one it was designed for, so a piece and the distances between pieces
-## shrink together. See [method DotHud.fit_scale].
+## shrink together. See [method GSHud.fit_scale].
 ##
 ## [b]Out of the way of a ballot.[/b] A client shell draws ballots over a delivered game it
 ## cannot reach into, and every such widget joins the group [constant COVER_GROUP]. Each
@@ -34,12 +34,12 @@ extends Control
 # No log channel: a piece draws numbers somebody else owns and decides nothing.
 
 ## The group every widget that holds screen space over a game joins
-## ([constant DotBallotPanel.COVER_GROUP]). The same string, never the other constant, for
+## ([constant GSBallotPanel.COVER_GROUP]). The same string, never the other constant, for
 ## the reason a game spells it: a pack built against a newer GameSpice UI runs on the shell's.
 const COVER_GROUP := "dot_hud_cover"
 
 ## The theme type every piece reads its colours from.
-const THEME_TYPE := &"DotHudPiece"
+const THEME_TYPE := &"GSHudPiece"
 
 ## What each colour is without a theme: the dark HUD, deep translucent plates under bold
 ## white text ringed in black (Christian's first play test, 2026-10-11: the pale plates,
@@ -136,7 +136,7 @@ func refresh_cover() -> void:
 
 
 ## Every visible member of [constant COVER_GROUP], each in [param control]'s own space
-## (through the canvas transforms, because a [DotHud] is inset and scaled). Empty when
+## (through the canvas transforms, because a [GSHud] is inset and scaled). Empty when
 ## nothing covers it, or when [param control] is not in the tree.
 static func cover_rects(control: Control) -> Array[Rect2]:
 	var out: Array[Rect2] = []
@@ -187,7 +187,7 @@ func number(key: StringName) -> int:
 ## the first play test found them pale and unreadable over pale maps in four games; a
 ## Label with its own colour override keeps it, and still gets the outline.
 ##
-## This is what GameSpice Menu's themes hand a game's HUD root, and what [DotUiTheme] fills; a
+## This is what GameSpice Menu's themes hand a game's HUD root, and what [GSUiTheme] fills; a
 ## game sets it on the node above its pieces and every piece and Label below follows.
 static func theme_from(colours: Dictionary, constants: Dictionary = {}) -> Theme:
 	var t := Theme.new()

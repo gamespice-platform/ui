@@ -21,7 +21,7 @@ func _test_ballot_panel() -> void:
 	print("")
 	_section("ballot panel")
 
-	var panel := DotBallotPanel.new()
+	var panel := GSBallotPanel.new()
 	panel.local_voter = "u9"
 	add_child(panel)
 
@@ -84,7 +84,7 @@ func _test_ballot_panel() -> void:
 	_test_ballot_pointer(panel, picked)
 
 
-func _test_ballot_pointer(panel: DotBallotPanel, picked: Array) -> void:
+func _test_ballot_pointer(panel: GSBallotPanel, picked: Array) -> void:
 	# Pointer mode.
 	var mouse_before := Input.mouse_mode
 	panel._input(_key(panel.pointer_key))
@@ -156,13 +156,13 @@ func _game_ballot(voters: Dictionary, ids: Array = ["wipeout", "zombie", "airdri
 
 
 ## Steps [param panel]'s avatars [param frames] frames at 60 fps.
-func _frames(panel: DotBallotPanel, frames: int) -> void:
+func _frames(panel: GSBallotPanel, frames: int) -> void:
 	for i in frames:
 		panel._process(1.0 / 60.0)
 
 
 ## The row [param voter]'s avatar is drawn on now, or -1.
-func _row_drawn(panel: DotBallotPanel, voter: String) -> int:
+func _row_drawn(panel: GSBallotPanel, voter: String) -> int:
 	var at := panel.avatar_position(voter)
 	for i in panel.option_count():
 		if panel.row_rect(i).has_point(at):
@@ -186,7 +186,7 @@ func _test_pointer_recapture() -> void:
 
 	var probe := ClickProbe.new()
 	add_child(probe)
-	var panel := DotBallotPanel.new()
+	var panel := GSBallotPanel.new()
 	panel.local_voter = "u9"
 	add_child(panel)
 	panel.show_state(_ballot_state("both"))
@@ -200,17 +200,17 @@ func _test_pointer_recapture() -> void:
 	await get_tree().process_frame
 	_check(probe.seen == 0, "a click outside the ballot's rows is consumed, so a host's click-to-capture never sees it")
 
-	var stack := DotScreenStack.new()
+	var stack := GSScreenStack.new()
 	stack.register_service = false
-	stack.config = DotUiConfig.new()
+	stack.config = GSUiConfig.new()
 	stack.config.allow_pause = false
 	add_child(stack)
-	var pause := DotPauseScreen.new()
+	var pause := GSPauseScreen.new()
 	pause.name = "Pause"
 	var _b := pause.build(PackedStringArray(["Resume"]))
-	var board := DotScoreboardScreen.new()
+	var board := GSScoreboardScreen.new()
 	var visible_screen := _make_screen(&"modal")
-	visible_screen.mouse_mode = DotScreen.Mouse.VISIBLE
+	visible_screen.mouse_mode = GSScreen.Mouse.VISIBLE
 	for each in [pause, board, visible_screen]:
 		var _r := stack.register(each)
 	for id in [&"pause", &"scoreboard", &"modal"]:
@@ -240,7 +240,7 @@ func _test_ballot_avatar_rows() -> void:
 	print("")
 	_section("ballot panel: the avatar sits on the row marked as the voter's")
 
-	var panel := DotBallotPanel.new()
+	var panel := GSBallotPanel.new()
 	panel.local_voter = "u9"
 	panel.result_hold_sec = 30.0
 	add_child(panel)
@@ -301,7 +301,7 @@ func _test_chat_window() -> void:
 	print("")
 	_section("chat window")
 
-	var window := DotChatWindow.new()
+	var window := GSChatWindow.new()
 	window.open_action = &"probe_chat_open"
 	window.team_action = &"probe_chat_team"
 	window.cycle_action = &""
@@ -367,10 +367,10 @@ func _test_chat_window() -> void:
 		"describe() reports the key, which is what a bug report needs"
 	)
 
-	var bold_before := DotHudPiece.bold_font()
-	DotHudPiece.clear_cache()
-	_check(DotHudPiece._fonts.is_empty(), "clear_cache() empties the shared fonts")
-	_check(DotHudPiece.bold_font() != null and DotHudPiece._fonts.size() == 1 and bold_before != null, "and a font refills it")
+	var bold_before := GSHudPiece.bold_font()
+	GSHudPiece.clear_cache()
+	_check(GSHudPiece._fonts.is_empty(), "clear_cache() empties the shared fonts")
+	_check(GSHudPiece.bold_font() != null and GSHudPiece._fonts.size() == 1 and bold_before != null, "and a font refills it")
 
 	window.queue_free()
 	InputMap.erase_action(&"probe_chat_open")
@@ -378,7 +378,7 @@ func _test_chat_window() -> void:
 	_done()
 
 
-func _chat_window_input(window: DotChatWindow, said: Array[Dictionary]) -> void:
+func _chat_window_input(window: GSChatWindow, said: Array[Dictionary]) -> void:
 	# An empty line is how a player abandons one, and it must not reach the server.
 	window.open()
 	window.entry().text = "   "
@@ -411,9 +411,9 @@ func _chat_window_input(window: DotChatWindow, said: Array[Dictionary]) -> void:
 	window.close()
 
 
-func _chat_window_selfmute(window: DotChatWindow, said: Array[Dictionary]) -> void:
+func _chat_window_selfmute(window: GSChatWindow, said: Array[Dictionary]) -> void:
 	# `!sm` / `/sm`, the player's own block list: run here and never emitted, so it cannot
-	# reach the server and nobody is told. A stand-in for GameSpice Chat's DotChatSelfMute, which
+	# reach the server and nobody is told. A stand-in for GameSpice Chat's GSChatSelfMute, which
 	# GameSpice UI does not link.
 	var mutes := FakeSelfMute.new()
 	window.self_mute = mutes
@@ -439,7 +439,7 @@ func _chat_window_selfmute(window: DotChatWindow, said: Array[Dictionary]) -> vo
 	window.self_mute_enabled = false
 
 
-func _chat_window_channels(window: DotChatWindow) -> void:
+func _chat_window_channels(window: GSChatWindow) -> void:
 	# Channels.
 	var changed: Array[StringName] = []
 	window.channel_changed.connect(func(c: StringName) -> void: changed.append(c))
@@ -480,7 +480,7 @@ func _chat_window_channels(window: DotChatWindow) -> void:
 
 func _chat_window_wrap() -> void:
 	# A line added before the node is readied must be kept: the log is built on demand.
-	var early := DotChatWindow.new()
+	var early := GSChatWindow.new()
 	early.register_actions = false
 	early.add_text("connecting to the server")
 	_check(
@@ -491,7 +491,7 @@ func _chat_window_wrap() -> void:
 	add_child(early)
 	_check(early.line_count() == 1, "and survives being added to the tree")
 
-	# Wrapping: DotFeedView does not clip an entry, so a 127-character line ran out of the 460 px box.
+	# Wrapping: GSFeedView does not clip an entry, so a 127-character line ran out of the 460 px box.
 	early.clear()
 	early.add_said("someone", "short")
 	var short_rows := early.line_count()
@@ -550,7 +550,7 @@ func _chat_window_history() -> void:
 	# [b]What faded is still there to read.[/b] A closed log is a glance and lets go of a
 	# line after ten seconds; a player who opens the box to find what somebody said a
 	# minute ago was finding nothing.
-	var past := DotChatWindow.new()
+	var past := GSChatWindow.new()
 	past.register_actions = false
 	past.history_limit = 30
 	past.history_lines = 4
@@ -564,7 +564,7 @@ func _chat_window_history() -> void:
 	_check(past.history().size() == 10, "and the history keeps every one of them")
 
 	past.open()
-	var view := past.get_node("History") as DotFeedView
+	var view := past.get_node("History") as GSFeedView
 	_check(
 		view.visible and view.line_count() == 4,
 		"opening shows the newest rows of the history, as many as it is tall (%d)" % view.line_count()
@@ -613,13 +613,13 @@ func _chat_window_history() -> void:
 	past.queue_free()
 
 
-func _chat_window_defaults(window: DotChatWindow) -> void:
+func _chat_window_defaults(window: GSChatWindow) -> void:
 	_check(
-		DotInputBinding.describe_action(&"probe_chat_open") == "Y",
+		GSInputBinding.describe_action(&"probe_chat_open") == "Y",
 		"the box registers its open key at Y when the project has no action for it"
 	)
 	_check(
-		DotInputBinding.describe_action(&"probe_chat_team") == "U",
+		GSInputBinding.describe_action(&"probe_chat_team") == "U",
 		"and team chat at U"
 	)
 	_check(window.channel() == &"all", "it starts on the first channel")
@@ -634,7 +634,7 @@ func _chat_window_defaults(window: DotChatWindow) -> void:
 	)
 
 
-func _ballot_avatar_rows_late(panel: DotBallotPanel) -> void:
+func _ballot_avatar_rows_late(panel: GSBallotPanel) -> void:
 	# 4. A new ballot over an old one: nothing carries over.
 	panel.show_state(_game_ballot({}))
 	panel.choose(5)

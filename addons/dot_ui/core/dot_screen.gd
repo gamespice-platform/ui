@@ -1,16 +1,16 @@
 @tool
-class_name DotScreen
+class_name GSScreen
 extends Control
 
 ## One full-screen thing: a pause menu, a settings panel, a scoreboard, a loadout
 ## picker.
 ##
-## A [Control] with a lifecycle a [DotScreenStack] manages. Subclass it and the stack
+## A [Control] with a lifecycle a [GSScreenStack] manages. Subclass it and the stack
 ## takes care of z-order, input blocking, mouse mode and the back key — all four of
 ## which are easy to get individually right and collectively wrong.
 ##
 ## [codeblock]
-## class_name PauseMenu extends DotScreen
+## class_name PauseMenu extends GSScreen
 ##
 ## func _screen_id() -> StringName: return &"pause"
 ##
@@ -65,7 +65,7 @@ signal close_requested()
 @export var mouse_mode: Mouse = Mouse.VISIBLE
 
 ## Ask the tree to pause. Honoured only when
-## [member DotUiConfig.allow_pause] is on — see there for why.
+## [member GSUiConfig.allow_pause] is on — see there for why.
 @export var pauses_game: bool = false
 
 ## The back key pops this screen.
@@ -168,7 +168,7 @@ func _apply_focus() -> void:
 	var target := get_node_or_null(initial_focus) as Control
 
 	if target == null:
-		DotLog.warn(
+		GSLog.warn(
 			"ui.screen",
 			"initial_focus does not resolve to a Control",
 			{"screen": String(screen_id()), "path": String(initial_focus)}

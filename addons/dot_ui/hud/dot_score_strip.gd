@@ -1,6 +1,6 @@
 @tool
-class_name DotScoreStrip
-extends DotHudPiece
+class_name GSScoreStrip
+extends GSHudPiece
 
 ## Top centre: the clock on its own plate, the two scores either side of it when there are
 ## sides, and a line under them ("First to 25 · Team deathmatch", "Round 2 of 5").

@@ -1,6 +1,6 @@
 @tool
-class_name DotStatusLines
-extends DotHudPiece
+class_name GSStatusLines
+extends GSHudPiece
 
 ## Short stacked status text, one line each ("Down, hold on for help", "Haste x2  0:12"),
 ## top to bottom, left- or right-aligned to this control's edge. A row is a String or
@@ -41,7 +41,7 @@ func texts() -> PackedStringArray:
 ## and says [param endless]; [param stacks] over 1 adds a multiplier.
 static func effect_text(title: String, stacks: int, seconds: float, endless: String = "this round") -> String:
 	var tag := " x%d" % stacks if stacks > 1 else ""
-	return "%s%s  %s" % [title, tag, DotScoreStrip.clock_text(seconds) if seconds >= 0.0 else endless]
+	return "%s%s  %s" % [title, tag, GSScoreStrip.clock_text(seconds) if seconds >= 0.0 else endless]
 
 
 func _text_of(r: Variant) -> String:

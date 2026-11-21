@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Renders DotServerList at 1280x720, 390x844 and 844x390 over the Gamespice background to
+## Renders GSServerList at 1280x720, 390x844 and 844x390 over the Gamespice background to
 ## screenshots/server_list_<w>x<h>.png, one row selected and focused so the ring shows.
 ## Run through tools/server_list_shot.sh (xvfb-run, not --headless).
 
@@ -16,7 +16,7 @@ func _initialize() -> void:
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	var floor_rect := ColorRect.new()
-	floor_rect.color = DotUiGamespice.BG
+	floor_rect.color = GSUiGamespice.BG
 	floor_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(floor_rect)
 
@@ -25,7 +25,7 @@ func _run() -> void:
 	for side in ["left", "right", "top", "bottom"]:
 		holder.add_theme_constant_override("margin_" + side, 16)
 	root.add_child(holder)
-	var list := DotServerList.new()
+	var list := GSServerList.new()
 	holder.add_child(list)
 	list.set_rows(_fixture())
 	list.set_status("5 of 6 answering.")

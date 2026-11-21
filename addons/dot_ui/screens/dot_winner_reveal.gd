@@ -1,4 +1,4 @@
-class_name DotWinnerReveal
+class_name GSWinnerReveal
 extends CanvasLayer
 
 ## The end-of-match announcement: the winner's name revealed under a title, then a podium of the
@@ -28,8 +28,8 @@ signal finished(skipped: bool)
 ## Input actions that skip it. Missing actions are ignored.
 @export var skip_actions: PackedStringArray = ["ui_cancel", "ui_accept"]
 
-## Colours. Null uses [method DotUiTheme.dark].
-@export var palette: DotUiTheme = null
+## Colours. Null uses [method GSUiTheme.dark].
+@export var palette: GSUiTheme = null
 
 ## Podium colours for first, second and third.
 @export var medal_colours: Array[Color] = [Color(1.0, 0.8, 0.22), Color(0.78, 0.8, 0.86), Color(0.8, 0.52, 0.3)]
@@ -70,13 +70,13 @@ func elapsed() -> float:
 
 ## Shows [param entries] (best first: `name`, optional `score` text and `colour`). [param options]:
 ## `title` (default "WINNER"), `subtitle` (default the winner's score), `hint`.
-func present(entries: Array, options: Dictionary = {}) -> DotResult:
+func present(entries: Array, options: Dictionary = {}) -> GSResult:
 	if entries.is_empty() or not (entries[0] is Dictionary):
-		return DotResult.fail(DotError.CODE_INVALID, "A winner reveal needs at least one entry.")
+		return GSResult.fail(GSError.CODE_INVALID, "A winner reveal needs at least one entry.")
 	if root == null:
 		_build()
 	var winner: Dictionary = entries[0]
-	var theme := palette if palette != null else DotUiTheme.dark()
+	var theme := palette if palette != null else GSUiTheme.dark()
 	title_label.text = String(options.get("title", "WINNER"))
 	name_label.text = String(winner.get("name", "?"))
 	name_label.add_theme_color_override("font_color", winner.get("colour", theme.text))
@@ -95,8 +95,8 @@ func present(entries: Array, options: Dictionary = {}) -> DotResult:
 	_burst = false
 	visible = true
 	_pose()
-	DotLog.debug(CHANNEL, "winner reveal", {"winner": name_label.text, "places": mini(entries.size(), 3)})
-	return DotResult.success()
+	GSLog.debug(CHANNEL, "winner reveal", {"winner": name_label.text, "places": mini(entries.size(), 3)})
+	return GSResult.success()
 
 
 func skip() -> void:
@@ -241,7 +241,7 @@ func _label(align := HORIZONTAL_ALIGNMENT_CENTER) -> Label:
 func _build() -> void:
 	if root != null:
 		return
-	var theme := palette if palette != null else DotUiTheme.dark()
+	var theme := palette if palette != null else GSUiTheme.dark()
 	root = Control.new()
 	root.name = "WinnerReveal"
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -307,6 +307,6 @@ func describe() -> Dictionary:
 
 func describe_lines() -> PackedStringArray:
 	var d := describe()
-	return PackedStringArray(["DotWinnerReveal: %s, %s" % [
+	return PackedStringArray(["GSWinnerReveal: %s, %s" % [
 		"showing %s at %.2f s" % [d["winner"], d["elapsed"]] if d["active"] else "idle",
 		"reduced motion" if reduced_motion else "animated"]])

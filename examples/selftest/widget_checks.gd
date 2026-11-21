@@ -4,7 +4,7 @@ extends "selftest_base.gd"
 
 
 func _crosshair_alive_checks() -> void:
-	var c := DotCrosshair.new()
+	var c := GSCrosshair.new()
 	add_child(c)
 	_check(c.is_shown(), "a crosshair is shown by default")
 	var alive := [false]
@@ -34,7 +34,7 @@ func _test_crosshair() -> void:
 	_section("crosshair")
 	_crosshair_alive_checks()
 
-	var crosshair := DotCrosshair.new()
+	var crosshair := GSCrosshair.new()
 	crosshair.base_gap = 4.0
 	crosshair.fov_degrees = 90.0
 	crosshair.max_gap = 200.0
@@ -103,7 +103,7 @@ func _test_crosshair() -> void:
 	_done()
 
 
-func _crosshair_ease_checks(crosshair: DotCrosshair) -> void:
+func _crosshair_ease_checks(crosshair: GSCrosshair) -> void:
 	crosshair.close_sec = 0.08
 	crosshair.set_spread(1.0)
 	crosshair.ease_spread(1.0)
@@ -118,7 +118,7 @@ func _crosshair_ease_checks(crosshair: DotCrosshair) -> void:
 	crosshair.close_sec = 0.0
 
 
-func _crosshair_aim_checks(crosshair: DotCrosshair) -> void:
+func _crosshair_aim_checks(crosshair: GSCrosshair) -> void:
 	# Aiming down the sights: the crosshair fades out, and back, never snaps.
 	var aim := [0.0]
 	crosshair.aim_source = func() -> float: return aim[0]
@@ -130,17 +130,17 @@ func _crosshair_aim_checks(crosshair: DotCrosshair) -> void:
 		"aiming fades it rather than snapping it off", "%.2f" % crosshair.aim_opacity)
 	crosshair.follow_aim(1.0)
 	_close(crosshair.aim_opacity, 0.0, "and fully aimed it is gone")
-	_close(DotCrosshair.opacity_for_aim(0.25, 0.5), 0.5, "halfway to aim_hide_by it is half drawn")
+	_close(GSCrosshair.opacity_for_aim(0.25, 0.5), 0.5, "halfway to aim_hide_by it is half drawn")
 	aim[0] = 0.0
 	crosshair.follow_aim(0.016)
 	_check(crosshair.aim_opacity < 1.0, "a released aim fades it back in too")
 	crosshair.follow_aim(1.0)
 	_close(crosshair.aim_opacity, 1.0, "and it returns whole")
-	_close(DotCrosshair.opacity_for_aim(NAN), 1.0, "a NaN aim draws the crosshair rather than hiding it")
+	_close(GSCrosshair.opacity_for_aim(NAN), 1.0, "a NaN aim draws the crosshair rather than hiding it")
 
 
-func _crosshair_cvar_checks(crosshair: DotCrosshair) -> void:
-	var cvars := DotCrosshairCvars.new()
+func _crosshair_cvar_checks(crosshair: GSCrosshair) -> void:
+	var cvars := GSCrosshairCvars.new()
 	cvars.target = crosshair
 	var seen := {}
 	var local := _FakeLocal.new(seen)
@@ -159,12 +159,12 @@ func _crosshair_cvar_checks(crosshair: DotCrosshair) -> void:
 	(seen[&"cl_crosshair_colour"] as Callable).call("ff0000")
 	_check(crosshair.colour.is_equal_approx(Color.RED), "colour is read from hex")
 	var bad = (seen[&"cl_crosshair_size"] as Callable).call("x")
-	_check(bad is DotResult and not (bad as DotResult).ok, "a bad value is refused")
+	_check(bad is GSResult and not (bad as GSResult).ok, "a bad value is refused")
 	_hud_element_cvar_checks()
 
 
 func _hud_element_cvar_checks() -> void:
-	var cv := DotHudElementCvars.new()
+	var cv := GSHudElementCvars.new()
 	var seen := {}
 	_check(cv.bind_console(_FakeLocal.new(seen)) and seen.has(&"cl_hud_show_perf") and seen.has(&"cl_hud_scale"), "every hud element cvar is registered")
 	var panel := Control.new()
@@ -179,7 +179,7 @@ func _hud_element_cvar_checks() -> void:
 	(seen[&"cl_hud_scale"] as Callable).call("9")
 	_close(cv.scale, 2.0, "scale is clamped")
 	var bad = (seen[&"cl_hud_show_wave"] as Callable).call("x")
-	_check(bad is DotResult and not (bad as DotResult).ok, "a bad value is refused")
+	_check(bad is GSResult and not (bad as GSResult).ok, "a bad value is refused")
 	panel.free()
 	ammo.free()
 
@@ -196,7 +196,7 @@ class _FakeLocal:
 func _test_stat_bar() -> void:
 	_section("stat bar")
 
-	var bar := DotStatBar.new()
+	var bar := GSStatBar.new()
 	bar.max_value = 100.0
 	bar.ease_sec = 0.0
 	var health := [100.0]
@@ -242,7 +242,7 @@ func _test_stat_bar() -> void:
 func _registered_ids_checks() -> void:
 	# registered_ids() must be alphabetical text, not StringName interning order.
 	var order_stack := _make_stack()
-	var made: Array[DotScreen] = []
+	var made: Array[GSScreen] = []
 	for n in ["zq_ids", "yq_ids", "xq_ids", "wq_ids", "vq_ids", "uq_ids", "tq_ids", "sq_ids"]:
 		var sc := _make_screen(StringName(n))
 		made.append(sc)
@@ -262,7 +262,7 @@ func _registered_ids_checks() -> void:
 func _test_icon_plate_and_status_lines() -> void:
 	_section("weapon icon plate and status lines")
 
-	var plate := _piece(DotWeaponIconPlate.new(), Rect2(0.0, 0.0, 400.0, 100.0)) as DotWeaponIconPlate
+	var plate := _piece(GSWeaponIconPlate.new(), Rect2(0.0, 0.0, 400.0, 100.0)) as GSWeaponIconPlate
 	_check(not plate.footprint().has_area(), "no sprite draws nothing")
 	plate.show_icon(ImageTexture.create_from_image(Image.create(128, 32, false, Image.FORMAT_RGBA8)), &"rifle")
 	_close(plate.icon_size().y, 37.5, "a wide sprite is capped by max_width, keeping its aspect")
@@ -272,7 +272,7 @@ func _test_icon_plate_and_status_lines() -> void:
 	plate.clear()
 	_check(not plate.footprint().has_area(), "clear() takes it down")
 
-	var lines := _piece(DotStatusLines.new(), Rect2(0.0, 0.0, 300.0, 200.0)) as DotStatusLines
+	var lines := _piece(GSStatusLines.new(), Rect2(0.0, 0.0, 300.0, 200.0)) as GSStatusLines
 	lines.show_lines(["Down", {"text": "Haste x2  0:12", "colour": Color.RED}])
 	_check(lines.texts() == PackedStringArray(["Down", "Haste x2  0:12"]), "strings and dictionaries both give words")
 	_check(is_equal_approx(lines.footprint().size.y, 2.0 * lines.row_height), "a row per line")
@@ -281,8 +281,8 @@ func _test_icon_plate_and_status_lines() -> void:
 	lines.max_lines = 1
 	lines.show_lines(["a", "b"])
 	_check(lines.texts().size() == 1, "max_lines drops the rest")
-	_check(DotStatusLines.effect_text("Haste", 2, 12.0) == "Haste x2  0:12", "a timed effect line")
-	_check(DotStatusLines.effect_text("Haste", 1, -1.0) == "Haste  this round", "an endless one")
+	_check(GSStatusLines.effect_text("Haste", 2, 12.0) == "Haste x2  0:12", "a timed effect line")
+	_check(GSStatusLines.effect_text("Haste", 1, -1.0) == "Haste  this round", "an endless one")
 	lines.clear()
 	_check(not lines.footprint().has_area(), "clear() takes the lines down")
 	plate.queue_free()

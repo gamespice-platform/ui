@@ -1,5 +1,5 @@
 @tool
-class_name DotTableView
+class_name GSTableView
 extends Control
 
 ## Rows and columns. The scoreboard, the server browser, and a stats panel.

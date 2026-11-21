@@ -1,11 +1,11 @@
-class_name DotFormGroup
+class_name GSFormGroup
 extends PanelContainer
 
 ## A collapsible rounded card holding rows and nested cards; the body eases open and shut.
 
 signal toggled(open: bool)
 
-var tokens: DotFormTokens = DotFormTokens.new()
+var tokens: GSFormTokens = GSFormTokens.new()
 var title := ""
 var path := ""
 var depth := 0
@@ -29,7 +29,7 @@ var _clip: Control
 var _body: VBoxContainer
 
 
-func build(p_title: String, p_path: String, p_depth: int, p_tokens: DotFormTokens) -> void:
+func build(p_title: String, p_path: String, p_depth: int, p_tokens: GSFormTokens) -> void:
 	title = p_title
 	path = p_path
 	depth = p_depth
@@ -80,7 +80,7 @@ func add_row(row: Control) -> void:
 	_body.add_child(row)
 
 
-func add_group(g: DotFormGroup) -> void:
+func add_group(g: GSFormGroup) -> void:
 	g.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_body.add_child(g)
 

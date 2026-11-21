@@ -1,5 +1,5 @@
 @tool
-class_name DotChatWindow
+class_name GSChatWindow
 extends Control
 
 ## A chat box: a log that fades, a line to type in, and a key that opens it.
@@ -12,12 +12,12 @@ extends Control
 ##
 ## So this is the window, and it knows nothing about chat: it takes coloured fragments to
 ## draw and it emits the string somebody typed. A game hands [signal submitted] to
-## whatever its send path already is — [code]DotClientChat.send[/code],
-## [code]DotChatClient.compose[/code], a bridge's `say` — and feeds arriving lines back in
+## whatever its send path already is — [code]GSClientChat.send[/code],
+## [code]GSChatClient.compose[/code], a bridge's `say` — and feeds arriving lines back in
 ## through [method add_message]. GameSpice UI still depends on GameSpice Core and nothing else.
 ##
 ## [codeblock]
-## var chat := DotChatWindow.new()
+## var chat := GSChatWindow.new()
 ## chat.submitted.connect(func(text: String, _channel: StringName) -> void:
 ##     link.chat.send(text))
 ## chat.opened.connect(func(_c: StringName) -> void: controller.suspended = true)
@@ -34,8 +34,8 @@ extends Control
 ## whatever suspends your controller[/b] — without that, typing "sw" walks you backwards.
 ##
 ## [b]The open key is an action, not a key.[/b] [member open_action] names an [InputMap]
-## action so the binding is the player's, rebindable through [DotBindingsPanel] or stored
-## in a settings document as text through [DotInputBinding]. A hardcoded [constant KEY_Y]
+## action so the binding is the player's, rebindable through [GSBindingsPanel] or stored
+## in a settings document as text through [GSInputBinding]. A hardcoded [constant KEY_Y]
 ## is a key somebody cannot move, on a keyboard whose Y is somewhere else.
 
 const CHANNEL := "ui.chat"
@@ -134,7 +134,7 @@ signal channel_changed(channel: StringName)
 ## What is drawn behind the log while the box is open. Transparent draws nothing.
 ##
 ## [b]Only while open.[/b] Closed, the log is outlined rather than panelled (see
-## [DotFeedView]): a backing would be a dark rectangle in the corner of the view while
+## [GSFeedView]): a backing would be a dark rectangle in the corner of the view while
 ## nobody is talking. Open, the player is reading, the game behind it is not what they are
 ## looking at, and twelve rows of text over a busy floor want something under them.
 @export var open_backdrop: Color = Color(0.0, 0.0, 0.05, 0.45)
@@ -172,7 +172,7 @@ signal channel_changed(channel: StringName)
 ## overflow straight through the entry field underneath it.
 ## Pixels of outline behind every line in the log. Zero draws none.
 ##
-## Passed straight through to [DotFeedView]; see its own note for why an outline rather
+## Passed straight through to [GSFeedView]; see its own note for why an outline rather
 ## than a panel. A game over a bright map wants 4 or 5 and a game over a dark one can
 ## leave it off.
 ##
@@ -186,7 +186,7 @@ signal channel_changed(channel: StringName)
 ## Channels the box can send on, in cycle order.
 ##
 ## `[{"id": StringName, "label": String, "colour": Color}]`. Dictionaries rather than
-## [code]DotChatChannel[/code] for the reason [DotFeedView] takes them: GameSpice UI does not
+## [code]GSChatChannel[/code] for the reason [GSFeedView] takes them: GameSpice UI does not
 ## import GameSpice Chat and does not know what a channel is. A game maps its own.
 var channels: Array[Dictionary] = []
 
@@ -196,7 +196,7 @@ var channels: Array[Dictionary] = []
 ## [b]The one piece of chat this box knows, and why it is here.[/b] `sm` must never reach the
 ## server, or the muted player could be told; every game in the family sends what this box
 ## emits, by a different path each, so the only place that stops it in all of them is the
-## place before [signal submitted]. The list itself is GameSpice Chat's `DotChatSelfMute`, found
+## place before [signal submitted]. The list itself is GameSpice Chat's `GSChatSelfMute`, found
 ## by registry name or by path and duck-typed, so GameSpice UI still depends on GameSpice Core alone.
 @export var self_mute_enabled: bool = true
 
@@ -208,7 +208,7 @@ var channels: Array[Dictionary] = []
 ## script by path) the first time it is needed.
 var self_mute: Object = null
 
-var _feed: DotFeedView = null
+var _feed: GSFeedView = null
 var _entry: LineEdit = null
 var _prompt: Label = null
 var _open: bool = false
@@ -217,10 +217,10 @@ var _sent: PackedStringArray = PackedStringArray()
 var _recall: int = -1
 
 ## The view drawn while the box is open, over the history rather than the fading log.
-var _history_view: DotFeedView = null
+var _history_view: GSFeedView = null
 
 ## Every row added, oldest first, bounded by [member history_limit]. Each is the parts
-## array [DotFeedView] takes.
+## array [GSFeedView] takes.
 var _history: Array = []
 
 ## Rows scrolled up from the newest. Zero is following the conversation.
@@ -234,7 +234,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	if register_actions:
-		DotChatParts.register_actions(self)
+		GSChatParts.register_actions(self)
 
 	if place_bottom_left:
 		_place()
@@ -299,7 +299,7 @@ func _relayout_log() -> void:
 
 
 func _build() -> void:
-	_feed = DotChatParts.make_feed(self, "Log", max_lines)
+	_feed = GSChatParts.make_feed(self, "Log", max_lines)
 	_feed.lifetime_sec = lifetime_sec
 	add_child(_feed)
 	_feed.line_added.connect(func(_line: Dictionary) -> void: _relayout_log())
@@ -307,14 +307,14 @@ func _build() -> void:
 
 	# A second feed rather than the first one refilled: the closed log's lines carry the time
 	# each arrived, which is what fades them, and refilling it would restart every clock.
-	_history_view = DotChatParts.make_feed(self, "History", history_lines)
+	_history_view = GSChatParts.make_feed(self, "History", history_lines)
 	_history_view.lifetime_sec = 0.0
 	_history_view.hold = true
 	_history_view.visible = false
 	add_child(_history_view)
 	_history_view.draw.connect(_draw_backdrop)
 
-	var parts := DotChatParts.make_entry_row(self)
+	var parts := GSChatParts.make_entry_row(self)
 	add_child(parts["row"])
 	_prompt = parts["prompt"]
 	_entry = parts["entry"]
@@ -409,8 +409,8 @@ func _apply_open_state() -> void:
 			_show_history()
 
 	if _prompt != null:
-		_prompt.text = "%s: " % DotChatParts.label_of(channels, _channel)
-		_prompt.add_theme_color_override("font_color", DotChatParts.colour_of(channels, _channel))
+		_prompt.text = "%s: " % GSChatParts.label_of(channels, _channel)
+		_prompt.add_theme_color_override("font_color", GSChatParts.colour_of(channels, _channel))
 
 	if _entry != null:
 		_entry.visible = _open
@@ -421,7 +421,7 @@ func _apply_open_state() -> void:
 
 
 func _index_of(id: StringName) -> int:
-	return DotChatParts.index_of(channels, id)
+	return GSChatParts.index_of(channels, id)
 
 
 # --- Input -----------------------------------------------------------------
@@ -444,12 +444,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if _pressed(event, open_action):
 		get_viewport().set_input_as_handled()
-		open(DotChatParts.first_channel(channels))
+		open(GSChatParts.first_channel(channels))
 		return
 
 	if _pressed(event, team_action):
 		get_viewport().set_input_as_handled()
-		open(DotChatParts.team_channel(channels, _channel))
+		open(GSChatParts.team_channel(channels, _channel))
 
 
 ## The wheel scrolls the open history. In [method Node._input] rather than unhandled,
@@ -561,7 +561,7 @@ func _self_mute() -> Object:
 	if not self_mute_enabled or Engine.is_editor_hint():
 		return null
 	if self_mute == null or not is_instance_valid(self_mute):
-		self_mute = DotChatParts.find_self_mute()
+		self_mute = GSChatParts.find_self_mute()
 	return self_mute
 
 
@@ -604,7 +604,7 @@ func _recall_step(direction: int) -> void:
 
 # --- Lines -----------------------------------------------------------------
 
-## Adds a line built from coloured fragments, as [DotFeedView] takes them.
+## Adds a line built from coloured fragments, as [GSFeedView] takes them.
 ##
 ## Wrapped to the width of the box first. See [method _wrap].
 func add_message(parts: Array) -> void:
@@ -627,15 +627,15 @@ func add_message(parts: Array) -> void:
 		_show_history()
 
 
-## Splits one line into as many rows as it takes to fit the box; see [DotChatWrap].
+## Splits one line into as many rows as it takes to fit the box; see [GSChatWrap].
 ##
 ## [b]Chat is the one feed that has to wrap, and it wraps rather than truncating[/b]: the
-## text IS the content, and a player cannot ask the log to repeat itself. [DotFeedView]
+## text IS the content, and a player cannot ask the log to repeat itself. [GSFeedView]
 ## draws an entry as one run and does not clip it, which is right for a kill feed and
 ## wrong for a 127-character line in a 460-pixel box.
 func _wrap(parts: Array) -> Array:
 	var limit := _feed.size.x if _feed != null and _feed.size.x > 0.0 else width
-	return DotChatWrap.wrap(parts, get_theme_default_font(), get_theme_default_font_size(), limit)
+	return GSChatWrap.wrap(parts, get_theme_default_font(), get_theme_default_font_size(), limit)
 
 
 
@@ -732,7 +732,7 @@ func history() -> Array:
 ## Draws the window of the history the scroll position says.
 func _show_history() -> void:
 	if _history_view != null:
-		DotChatParts.show_history(self, _history_view, _rows(), _scroll)
+		GSChatParts.show_history(self, _history_view, _rows(), _scroll)
 
 
 func _draw_backdrop() -> void:
@@ -749,7 +749,7 @@ func _draw_backdrop() -> void:
 
 
 ## The log, for a game that wants to tune it further.
-func feed() -> DotFeedView:
+func feed() -> GSFeedView:
 	_ensure_built()
 	return _feed
 
@@ -772,8 +772,8 @@ func describe() -> Dictionary:
 		"channel": String(_channel),
 		"channels": channels.size(),
 		"lines": line_count(),
-		"open_binding": DotInputBinding.describe_action(open_action),
-		"team_binding": DotInputBinding.describe_action(team_action),
+		"open_binding": GSInputBinding.describe_action(open_action),
+		"team_binding": GSInputBinding.describe_action(team_action),
 		"recalled": _sent.size(),
 		"history": _rows().size(),
 		"scroll": _scroll,

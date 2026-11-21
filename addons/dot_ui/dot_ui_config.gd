@@ -1,8 +1,8 @@
 @tool
-class_name DotUiConfig
-extends DotConfig
+class_name GSUiConfig
+extends GSConfig
 
-## Everything configurable about the interface. Layered like every [DotConfig]:
+## Everything configurable about the interface. Layered like every [GSConfig]:
 ## exported defaults, then a JSON file, then [code]DOT_UI_*[/code] environment
 ## variables, then [code]--ui-*[/code] arguments.
 
@@ -24,7 +24,7 @@ extends DotConfig
 
 ## Whether the escape key pops a screen.
 ##
-## Off for a game that wants to handle it itself. On, [DotScreenStack] consumes the
+## Off for a game that wants to handle it itself. On, [GSScreenStack] consumes the
 ## event, which is why it is a setting rather than something a game overrides.
 @export var back_pops_screen: bool = true
 
@@ -37,7 +37,7 @@ extends DotConfig
 
 ## Seconds a screen transition takes. Zero is instant.
 ##
-## [b]Not applied yet.[/b] [DotScreenStack] switches instantly whatever this says;
+## [b]Not applied yet.[/b] [GSScreenStack] switches instantly whatever this says;
 ## the field is here so a game that animates its own screens reads one number.
 ## Declared honestly rather than quietly ignored.
 @export_range(0.0, 2.0, 0.05) var transition_sec: float = 0.12
@@ -80,21 +80,21 @@ func cli_prefix() -> String:
 	return "--ui-"
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if scale <= 0.0:
-		return DotResult.fail(DotError.CODE_INVALID, "A UI scale of zero.")
+		return GSResult.fail(GSError.CODE_INVALID, "A UI scale of zero.")
 
 	if allow_pause:
 		# Not an error: a single-player game wants it. But it is the setting most
 		# likely to be turned on by habit and then to desynchronise a multiplayer
 		# client from a server that did not pause with it.
-		DotLog.debug(
+		GSLog.debug(
 			"ui.config",
 			"allow_pause is on; a menu will pause the local tree only, "
 			+ "which desynchronises a networked game"
 		)
 
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 func describe_summary() -> String:

@@ -1,13 +1,13 @@
 @tool
-class_name DotKeyPrompt
-extends DotHudPiece
+class_name GSKeyPrompt
+extends GSHudPiece
 
 ## What can be done right now, with the key drawn as a key: "Open door [E]", "Reload [R]",
 ## "Cancel slide [C]". Centred on this control's middle, on a plate; hidden while there is
 ## nothing to say.
 ##
 ## [b]The key is the player's[/b]: the host passes the bound key's name (GameSpice UI's
-## [method DotInputBinding.to_text] or [method DotBindingsPanel.event_name]), never a letter
+## [method GSInputBinding.to_text] or [method GSBindingsPanel.event_name]), never a letter
 ## written into the game, because a rebound key the prompt still calls "E" is worse than no
 ## prompt.
 

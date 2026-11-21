@@ -1,4 +1,4 @@
-class_name DotFormRow
+class_name GSFormRow
 extends MarginContainer
 
 ## One field of a form: name, description, the editor its type needs, reset-to-default and an inline error.
@@ -12,7 +12,7 @@ signal keypad_requested(edit: LineEdit, numeric: bool)
 
 var field: Dictionary = {}
 var key := ""
-var tokens: DotFormTokens = DotFormTokens.new()
+var tokens: GSFormTokens = GSFormTokens.new()
 
 var bar := 0.0:
 	set(v):
@@ -31,9 +31,9 @@ var _reset: Button
 var _undo: Button
 var _actions: HBoxContainer
 var _unit: Label
-var _slider: DotFormSlider
+var _slider: GSFormSlider
 var _entry: LineEdit
-var _toggle: DotFormToggle
+var _toggle: GSFormToggle
 var _option: OptionButton
 var _picker: ColorPickerButton
 var _list: VBoxContainer
@@ -43,7 +43,7 @@ var _line: HBoxContainer
 var _right: VBoxContainer
 
 
-func build(p_field: Dictionary, p_tokens: DotFormTokens) -> void:
+func build(p_field: Dictionary, p_tokens: GSFormTokens) -> void:
 	field = p_field
 	key = field["name"]
 	tokens = p_tokens
@@ -103,7 +103,7 @@ func build(p_field: Dictionary, p_tokens: DotFormTokens) -> void:
 	_reset = Button.new()
 	_reset.theme_type_variation = &"FormReset"
 	_reset.text = "Reset"
-	_reset.tooltip_text = "Back to the default (%s)" % DotFormSchema.display(field, field["default"])
+	_reset.tooltip_text = "Back to the default (%s)" % GSFormSchema.display(field, field["default"])
 	_reset.pressed.connect(func() -> void: reset_requested.emit(key))
 	_reset.modulate.a = 0.0
 	_reset.focus_mode = Control.FOCUS_NONE
@@ -129,7 +129,7 @@ func _build_editor(line: HBoxContainer) -> void:
 		_option.item_selected.connect(func(i: int) -> void: _emit_value((field["enum"] as Array)[i]))
 		line.add_child(_option)
 	elif type == "bool":
-		_toggle = DotFormToggle.new()
+		_toggle = GSFormToggle.new()
 		_toggle.tokens = tokens
 		_toggle.toggled.connect(func(on: bool) -> void: _emit_value(on))
 		var spacer := Control.new()
@@ -145,7 +145,7 @@ func _build_editor(line: HBoxContainer) -> void:
 		line.add_child(_picker)
 		_make_entry(line, "#rrggbb")
 	elif type == "vector2" or type == "vector3":
-		for i in DotFormSchema.vector_size(type):
+		for i in GSFormSchema.vector_size(type):
 			var axis := Label.new()
 			axis.theme_type_variation = &"FormUnit"
 			axis.text = "XYZ"[i]
@@ -167,7 +167,7 @@ func _build_editor(line: HBoxContainer) -> void:
 		line.add_child(_list)
 	else:
 		if field["slider"]:
-			_slider = DotFormSlider.new()
+			_slider = GSFormSlider.new()
 			_slider.tokens = tokens
 			_slider.min_value = float(field["min"])
 			_slider.max_value = float(field["max"])
@@ -177,7 +177,7 @@ func _build_editor(line: HBoxContainer) -> void:
 			_slider.value_changed.connect(_on_slider)
 			line.add_child(_slider)
 		_make_entry(line, "")
-		if DotFormSchema.is_numeric(field):
+		if GSFormSchema.is_numeric(field):
 			_unit = Label.new()
 			_unit.theme_type_variation = &"FormUnit"
 			_unit.text = field["unit"]
@@ -203,7 +203,7 @@ func _make_entry(line: HBoxContainer, placeholder: String) -> void:
 	_entry.text_changed.connect(_on_entry_text)
 	_entry.focus_exited.connect(_on_entry_blur)
 	_entry.text_submitted.connect(func(_t: String) -> void: _on_entry_blur())
-	_hook_keypad(_entry, DotFormSchema.is_numeric(field))
+	_hook_keypad(_entry, GSFormSchema.is_numeric(field))
 	if field["type"] == "color":
 		_entry.custom_minimum_size.x = tokens.px(104.0)
 		_entry.max_length = 9
@@ -236,7 +236,7 @@ func show_value(v: Variant) -> void:
 		_toggle.set_pressed_no_signal(bool(v))
 	elif _picker != null:
 		_picker.color = _as_color(v)
-		_entry.text = DotFormSchema.display(field, v)
+		_entry.text = GSFormSchema.display(field, v)
 	elif not _vec.is_empty():
 		_show_vec(v)
 	elif _list != null:
@@ -244,7 +244,7 @@ func show_value(v: Variant) -> void:
 	else:
 		if _slider != null:
 			_slider.set_value_no_signal(float(v))
-		_entry.text = DotFormSchema.display(field, v)
+		_entry.text = GSFormSchema.display(field, v)
 	_syncing = false
 	_set_error("")
 	_sync_default_state()
@@ -281,11 +281,11 @@ func is_modified() -> bool:
 
 
 func is_default() -> bool:
-	return DotValue.same(_value, _normal(field["default"]))
+	return GSValue.same(_value, _normal(field["default"]))
 
 
 func _normal(v: Variant) -> Variant:
-	var r := DotFormSchema.validate(field, v)
+	var r := GSFormSchema.validate(field, v)
 	return r.value if r.ok else v
 
 
@@ -322,7 +322,7 @@ func editor() -> Control:
 func _emit_value(v: Variant) -> void:
 	if _syncing:
 		return
-	var r := DotFormSchema.validate(field, v)
+	var r := GSFormSchema.validate(field, v)
 	if r.ok:
 		_value = r.value
 		_set_error("")
@@ -335,14 +335,14 @@ func _emit_value(v: Variant) -> void:
 func _on_slider(v: float) -> void:
 	var out: Variant = int(round(v)) if field["type"] == "int" else v
 	if _entry != null:
-		_entry.text = DotFormSchema.display(field, out)
+		_entry.text = GSFormSchema.display(field, out)
 	_emit_value(out)
 
 
 func _on_entry_text(text: String) -> void:
 	if _syncing:
 		return
-	var r := DotFormSchema.parse_text(field, text)
+	var r := GSFormSchema.parse_text(field, text)
 	if r.ok:
 		_value = r.value
 		_set_error("")
@@ -358,7 +358,7 @@ func _on_entry_text(text: String) -> void:
 
 func _on_entry_blur() -> void:
 	if _error == "" and _entry != null and not _syncing:
-		_entry.text = DotFormSchema.display(field, _value)
+		_entry.text = GSFormSchema.display(field, _value)
 
 
 ## Types into one component box of a vector field; returns the resulting error.
@@ -371,7 +371,7 @@ func type_component(index: int, text: String) -> String:
 
 
 func _show_vec(v: Variant) -> void:
-	var shown := DotFormSchema.display(field, v).split(", ")
+	var shown := GSFormSchema.display(field, v).split(", ")
 	for i in _vec.size():
 		_vec[i].text = shown[i] if i < shown.size() else ""
 
@@ -382,7 +382,7 @@ func _on_vec_text() -> void:
 	var texts := PackedStringArray()
 	for e in _vec:
 		texts.append(e.text.strip_edges())
-	var r := DotFormSchema.parse_text(field, " ".join(texts))
+	var r := GSFormSchema.parse_text(field, " ".join(texts))
 	if r.ok:
 		_value = r.value
 		_set_error("")
@@ -439,7 +439,7 @@ func _rebuild_list(items: Array) -> void:
 		var e := LineEdit.new()
 		e.custom_minimum_size.y = tokens.target()
 		e.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		e.text = DotFormSchema.display({"type": field.get("items", "string")}, items[i])
+		e.text = GSFormSchema.display({"type": field.get("items", "string")}, items[i])
 		e.text_changed.connect(func(_t: String) -> void: _list_changed())
 		e.gui_input.connect(func(ev: InputEvent) -> void:
 			if reorder and ev is InputEventKey and ev.pressed and ev.alt_pressed and (ev.keycode == KEY_UP or ev.keycode == KEY_DOWN):
@@ -576,14 +576,14 @@ func _list_changed() -> void:
 	var parsed := []
 	var bad := ""
 	for t in _list_texts():
-		var r := DotFormSchema.parse_text(item_field, str(t))
+		var r := GSFormSchema.parse_text(item_field, str(t))
 		if r.ok:
 			parsed.append(r.value)
 		elif bad == "":
 			bad = "Item %d: %s" % [parsed.size() + 1, r.error.message]
 			parsed.append(t)
 	if bad == "":
-		var whole := DotFormSchema.validate(field, parsed)
+		var whole := GSFormSchema.validate(field, parsed)
 		if whole.ok:
 			_value = whole.value
 			_set_error("")

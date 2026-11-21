@@ -4,7 +4,7 @@
 
 **Z-order, input blocking, mouse mode and pause are derived in one place, from one stack.**
 
-Each is easy alone. Collectively they are where UI bugs live: a menu that renders under the HUD, a scoreboard that captures the mouse, an escape key that closes two screens, a settings panel that blocks input to a pause menu it is supposed to sit on top of. `DotScreenStack._refresh()` recomputes all four from `_stack` every time it changes, and nothing else in the addon touches `Input.mouse_mode`, `mouse_filter`, `visible` or `move_child` for a screen. (The one exception is `DotBallotPanel`, which is a widget, not a screen: see [hud.md](hud.md#a-ballot-on-the-hud).)
+Each is easy alone. Collectively they are where UI bugs live: a menu that renders under the HUD, a scoreboard that captures the mouse, an escape key that closes two screens, a settings panel that blocks input to a pause menu it is supposed to sit on top of. `GSScreenStack._refresh()` recomputes all four from `_stack` every time it changes, and nothing else in the addon touches `Input.mouse_mode`, `mouse_filter`, `visible` or `move_child` for a screen. (The one exception is `GSBallotPanel`, which is a widget, not a screen: see [hud.md](hud.md#a-ballot-on-the-hud).)
 
 The two flags that look like one and are not:
 
@@ -29,7 +29,7 @@ If `_can_pop()` returns false, `_unhandled_input` marks the event handled anyway
 
 ## A screen's id
 
-`DotScreen._screen_id()` defaults to `StringName(name)`, the NODE NAME. A screen called `Pause` registers as `&"Pause"`, and `push(&"pause")` answers "no such screen", which nothing treats as fatal, so the menu never opens. Ship a screen with an explicit id, and assert `stack.top_id()` after a push: a *registered* screen is sized and focusable whether or not it is on screen.
+`GSScreen._screen_id()` defaults to `StringName(name)`, the NODE NAME. A screen called `Pause` registers as `&"Pause"`, and `push(&"pause")` answers "no such screen", which nothing treats as fatal, so the menu never opens. Ship a screen with an explicit id, and assert `stack.top_id()` after a push: a *registered* screen is sized and focusable whether or not it is on screen.
 
 ## `allow_pause` defaults to off
 
@@ -37,33 +37,33 @@ Pausing the tree pauses only the *local* simulation, which desynchronises it fro
 
 ## The pause and settings screens
 
-`DotPauseScreen` and `DotSettingsScreen`, in `screens/`, exist because four clients had each written the same forty lines (a centred `PanelContainer`, a heading, a column of `Button`s, a focus path) and differed only in the words on the buttons and the document the panel was bound to.
+`GSPauseScreen` and `GSSettingsScreen`, in `screens/`, exist because four clients had each written the same forty lines (a centred `PanelContainer`, a heading, a column of `Button`s, a focus path) and differed only in the words on the buttons and the document the panel was bound to.
 
-Today game-hungario uses them; game-fatal-contact moved to GameSpice Menu's `DotMenu` on 2026-10-10 (game-fatal-contact f9aeaf9), and the other games are on GameSpice Menu's Escape menu too, which builds on this addon's primitives (`DotScreenStack`, `DotInputBinding`, `DotChatWindow`) and adds a designed look. **An extraction is finished when the last caller moves, and nothing in the extracted repository can tell you whether that happened.** The grep is `grep -rn 'extends DotScreen'` (and the screen class names) over the games.
+Today game-hungario uses them; game-fatal-contact moved to GameSpice Menu's `GSMenu` on 2026-10-10 (game-fatal-contact f9aeaf9), and the other games are on GameSpice Menu's Escape menu too, which builds on this addon's primitives (`GSScreenStack`, `GSInputBinding`, `GSChatWindow`) and adds a designed look. **An extraction is finished when the last caller moves, and nothing in the extracted repository can tell you whether that happened.** The grep is `grep -rn 'extends GSScreen'` (and the screen class names) over the games.
 
-**The settings source is an `Object` and is never named.** GameSpice UI depends on GameSpice Core and GameSpice Input and names no other addon, and a script that so much as *mentions* `DotSettingsManager` fails to compile in a project without GameSpice Settings. The contract is two methods, `to_config()` and `absorb_config()`; that the screen also accepts a bare `DotConfig` is the proof the seam is real.
+**The settings source is an `Object` and is never named.** GameSpice UI depends on GameSpice Core and GameSpice Input and names no other addon, and a script that so much as *mentions* `GSSettingsManager` fails to compile in a project without GameSpice Settings. The contract is two methods, `to_config()` and `absorb_config()`; that the screen also accepts a bare `GSConfig` is the proof the seam is real.
 
-**The two-step apply is the whole reason the screen exists.** `to_config()` hands out a *snapshot*: writing to it does not write to the manager. A screen that called only `DotSettingsPanel.apply()` would report success and change nothing, for ever, and every structural check passes either way. Only a check that edits a value, presses Apply and then reads the **manager** can tell the two apart.
+**The two-step apply is the whole reason the screen exists.** `to_config()` hands out a *snapshot*: writing to it does not write to the manager. A screen that called only `GSSettingsPanel.apply()` would report success and change nothing, for ever, and every structural check passes either way. Only a check that edits a value, presses Apply and then reads the **manager** can tell the two apart.
 
 **A pause menu's button ids are derived from its labels**, never paired with them. `"Rock the vote"` is `&"rock_the_vote"`. A list of labels and a parallel list of ids is two lists that can disagree.
 
-**`id_override`, not `screen_id`.** `DotScreen` already has a `screen_id()` method and a property cannot shadow one: GDScript refuses it with *"Could not resolve external class member"*, reported against the file that **uses** the property rather than the one that declares it, with `--check-only` on the declaring file saying nothing. The scene then hangs rather than failing. It is configurable because a game legitimately has two settings screens (the player's settings and the interface's own `DotUiConfig` are different documents), and a stack registers by id.
+**`id_override`, not `screen_id`.** `GSScreen` already has a `screen_id()` method and a property cannot shadow one: GDScript refuses it with *"Could not resolve external class member"*, reported against the file that **uses** the property rather than the one that declares it, with `--check-only` on the declaring file saying nothing. The scene then hangs rather than failing. It is configurable because a game legitimately has two settings screens (the player's settings and the interface's own `GSUiConfig` are different documents), and a stack registers by id.
 
-**The settings rows are in a `ScrollContainer` and the buttons sit below it.** A `DotSettingsPanel` is as tall as the document it was handed (`DotUiConfig` alone is around 600 pixels), and without the scroll Apply, Revert and Back left the window. Only a picture catches a regression; see [testing.md](testing.md#what-a-headless-suite-cannot-see).
+**The settings rows are in a `ScrollContainer` and the buttons sit below it.** A `GSSettingsPanel` is as tall as the document it was handed (`GSUiConfig` alone is around 600 pixels), and without the scroll Apply, Revert and Back left the window. Only a picture catches a regression; see [testing.md](testing.md#what-a-headless-suite-cannot-see).
 
 ## The scoreboard screen
 
-`DotScoreboardScreen` is the Tab screen, shared: a title and a ranked `DotTableView`, with the **rows and the columns the game's** (`row_fn`, `columns`), because a deathmatch counts kills, an obstacle course points and an eating game mass. Transparent and non-blocking. game-hungario still has its own `ScoreboardScreen`, which predates it; GameSpice Menu's Tab scoreboard is what the other games use, game-fatal-contact included since f9aeaf9.
+`GSScoreboardScreen` is the Tab screen, shared: a title and a ranked `GSTableView`, with the **rows and the columns the game's** (`row_fn`, `columns`), because a deathmatch counts kills, an obstacle course points and an eating game mass. Transparent and non-blocking. game-hungario still has its own `ScoreboardScreen`, which predates it; GameSpice Menu's Tab scoreboard is what the other games use, game-fatal-contact included since f9aeaf9.
 
-## `DotSettingsPanel` must never show a secret
+## `GSSettingsPanel` must never show a secret
 
-`sensitive_keys()` is honoured and `show_sensitive` defaults to off, for the reason `DotConfig` refuses secrets from the environment and argv: both end up in `ps` output, screenshots and pasted bug reports.
+`sensitive_keys()` is honoured and `show_sensitive` defaults to off, for the reason `GSConfig` refuses secrets from the environment and argv: both end up in `ps` output, screenshots and pasted bug reports.
 
 - **Group headings are added lazily**, once a group turns out to have something visible in it. Adding them up front leaves a bare "Storage" heading over nothing whenever a group holds only secrets.
 - **Text is committed on submit and focus-out, not on `text_changed`.** With `live` on, per-keystroke would be a `validate()` per character typed.
 - `apply()` **rolls back every edit** on a validation failure. Applying half of an invalid set leaves the config in a state nobody chose.
 
-## `DotBindingsPanel`: three things a naive rebinder gets wrong
+## `GSBindingsPanel`: three things a naive rebinder gets wrong
 
 1. **An action left bound to nothing.** `load_saved` resets any action a file leaves with no events back to its default. A truncated, hand-edited or older-build file otherwise leaves the player with a control they cannot use and cannot reach the rebinder for.
 2. **Conflicts detected after committing.** `bind_action` checks first, so a refusal is a no-op rather than something the caller undoes.
@@ -77,15 +77,15 @@ An absent `bindings` key in the file is a **failure**; a present-but-empty one i
 
 `rebindable_actions()` sorts as Strings: `Array.sort()` on `StringName`s compares interned pointers, an order that is neither alphabetical nor stable between builds.
 
-## `DotInputBinding`: one binding as a short string
+## `GSInputBinding`: one binding as a short string
 
-**The code lives in GameSpice Input** (`DotInputText` for event and text, `DotInputMap` for `InputMap` actions); `DotInputBinding` forwards every method to them so the games' calls keep working, and GameSpice UI now requires `addons/dot_input`.
+**The code lives in GameSpice Input** (`GSInputText` for event and text, `GSInputMap` for `InputMap` actions); `GSInputBinding` forwards every method to them so the games' calls keep working, and GameSpice UI now requires `addons/dot_input`.
 
-`"Y"`, `"Shift+A"`, `"Mouse 1"`, `"Wheel up"`, `"Mouse back"`, `"Pad 0"`, `"Axis 0+"`. `DotBindingsPanel` stores a whole screen's worth as dictionaries in a file of its own, which is right for a rebinder; a *single* binding that travels in a settings document needs a form a person can read in a JSON file and type by hand.
+`"Y"`, `"Shift+A"`, `"Mouse 1"`, `"Wheel up"`, `"Mouse back"`, `"Pad 0"`, `"Axis 0+"`. `GSBindingsPanel` stores a whole screen's worth as dictionaries in a file of its own, which is right for a rebinder; a *single* binding that travels in a settings document needs a form a person can read in a JSON file and type by hand.
 
-The vocabulary is deliberately the one `DotBindingsPanel.event_name` already draws on a button. Two spellings of one binding is a settings file that disagrees with the rebinding screen.
+The vocabulary is deliberately the one `GSBindingsPanel.event_name` already draws on a button. Two spellings of one binding is a settings file that disagrees with the rebinding screen.
 
-**The wheel and the side buttons are written by name** (API level 2, `MOUSE_NAMES`): `Wheel up` / `down` / `left` / `right` for Godot's buttons 4 to 7, `Mouse back` / `Mouse forward` for 8 and 9. Godot's numbering made the wheel "Mouse 4", which every player reads as the thumb button. The side buttons cannot take "Mouse 4" / "Mouse 5" because `from_text` still reads that old spelling as the wheel: every binding stored before the names says it, and reading it any other way moves a player's key on upgrade. Names read case-blind; "Mouse N" reads for every N. A game that patched its own labels around "Mouse 4" checks `DotAddonApi.build_level("dot_ui") >= 2` before dropping the patch, because a delivered pack runs on the shell's GameSpice UI.
+**The wheel and the side buttons are written by name** (API level 2, `MOUSE_NAMES`): `Wheel up` / `down` / `left` / `right` for Godot's buttons 4 to 7, `Mouse back` / `Mouse forward` for 8 and 9. Godot's numbering made the wheel "Mouse 4", which every player reads as the thumb button. The side buttons cannot take "Mouse 4" / "Mouse 5" because `from_text` still reads that old spelling as the wheel: every binding stored before the names says it, and reading it any other way moves a player's key on upgrade. Names read case-blind; "Mouse N" reads for every N. A game that patched its own labels around "Mouse 4" checks `GSAddonApi.build_level("dot_ui") >= 2` before dropping the patch, because a delivered pack runs on the shell's GameSpice UI.
 
 **Keys are physical.** A binding stored as a keycode is stored in the player's current layout, and the same file on an AZERTY keyboard binds a key that is not where the label says.
 
@@ -93,7 +93,7 @@ The vocabulary is deliberately the one `DotBindingsPanel.event_name` already dra
 
 ## The winner reveal
 
-`DotWinnerReveal` is the end-of-match announcement: a title ("WINNER" by default), the winner's name typed out under it with a stripe, their score, then a podium of up to three columns rising (third, second, first) with names and scores over them, and a burst of confetti drawn from the theme's colours. It ships no art and no sound. A game passes rows best first (`name`, `score` text, optional `colour`) to `present`, and goes on at `finished(skipped)`.
+`GSWinnerReveal` is the end-of-match announcement: a title ("WINNER" by default), the winner's name typed out under it with a stripe, their score, then a podium of up to three columns rising (third, second, first) with names and scores over them, and a burst of confetti drawn from the theme's colours. It ships no art and no sound. A game passes rows best first (`name`, `score` text, optional `colour`) to `present`, and goes on at `finished(skipped)`.
 
-It is a `CanvasLayer` of its own (layer 95), not a `DotScreen`: it takes the whole frame for a few seconds between a match and its scoreboard, and nothing should stack on or under it. Every frame is computed from the seconds since `present` (`advance`), never from tweens, so a check steps it to any instant and a skip is exact. `reduced_motion` draws the final frame from the first and bursts nothing; it still holds for `hold_seconds`, because the scoreboard behind it is not going anywhere. The skip button, `skip_actions` and `skip()` end it with `finished(true)`.
+It is a `CanvasLayer` of its own (layer 95), not a `GSScreen`: it takes the whole frame for a few seconds between a match and its scoreboard, and nothing should stack on or under it. Every frame is computed from the seconds since `present` (`advance`), never from tweens, so a check steps it to any instant and a skip is exact. `reduced_motion` draws the final frame from the first and bursts nothing; it still holds for `hold_seconds`, because the scoreboard behind it is not going anywhere. The skip button, `skip_actions` and `skip()` end it with `finished(true)`.
 

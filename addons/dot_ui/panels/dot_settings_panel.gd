@@ -1,10 +1,10 @@
 @tool
-class_name DotSettingsPanel
+class_name GSSettingsPanel
 extends VBoxContainer
 
-## Builds an editable settings panel out of any [DotConfig], automatically.
+## Builds an editable settings panel out of any [GSConfig], automatically.
 ##
-## [b]Every project in this family already describes its settings.[/b] A [DotConfig]
+## [b]Every project in this family already describes its settings.[/b] A [GSConfig]
 ## knows its keys, their types, their ranges, their enum choices, their groups and
 ## which of them are secrets — all of it in `@export` annotations the engine already
 ## exposes through [method Object.get_property_list]. A hand-built settings screen
@@ -15,8 +15,8 @@ extends VBoxContainer
 ## settings screen builds one; this is what a game gets for free, and it is never
 ## wrong about what the settings are.
 ##
-## [b]Secrets are never shown.[/b] [method DotConfig.sensitive_keys] is honoured, for
-## the same reason `DotConfig` refuses them from the environment and argv: they end up
+## [b]Secrets are never shown.[/b] [method GSConfig.sensitive_keys] is honoured, for
+## the same reason `GSConfig` refuses them from the environment and argv: they end up
 ## in screenshots and pasted bug reports.
 
 const CHANNEL := "ui.settings"
@@ -28,7 +28,7 @@ signal setting_changed(key: String, value: Variant)
 signal applied()
 
 ## [method apply] was called and the config refused the new values.
-signal apply_failed(error: DotError)
+signal apply_failed(error: GSError)
 
 @export_group("Behaviour")
 
@@ -39,16 +39,16 @@ signal apply_failed(error: DotError)
 ## a half-edited config can be invalid on the way to being valid.
 @export var live: bool = false
 
-## Show keys listed by [method DotConfig.sensitive_keys]. **Leave this off.**
+## Show keys listed by [method GSConfig.sensitive_keys]. **Leave this off.**
 @export var show_sensitive: bool = false
 
 ## Groups to show. Empty shows all.
 @export var only_groups: Array[String] = []
 
-var _config: DotConfig = null
+var _config: GSConfig = null
 
-## The form that draws the rows; the panel is its adapter to a [DotConfig].
-var form: DotUiForm = null
+## The form that draws the rows; the panel is its adapter to a [GSConfig].
+var form: GSUiForm = null
 
 ## key -> int enum option names, for enums stored as an index.
 var _index_enums: Dictionary = {}
@@ -62,9 +62,9 @@ var _syncing := false
 ## Builds the panel from [param config].
 ##
 ## Safe to call again with a different config; the old controls are freed.
-func bind(config: DotConfig) -> DotResult:
+func bind(config: GSConfig) -> GSResult:
 	if config == null:
-		return DotResult.fail(DotError.CODE_INVALID, "No config to bind.")
+		return GSResult.fail(GSError.CODE_INVALID, "No config to bind.")
 
 	_config = config
 	_pending.clear()
@@ -101,13 +101,13 @@ func bind(config: DotConfig) -> DotResult:
 		var field := _field_for(property, current_group)
 
 		if field.is_empty():
-			DotLog.debug(CHANNEL, "no editor for property type", {"key": key, "type": int(property["type"])})
+			GSLog.debug(CHANNEL, "no editor for property type", {"key": key, "type": int(property["type"])})
 			continue
 
 		schema.append(field)
 		values[key] = _form_value(key, config.get(key))
 
-	form = DotUiForm.new()
+	form = GSUiForm.new()
 	form.name = "Form"
 	form.chrome = false
 	form.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -115,14 +115,14 @@ func bind(config: DotConfig) -> DotResult:
 	var built := form.build(schema, values)
 
 	if not built.ok:
-		DotLog.warn(CHANNEL, "the form refused the settings", {"why": built.error.message})
+		GSLog.warn(CHANNEL, "the form refused the settings", {"why": built.error.message})
 
 	form.value_changed.connect(_on_form_value)
 
 	if schema.is_empty():
-		DotLog.warn(CHANNEL, "the config produced no editable settings", {"groups": only_groups})
+		GSLog.warn(CHANNEL, "the config produced no editable settings", {"groups": only_groups})
 
-	return DotResult.success(schema.size())
+	return GSResult.success(schema.size())
 
 
 ## One form field per config property; empty for a type the form has no editor for.
@@ -231,13 +231,13 @@ func _edited(key: String, value: Variant) -> void:
 ## [b]On a validation failure every edit is rolled back.[/b] Applying half of them
 ## leaves the config in a state neither the player nor the code chose, and the player
 ## has no way to tell which half survived.
-func apply() -> DotResult:
+func apply() -> GSResult:
 	if _config == null:
-		return DotResult.fail(DotError.CODE_STATE, "Nothing is bound.")
+		return GSResult.fail(GSError.CODE_STATE, "Nothing is bound.")
 
 	if _pending.is_empty():
 		applied.emit()
-		return DotResult.success(0)
+		return GSResult.success(0)
 
 	var rollback := {}
 
@@ -258,7 +258,7 @@ func apply() -> DotResult:
 	var count := _pending.size()
 	refresh()
 	applied.emit()
-	return DotResult.success(count)
+	return GSResult.success(count)
 
 
 ## Throws the pending edits away and puts the controls back to what the config says.
@@ -285,7 +285,7 @@ func refresh() -> void:
 	_pending.clear()
 
 
-func bound_config() -> DotConfig:
+func bound_config() -> GSConfig:
 	return _config
 
 

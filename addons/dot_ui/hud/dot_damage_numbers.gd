@@ -1,6 +1,6 @@
 @tool
-class_name DotDamageNumbers
-extends DotHudPiece
+class_name GSDamageNumbers
+extends GSHudPiece
 
 ## Damage numbers: each rises off the point a hit landed and fades. A world point is
 ## projected through the camera every frame, so the number stays on the body while the view

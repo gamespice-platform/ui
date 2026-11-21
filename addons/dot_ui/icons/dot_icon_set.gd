@@ -1,4 +1,4 @@
-class_name DotIconSet
+class_name GSIconSet
 extends RefCounted
 
 ## Icons by id or type tag, drawn from sprite sheets, with per-profile overrides.
@@ -20,7 +20,7 @@ var flat_colour := Color.WHITE
 
 
 ## Uses [param sheet] cut into [param cell_size] cells; [method map] names cells by column and row.
-func use_sheet(sheet: Texture2D, cell_size: Vector2i) -> DotIconSet:
+func use_sheet(sheet: Texture2D, cell_size: Vector2i) -> GSIconSet:
 	_sheet = sheet
 	_cell_size = cell_size
 	_cache.clear()
@@ -29,7 +29,7 @@ func use_sheet(sheet: Texture2D, cell_size: Vector2i) -> DotIconSet:
 
 
 ## [param key] (an id or a tag) is the sprite in cell [param cell] (column, row).
-func map(key: StringName, cell: Vector2i) -> DotIconSet:
+func map(key: StringName, cell: Vector2i) -> GSIconSet:
 	_cells[key] = cell
 	_cache.erase(key)
 	_flat_cache.erase(key)
@@ -37,7 +37,7 @@ func map(key: StringName, cell: Vector2i) -> DotIconSet:
 
 
 ## Weapon [param id] is drawn as whatever [param key] draws (another id or a tag).
-func alias(id: StringName, key: StringName) -> DotIconSet:
+func alias(id: StringName, key: StringName) -> GSIconSet:
 	_by_id[id] = key
 	return self
 
@@ -90,7 +90,7 @@ static func pixel_perfect(canvas: CanvasItem) -> void:
 
 
 func describe() -> String:
-	return "DotIconSet(%d sprites, %d aliases, %d overrides, profile=%s, flat=%s)" % [
+	return "GSIconSet(%d sprites, %d aliases, %d overrides, profile=%s, flat=%s)" % [
 		_cells.size(), _by_id.size(), _overrides.size(), profile, flat]
 
 

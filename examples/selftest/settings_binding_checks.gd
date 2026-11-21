@@ -9,18 +9,18 @@ extends "stack_checks.gd"
 func _test_settings_screen() -> void:
 	_section("settings screen")
 
-	var stack := DotScreenStack.new()
+	var stack := GSScreenStack.new()
 	stack.register_service = false
 	stack.manage_mouse = false
 	add_child(stack)
 	stack.setup()
 
-	# A bare DotConfig first: the screen has to work without GameSpice Settings existing at all,
+	# A bare GSConfig first: the screen has to work without GameSpice Settings existing at all,
 	# which is the case every project that has GameSpice UI and not GameSpice Settings is in.
 	var direct := TestConfig.new()
-	var plain := DotSettingsScreen.new()
+	var plain := GSSettingsScreen.new()
 	plain.name = "PlainSettings"
-	_check(plain.build(direct).ok, "a screen builds straight onto a DotConfig")
+	_check(plain.build(direct).ok, "a screen builds straight onto a GSConfig")
 	stack.register(plain)
 	stack.push(&"settings")
 	await get_tree().process_frame
@@ -54,10 +54,10 @@ func _test_settings_screen() -> void:
 	stack.queue_free()
 	_done()
 
-func _check_settings_scroll(plain: DotSettingsScreen) -> void:
+func _check_settings_scroll(plain: GSSettingsScreen) -> void:
 	# THE CHECK A PICTURE HAD TO FIND FIRST.
 	#
-	# A `DotSettingsPanel` is as tall as the document it was handed, and `DotUiConfig` alone
+	# A `GSSettingsPanel` is as tall as the document it was handed, and `GSUiConfig` alone
 	# comes out around 600 pixels. Without a scroll container the column grew past the panel
 	# and past the bottom of the SCREEN, taking Apply, Revert and Back with it -- a settings
 	# screen a player can read and cannot save from or leave. Every assertion passed: the
@@ -89,7 +89,7 @@ func _check_settings_scroll(plain: DotSettingsScreen) -> void:
 	_check(
 		plain.get_node_or_null("Panel/Column/Scroll") is ScrollContainer,
 		"and the rows are in a scroll container",
-		"a DotSettingsPanel is as tall as the document it was handed; without this the "
+		"a GSSettingsPanel is as tall as the document it was handed; without this the "
 		+ "column grows past the panel and past the bottom of the window, taking Apply, "
 		+ "Revert and Back with it"
 	)
@@ -100,12 +100,12 @@ func _check_settings_scroll(plain: DotSettingsScreen) -> void:
 
 
 
-func _check_settings_source(stack: DotScreenStack) -> void:
+func _check_settings_source(stack: GSScreenStack) -> void:
 	# And the two-step, which is the reason this screen exists. `to_config()` hands out a
 	# SNAPSHOT: a screen that called only `panel.apply()` would report success and change
 	# nothing, for ever, and every check above would still pass.
 	var source := FakeSettingsSource.new()
-	var screen := DotSettingsScreen.new()
+	var screen := GSSettingsScreen.new()
 	screen.name = "SourceSettings"
 	# Its own id, because the stack registers by id and `plain` already holds the default.
 	# A second screen under one name is refused or silently replaces the first, and the
@@ -148,15 +148,15 @@ func _check_settings_source(stack: DotScreenStack) -> void:
 			% (screen.config as TestConfig).port
 	)
 
-	var orphan := DotSettingsScreen.new()
+	var orphan := GSSettingsScreen.new()
 	_check(not orphan.build(null).ok, "a screen with nothing to edit is refused")
 	orphan.free()
 
 
 
-func _check_pause_screen(stack: DotScreenStack) -> void:
+func _check_pause_screen(stack: GSScreenStack) -> void:
 	# The pause menu beside it, for the same reason: four games wrote the same forty lines.
-	var pause := DotPauseScreen.new()
+	var pause := GSPauseScreen.new()
 	pause.name = "Pause"
 	_check(
 		pause.build(PackedStringArray(["Resume", "Rock the vote", "Leave"])).ok,
@@ -174,7 +174,7 @@ func _check_pause_screen(stack: DotScreenStack) -> void:
 
 	# THAT THE PUSH LANDED, which nothing asserted and a rendered frame is what found.
 	#
-	# `DotScreen`'s default id is the NODE NAME, so a screen called `Pause` registered as
+	# `GSScreen`'s default id is the NODE NAME, so a screen called `Pause` registered as
 	# `&"Pause"` and `push(&"pause")` answered "no such screen" -- reported, not fatal, so
 	# the menu simply never opened. Every check below this line passed anyway: a registered
 	# screen is sized and focusable whether or not it is on screen. A test that asserts
@@ -197,7 +197,7 @@ func _check_pause_screen(stack: DotScreenStack) -> void:
 	)
 	_check(pause.button(&"nothing_like_this") == null, "and a button nobody made is null")
 
-	var empty := DotPauseScreen.new()
+	var empty := GSPauseScreen.new()
 	_check(
 		not empty.build(PackedStringArray()).ok,
 		"a pause menu with no buttons is refused, because it could not be left"
@@ -209,7 +209,7 @@ func _check_pause_screen(stack: DotScreenStack) -> void:
 ##
 ## A helper rather than a path, so the check reads as "the panel is inside a scroll" rather
 ## than as a string that silently stops matching when the tree changes shape.
-func panel_parent_of(screen: DotSettingsScreen) -> Node:
+func panel_parent_of(screen: GSSettingsScreen) -> Node:
 	return screen.panel.get_parent() if screen.panel != null else null
 
 
@@ -229,8 +229,8 @@ func _test_bindings() -> void:
 	jump.physical_keycode = KEY_SPACE
 	InputMap.action_add_event(&"test_jump", jump)
 
-	var panel := DotBindingsPanel.new()
-	panel.config = DotUiConfig.new()
+	var panel := GSBindingsPanel.new()
+	panel.config = GSUiConfig.new()
 	panel.config.bindings_file = BINDINGS_FILE
 	panel.prefix = "test_"
 	add_child(panel)
@@ -289,9 +289,9 @@ func _test_bindings() -> void:
 	_done()
 
 
-func _check_bindings_saved(panel: DotBindingsPanel) -> void:
-	# Persistence, through DotPaths so a web build's IndexedDB is flushed.
-	DotPaths.remove_tree(BINDINGS_FILE)
+func _check_bindings_saved(panel: GSBindingsPanel) -> void:
+	# Persistence, through GSPaths so a web build's IndexedDB is flushed.
+	GSPaths.remove_tree(BINDINGS_FILE)
 	_check(panel.save().ok, "bindings save")
 
 	var restore := InputEventKey.new()
@@ -311,7 +311,7 @@ func _check_bindings_saved(panel: DotBindingsPanel) -> void:
 
 	# The one that leaves a player stuck: a truncated or hand-edited file that gives
 	# an action no events at all.
-	DotPaths.write_json(
+	GSPaths.write_json(
 		BINDINGS_FILE, {"bindings": {"test_fire": []}}, true, true
 	)
 	panel.load_saved()
@@ -322,7 +322,7 @@ func _check_bindings_saved(panel: DotBindingsPanel) -> void:
 	)
 
 	# A garbage file must not be applied as though it were valid.
-	DotPaths.write_json(BINDINGS_FILE, {"nonsense": 1}, true, true)
+	GSPaths.write_json(BINDINGS_FILE, {"nonsense": 1}, true, true)
 	_check(
 		not panel.load_saved().ok,
 		"a bindings file with no bindings is refused"
@@ -344,7 +344,7 @@ func _check_bindings_saved(panel: DotBindingsPanel) -> void:
 
 
 
-func _check_bindings_sorted() -> DotBindingsPanel:
+func _check_bindings_sorted() -> GSBindingsPanel:
 	# SORTED AS STRINGS, AND THE LABEL DROPS THE PREFIX.
 	#
 	# `Array.sort()` on a `StringName` compares interned POINTERS, so this method's own
@@ -357,7 +357,7 @@ func _check_bindings_sorted() -> DotBindingsPanel:
 	InputMap.add_action("probe_alpha")
 	InputMap.add_action("probe_mike")
 
-	var sorted_panel := DotBindingsPanel.new()
+	var sorted_panel := GSBindingsPanel.new()
 	sorted_panel.prefix = "probe_"
 	add_child(sorted_panel)
 	sorted_panel.build()
@@ -392,14 +392,14 @@ func _check_bindings_sorted() -> DotBindingsPanel:
 
 
 
-func _check_bindings_prefixes(sorted_panel: DotBindingsPanel) -> void:
+func _check_bindings_prefixes(sorted_panel: GSBindingsPanel) -> void:
 	# [b]A game's bindable actions are not all in one namespace.[/b] A first-person game's
 	# movement is `dot_fps_*` and its chat key is its own `<game>_chat`; a panel filtered on
 	# one prefix showed one of those and silently dropped the other, which is an action a
 	# player cannot discover on any screen.
 	InputMap.add_action("other_chat")
 
-	var two_panel := DotBindingsPanel.new()
+	var two_panel := GSBindingsPanel.new()
 	two_panel.prefix = "probe_"
 	two_panel.also_prefixed = PackedStringArray(["other_"])
 	add_child(two_panel)
@@ -441,9 +441,9 @@ func _test_input_binding() -> void:
 	var y := InputEventKey.new()
 	y.physical_keycode = KEY_Y
 
-	_check(DotInputBinding.to_text(y) == "Y", "a key is its own name")
+	_check(GSInputBinding.to_text(y) == "Y", "a key is its own name")
 
-	var back := DotInputBinding.from_text("Y") as InputEventKey
+	var back := GSInputBinding.from_text("Y") as InputEventKey
 	_check(
 		back != null and back.physical_keycode == KEY_Y,
 		"and reads back as the same PHYSICAL key",
@@ -454,8 +454,8 @@ func _test_input_binding() -> void:
 	shifted.physical_keycode = KEY_A
 	shifted.shift_pressed = true
 
-	var shift_text := DotInputBinding.to_text(shifted)
-	var shift_back := DotInputBinding.from_text(shift_text) as InputEventKey
+	var shift_text := GSInputBinding.to_text(shifted)
+	var shift_back := GSInputBinding.from_text(shift_text) as InputEventKey
 	_check(
 		shift_back != null and shift_back.physical_keycode == KEY_A and shift_back.shift_pressed,
 		"a modifier survives the round trip (%s)" % shift_text
@@ -463,9 +463,9 @@ func _test_input_binding() -> void:
 
 	var mouse := InputEventMouseButton.new()
 	mouse.button_index = MOUSE_BUTTON_MIDDLE
-	_check(DotInputBinding.to_text(mouse) == "Mouse 3", "a mouse button has a short form")
+	_check(GSInputBinding.to_text(mouse) == "Mouse 3", "a mouse button has a short form")
 	_check(
-		(DotInputBinding.from_text("Mouse 3") as InputEventMouseButton) != null,
+		(GSInputBinding.from_text("Mouse 3") as InputEventMouseButton) != null,
 		"and comes back as a mouse button"
 	)
 
@@ -481,15 +481,15 @@ func _test_input_binding() -> void:
 	for index in expected:
 		var named := InputEventMouseButton.new()
 		named.button_index = index as MouseButton
-		var text := DotInputBinding.to_text(named)
+		var text := GSInputBinding.to_text(named)
 		if text != str(expected[index]):
 			written.append("%d -> %s" % [index, text])
-		var again := DotInputBinding.from_text(str(expected[index])) as InputEventMouseButton
+		var again := GSInputBinding.from_text(str(expected[index])) as InputEventMouseButton
 		if again == null or again.button_index != index:
 			read_back.append(str(expected[index]))
 	_check(written.is_empty(), "the wheel and the side buttons are written by name", ", ".join(written))
 	_check(read_back.is_empty(), "and every name reads back as its own button", ", ".join(read_back))
-	var lower := DotInputBinding.from_text("  wheel DOWN ") as InputEventMouseButton
+	var lower := GSInputBinding.from_text("  wheel DOWN ") as InputEventMouseButton
 	_check(
 		lower != null and lower.button_index == MOUSE_BUTTON_WHEEL_DOWN,
 		"a name typed by hand in any case still reads"
@@ -503,8 +503,8 @@ func _test_input_binding() -> void:
 func _check_binding_old_spellings() -> void:
 	# The old spelling. Every binding stored before the names says "Mouse 4" for the wheel
 	# up; reading it as anything else rebinds a player's previous-weapon key on upgrade.
-	var old_up := DotInputBinding.from_text("Mouse 4") as InputEventMouseButton
-	var old_down := DotInputBinding.from_text("Mouse 5") as InputEventMouseButton
+	var old_up := GSInputBinding.from_text("Mouse 4") as InputEventMouseButton
+	var old_down := GSInputBinding.from_text("Mouse 5") as InputEventMouseButton
 	_check(
 		old_up != null and old_up.button_index == MOUSE_BUTTON_WHEEL_UP
 			and old_down != null and old_down.button_index == MOUSE_BUTTON_WHEEL_DOWN,
@@ -512,29 +512,29 @@ func _check_binding_old_spellings() -> void:
 		"a stored binding from before the names would move to another button"
 	)
 	_check(
-		DotInputBinding.to_text(old_up) == "Wheel up",
+		GSInputBinding.to_text(old_up) == "Wheel up",
 		"and an old binding is written back under its new name"
 	)
 	_check(
-		(DotInputBinding.from_text("Mouse 8") as InputEventMouseButton).button_index == MOUSE_BUTTON_XBUTTON1,
+		(GSInputBinding.from_text("Mouse 8") as InputEventMouseButton).button_index == MOUSE_BUTTON_XBUTTON1,
 		"a numbered side button still reads"
 	)
 	_check(
-		DotBindingsPanel.event_name(old_up) == "Wheel up",
+		GSBindingsPanel.event_name(old_up) == "Wheel up",
 		"the rebinding screen draws the same word as the settings file"
 	)
 
-	_check(DotInputBinding.from_text("") == null, "nothing is bound to nothing")
-	_check(DotInputBinding.from_text("Qwerty") == null, "and so is a word that is not a key")
-	_check(not DotInputBinding.is_bound("Qwerty"), "is_bound agrees")
+	_check(GSInputBinding.from_text("") == null, "nothing is bound to nothing")
+	_check(GSInputBinding.from_text("Qwerty") == null, "and so is a word that is not a key")
+	_check(not GSInputBinding.is_bound("Qwerty"), "is_bound agrees")
 
 
 func _check_binding_replacement() -> void:
 	# The replacement rule. `action_add_event` on an action that already has one leaves
 	# BOTH bound, so a rebound key still works on its old one — invisible until a player
 	# rebinds crouch onto their forward key and both still fire.
-	DotInputBinding.apply(&"probe_chat", "Y")
-	DotInputBinding.apply(&"probe_chat", "T")
+	GSInputBinding.apply(&"probe_chat", "Y")
+	GSInputBinding.apply(&"probe_chat", "T")
 
 	_check(
 		InputMap.action_get_events(&"probe_chat").size() == 1,
@@ -542,31 +542,31 @@ func _check_binding_replacement() -> void:
 		"a rebound action that still answers to its old key"
 	)
 	_check(
-		DotInputBinding.describe_action(&"probe_chat") == "T",
+		GSInputBinding.describe_action(&"probe_chat") == "T",
 		"and it is the new one"
 	)
 
 	# ensure_action is the boot path: it must never overwrite what a player chose.
-	DotInputBinding.ensure_action(&"probe_chat", "Y")
+	GSInputBinding.ensure_action(&"probe_chat", "Y")
 	_check(
-		DotInputBinding.describe_action(&"probe_chat") == "T",
+		GSInputBinding.describe_action(&"probe_chat") == "T",
 		"ensure_action leaves an action that already has a binding alone"
 	)
 
-	DotInputBinding.apply(&"probe_chat", "")
+	GSInputBinding.apply(&"probe_chat", "")
 	_check(
 		InputMap.has_action(&"probe_chat")
 			and InputMap.action_get_events(&"probe_chat").is_empty(),
 		"an empty binding unbinds the action rather than deleting it"
 	)
-	DotInputBinding.ensure_action(&"probe_chat", "Y")
+	GSInputBinding.ensure_action(&"probe_chat", "Y")
 	_check(
-		DotInputBinding.describe_action(&"probe_chat") == "Y",
+		GSInputBinding.describe_action(&"probe_chat") == "Y",
 		"and ensure_action then gives an unbound action its default back"
 	)
 
 	_check(
-		DotInputBinding.describe_action(&"probe_missing") == "",
+		GSInputBinding.describe_action(&"probe_missing") == "",
 		"an action that does not exist describes as nothing rather than erroring"
 	)
 
