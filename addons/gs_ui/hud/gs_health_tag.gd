@@ -20,6 +20,8 @@ uniform vec4 fill_colour : source_color = vec4(0.3, 0.88, 0.5, 1.0);
 uniform vec4 accent : source_color = vec4(1.0);
 uniform vec2 size = vec2(1.0, 0.115);
 uniform float edge = 0.014;
+uniform float opacity = 1.0;
+uniform float modern = 0.0;
 float pill(vec2 p, vec2 half_size) {
 	float r = half_size.y;
 	vec2 q = abs(p) - (half_size - vec2(r));
@@ -36,17 +38,17 @@ void fragment() {
 	float v = UV.y;
 	float fill_on = 1.0 - smoothstep(fraction - px, fraction + px, u);
 	float trail_on = 1.0 - smoothstep(trail - px, trail + px, u);
-	vec3 col = mix(vec3(0.02, 0.025, 0.035), accent.rgb * 0.5, 1.0 - well);
+	vec3 col = mix(vec3(0.02, 0.025, 0.035), accent.rgb * 0.5 * (1.0 - modern), 1.0 - well);
 	col = mix(col, vec3(0.95, 0.97, 1.0), trail_on * (1.0 - fill_on) * 0.8);
 	vec3 lit = fill_colour.rgb * mix(1.3, 0.75, v);
-	lit += vec3(0.18) * (1.0 - smoothstep(0.0, 0.42, v));
+	lit += vec3(0.18) * (1.0 - smoothstep(0.0, 0.42, v)) * (1.0 - modern);
 	col = mix(col, lit, fill_on * well);
 	float k = u * 4.0;
 	float to_tick = min(fract(k), 1.0 - fract(k)) * (size.x - 2.0 * edge) * 0.25;
 	float ticks = (1.0 - smoothstep(0.003, 0.007, to_tick)) * step(0.02, u) * step(u, 0.98) * well;
-	col = mix(col, vec3(0.02, 0.025, 0.035), ticks * 0.45);
+	col = mix(col, vec3(0.02, 0.025, 0.035), ticks * 0.45 * (1.0 - modern));
 	ALBEDO = col;
-	ALPHA = body * mix(0.78, 0.96, well * max(fill_on, trail_on));
+	ALPHA = body * mix(mix(0.78, 0.5, modern), 0.96, well * max(fill_on, trail_on)) * opacity;
 }
 """
 
@@ -69,6 +71,10 @@ var _label: Label3D = null
 var shown_fraction: float = 1.0
 var trail_fraction: float = 1.0
 var _target: float = 1.0
+## The size and look the bar was last [method configure]d to; [method configure] writes nothing when they are unchanged.
+var _bar_size := BAR_SIZE
+var _modern: bool = false
+var _label_gap: float = BAR_SIZE.y * 0.5 + 0.17
 
 
 func _init() -> void:
@@ -97,6 +103,24 @@ func _init() -> void:
 	add_child(_label)
 
 
+## Sizes the bar to [param width] by [param height] metres (the defaults are [constant BAR_SIZE]) and picks the look:
+## [param modern] is a slim backing, a flat fill and no quarter ticks or gloss, a classic is the glass pill. Cheap to call every frame: it
+## writes only when something changed. The pill stays round at any size (the shader works in metres).
+func configure(width: float, height: float, modern: bool) -> void:
+	var size := Vector2(maxf(width, 0.01), maxf(height, 0.005))
+	if size == _bar_size and modern == _modern:
+		return
+	_bar_size = size
+	_modern = modern
+	_bar.scale = Vector3(size.x / BAR_SIZE.x, size.y / BAR_SIZE.y, 1.0)
+	_material.set_shader_parameter("size", size)
+	_material.set_shader_parameter("edge", (0.008 if modern else 0.014) * size.y / BAR_SIZE.y)
+	_material.set_shader_parameter("modern", 1.0 if modern else 0.0)
+	_label_gap = size.y * 0.5 + (0.12 if modern else 0.17)
+	_label.outline_size = 9 if modern else 14
+	_label.outline_modulate = Color(0.0, 0.0, 0.0, 0.7 if modern else 0.85)
+
+
 ## Colour of a fill at [param fraction]: green, through amber, to red.
 static func fill_for(fraction: float) -> Color:
 	var f := clampf(fraction, 0.0, 1.0)
@@ -110,13 +134,13 @@ static func smoothf(x: float) -> float:
 
 ## Draws what is asked: the bar at [param fraction] when [param bar], the [param player_name] when
 ## [param named] (in the teammate's colour when [param friend]). Hidden when it has neither. A [param tone] with
-## alpha above 0 replaces the health-graded fill; [param tag_scale] sizes the whole tag.
-func update(fraction: float, bar: bool, named: bool, player_name: String, friend: bool, delta: float, tone: Color = Color(0, 0, 0, 0), tag_scale: float = 1.0) -> void:
+## alpha above 0 replaces the health-graded fill; [param tag_scale] sizes the whole tag; [param opacity] (0 to 1) fades the bar and the name.
+func update(fraction: float, bar: bool, named: bool, player_name: String, friend: bool, delta: float, tone: Color = Color(0, 0, 0, 0), tag_scale: float = 1.0, opacity: float = 1.0) -> void:
 	visible = bar or named
 	_bar.visible = bar
 	_label.visible = named
 	scale = Vector3.ONE * tag_scale
-	_label.position.y = (BAR_SIZE.y * 0.5 + 0.17) if bar else 0.0
+	_label.position.y = _label_gap if bar else 0.0
 	_target = clampf(fraction, 0.0, 1.0)
 	# The bar eases to its mark and the trail waits a beat, then drains; a heal lifts both at once.
 	var ease_k := 1.0 - exp(-14.0 * delta)
@@ -130,9 +154,12 @@ func update(fraction: float, bar: bool, named: bool, player_name: String, friend
 	_material.set_shader_parameter("trail", trail_fraction)
 	_material.set_shader_parameter("fill_colour", fill_for(shown_fraction) if tone.a == 0.0 else tone)
 	_material.set_shader_parameter("accent", accent)
+	_material.set_shader_parameter("opacity", opacity)
 	if named:
 		_label.text = player_name
-		_label.modulate = Color(0.82, 0.96, 1.0) if friend else Color(1.0, 0.86, 0.84)
+		var ink := Color(0.82, 0.96, 1.0) if friend else Color(1.0, 0.86, 0.84)
+		ink.a = opacity
+		_label.modulate = ink
 
 
 ## Turns the whole tag to [param camera], so the fill stays on its background. Straight above or below, UP is colinear and the engine warns every frame: FORWARD stands in.
