@@ -43,5 +43,6 @@ extends RefCounted
 # 23: GSHealthTag, the pill health bar and name over another player's head (update, face).
 # 24: GSUiGamespice (Gamespice's tokens, card, focus ring, primary/ghost buttons, rows, fit_factor)
 #     and GSServerList (a focusable, phone-width server list that takes rows as dictionaries).
-const LEVEL := 24
+# 25: GSHealthTag.configure (per-game name/bar visibility, hover reveal, opacity).
+const LEVEL := 25
 const OLDEST := 1
