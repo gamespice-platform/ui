@@ -118,7 +118,7 @@ func build() -> GSResult:
 
 		var label := Label.new()
 		# The prefix is stripped, because it is exactly the part that is not information.
-		# A player reading "Dot Fps Noclip" is being shown which addon implements their
+		# A player reading "GS Fps Noclip" is being shown which addon implements their
 		# movement; what they came for is "Noclip".
 		# Whichever prefix matched is the one stripped, so a panel showing two
 		# namespaces does not label one of them with its namespace still on it.
