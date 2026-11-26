@@ -314,7 +314,7 @@ func _test_loadout_bar() -> void:
 	_check(bar._lift.size() == 1, "one eased lift per slot")
 
 	bar.set_weight(4.2, 10.0, 2, 3)
-	_check(bar.weight_text() == "4.2 / 10.0" and bar.pack_text() == "PACK 2", "weight and pack lines")
+	_check(bar.weight_text() == "4.2 / 10.0" and bar.pack_text() == "PACK SLOTS 2", "weight and pack lines")
 	_close(bar.footprint().size.y, bar.size.y, "the weight band is part of the footprint")
 	bar.set_weight(1.0, 0.0)
 	_check(bar.weight_text() == "1.0 / 0.1", "a zero limit is held above zero")
@@ -324,6 +324,11 @@ func _test_loadout_bar() -> void:
 
 	bar._process(0.5)
 	_check(bar._lift[0] > 0.9, "a selected slot lifts")
+	_check(GSLoadoutGlyphs.known(&"medkit") and GSLoadoutGlyphs.known(&"pills") and not GSLoadoutGlyphs.known(&"axe"), "glyphs: medkit and pills are drawn, others are not")
+	bar.set_slots([{"key": "1", "selected": true}, {"key": "6", "glyph": &"medkit", "fill": 0.3}, {"key": "7", "glyph": &"pills"}])
+	_check(not bar._accented(bar._slots[0]) and bar._accented(bar._slots[1]) and not bar._accented(bar._slots[2]), "a heal in progress accents only the healing slot")
+	bar.set_slots([{"key": "1", "selected": true}, {"key": "6", "glyph": &"medkit"}])
+	_check(bar._accented(bar._slots[0]), "no heal running: the selected slot keeps its accent")
 	bar.set_slots([])
 	_check(bar.slot_count() == 0 and not bar.footprint().has_area(), "an empty row clears it")
 	bar.queue_free()

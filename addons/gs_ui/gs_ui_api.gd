@@ -46,5 +46,6 @@ extends RefCounted
 # 25: GSHealthTag.configure (per-game name/bar visibility, hover reveal, opacity).
 # 26: GSLoadoutBar, the bottom-right row of weapon and kit slots with a weight bar (set_slots, set_weight).
 # 27: GSLoadoutBar.set_layout: STACK (a right-edge column of plates) and BUTTONS (ability buttons with cooldowns).
-const LEVEL := 27
+# 28: GSLoadoutBar slots take a "glyph" (&"medkit", &"pills"; GSLoadoutGlyphs); weight readout on a plate, pale icon wells.
+const LEVEL := 28
 const OLDEST := 1

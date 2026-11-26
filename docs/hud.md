@@ -159,16 +159,17 @@ Decided 2026-10-11 by grepping every game's HUD for its own version (`gs-ui-hud-
 | key | type | meaning |
 | --- | --- | --- |
 | `key` | String | the key cap; `""` for none |
-| `icon` | Texture2D | exactly one picture per slot; the used rect is cropped so a thin knife fills the slot, and a pale rim keeps dark metal readable. `null` draws `name` |
-| `name` | String | shown only when there is no icon |
+| `icon` | Texture2D | exactly one picture per slot; the used rect is cropped so a thin knife fills the slot, on a pale well with a pale rim so dark metal reads. `null` draws `glyph`, else `name` |
+| `glyph` | StringName | API 28: `&"medkit"` or `&"pills"`, a picture drawn by `GSLoadoutGlyphs` for a slot with no model |
+| `name` | String | shown only when there is neither icon nor glyph |
 | `text` | String | small line under the icon (ammo, a count) |
 | `selected` | bool | in hand: eased lift and accent edge |
 | `low` | bool | line in the low colour |
 | `empty` | bool | faint (vacant slot, used-up kit) |
 | `accent` | Color | optional selected-edge colour (a medkit may be green) |
-| `fill` | float 0..1 | optional progress bar along the slot's foot (hold to heal) |
+| `fill` | float 0..1 | optional progress bar along the slot's foot (hold to heal); it replaces the text line, and while any slot fills only that slot is accented |
 
-`set_weight(carried, limit, pack, pack_max)` feeds the bar (value text, `PACK n`); `clear_weight()` hides it. `footprint()` is the drawn rectangle, for placing other pieces clear of it. Up to `MAX_SLOTS` (8) fit the minimum size; the row grows leftwards.
+`set_weight(carried, limit, pack, pack_max)` feeds the bar (value text on its own backing plate, `PACK SLOTS n`); `clear_weight()` hides it. `footprint()` is the drawn rectangle, for placing other pieces clear of it. Up to `MAX_SLOTS` (8) fit the minimum size; the row grows leftwards.
 
 Colours come from the piece theme (`low`, `highlight`, `good`, `dim`, `text`, `plate_edge`).
 

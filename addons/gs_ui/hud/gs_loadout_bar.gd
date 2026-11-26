@@ -10,18 +10,20 @@ extends GSHudPiece
 ## [codeblock]
 ## {
 ##     "key": "1",                 # the key cap (String); "" for none
-##     "icon": Texture2D,          # exactly one picture; null draws the slot's name instead
-##     "name": "AK",               # shown only when there is no icon
+##     "icon": Texture2D,          # exactly one picture; null draws the glyph, else the slot's name
+##     "glyph": &"medkit",         # optional drawn picture for a slot with no model (&"medkit", &"pills"; GSLoadoutGlyphs)
+##     "name": "AK",               # shown only when there is neither icon nor glyph
 ##     "text": "30 / 120",         # the small line under the icon (ammo, count); "" for none
 ##     "selected": true,           # in hand
 ##     "low": false,               # the line in the low colour
 ##     "empty": false,             # nothing there: drawn faint (a vacant slot, a used-up kit)
 ##     "accent": Color(...),       # optional: the selected edge's colour (a medkit may be green)
-##     "fill": 0.4,                # optional 0..1: a progress bar along the slot's foot (hold E to heal)
+##     "fill": 0.4,                # optional 0..1: a progress bar along the slot's foot (hold E to heal); it replaces the text line
 ## }
 ## [/codeblock]
 ## Weapons first, then whatever else the host appends: the row grows to the left and stays anchored at the
-## right. [method set_weight] feeds the bar above it; [method clear_weight] hides it.
+## right. [method set_weight] feeds the bar above it, on its own backing plate; [method clear_weight] hides it.
+## While any slot has a [code]fill[/code] above zero only that slot is accented: the others draw a plain edge.
 ##
 ## [b]Layouts[/b] ([method set_layout]). [constant Layout.ROW] is the above. [constant Layout.STACK] is a
 ## column down the right edge, one plate per slot (the key cap at the plate's right, the picture left of it,
@@ -118,14 +120,14 @@ func clear_weight() -> void:
 		queue_redraw()
 
 
-## The weight line as drawn, for a check: "4.2 / 10.0" and the pack "PACK 2".
+## The weight line as drawn, for a check: "4.2 / 10.0" and the pack "PACK SLOTS 2".
 func weight_text() -> String:
 	var out := "%.1f / %.1f" % [_carried, _limit]
 	return out
 
 
 func pack_text() -> String:
-	return "PACK %d" % _pack if _pack_max > 0 else ""
+	return "PACK SLOTS %d" % _pack if _pack_max > 0 else ""
 
 
 func footprint() -> Rect2:
@@ -182,6 +184,8 @@ func _draw() -> void:
 func _draw_weight(area: Rect2) -> void:
 	var share := _carried / _limit
 	var tone := colour(&"low") if share > 1.0 else (colour(&"highlight") if share > 0.8 else colour(&"good"))
+	# Its own plate: the readout sits over whatever the world is, and bare text there was unreadable.
+	ink_plate(Rect2(area.position - Vector2(6.0, 4.0), area.size + Vector2(12.0, 8.0)), Color(0.04, 0.06, 0.1, 0.62), 7, Color(0, 0, 0, 0), 0)
 	ink_text(Vector2(area.position.x, area.position.y + 12.0), "WEIGHT", 12, colour(&"dim"), HORIZONTAL_ALIGNMENT_LEFT, -1.0, 4)
 	ink_text(Vector2(area.position.x + 62.0, area.position.y + 12.0), weight_text(), 13, tone, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 4)
 	var pack := pack_text()
@@ -210,10 +214,21 @@ func _used_rect(icon: Texture2D) -> Rect2:
 	return whole
 
 
+## Whether [param slot] draws as the accented one. While a slot is filling (a heal), only it is.
+func _accented(slot: Dictionary) -> bool:
+	if float(slot.get("fill", 0.0)) > 0.0:
+		return true
+	for other in _slots:
+		if float((other as Dictionary).get("fill", 0.0)) > 0.0:
+			return false
+	return true
+
+
 func _draw_slot(slot: Dictionary, rect: Rect2, lift: float) -> void:
 	var empty := bool(slot.get("empty", false))
 	var alpha := 0.4 if empty else 1.0
 	var accent: Color = slot.get("accent", colour(&"highlight"))
+	lift = lift if _accented(slot) else 0.0
 	rect.position.y -= 5.0 * lift
 	# A lighter glass than the other plates: the weapon renders are dark metal and must read against it.
 	var plate := Color(0.2, 0.24, 0.3, 0.74)
@@ -226,7 +241,11 @@ func _draw_slot(slot: Dictionary, rect: Rect2, lift: float) -> void:
 		var _w := ink_keycap(Vector2(rect.position.x + 7.0, rect.position.y + 14.0), key, 11, alpha)
 
 	var icon: Texture2D = slot.get("icon", null)
+	var glyph := StringName(slot.get("glyph", &""))
 	var picture := Rect2(rect.position + Vector2(8.0, 7.0), Vector2(rect.size.x - 16.0, rect.size.y - 29.0))
+	if icon != null or GSLoadoutGlyphs.known(glyph):
+		# A pale well under every picture: dark metal and dark glyphs both read on it.
+		ink_plate(picture.grow(2.0), Color(0.82, 0.88, 0.95, 0.26 * alpha), 6, Color(0, 0, 0, 0), 0)
 	if icon != null:
 		var used := _used_rect(icon)
 		var scale := minf(picture.size.x / used.size.x, picture.size.y / used.size.y)
@@ -238,6 +257,8 @@ func _draw_slot(slot: Dictionary, rect: Rect2, lift: float) -> void:
 		for offset in [Vector2(-1.5, 0.0), Vector2(1.5, 0.0), Vector2(0.0, -1.5), Vector2(0.0, 1.5)]:
 			draw_texture_rect_region(icon, Rect2(at.position + offset, at.size), used, rim)
 		draw_texture_rect_region(icon, at, used, shade)
+	elif GSLoadoutGlyphs.known(glyph):
+		GSLoadoutGlyphs.draw(self, glyph, picture, alpha)
 	else:
 		ink_text(Vector2(picture.position.x, picture.get_center().y + 5.0), str(slot.get("name", "")), 14,
 			Color(colour(&"text"), alpha), HORIZONTAL_ALIGNMENT_CENTER, picture.size.x, 4)
@@ -248,7 +269,7 @@ func _draw_slot(slot: Dictionary, rect: Rect2, lift: float) -> void:
 		draw_rect(track, Color(0.0, 0.0, 0.0, 0.45))
 		draw_rect(Rect2(track.position, Vector2(track.size.x * fill, track.size.y)), accent)
 
-	var text := str(slot.get("text", ""))
+	var text := "" if fill > 0.0 else str(slot.get("text", ""))
 	if text != "":
 		var tone := colour(&"low") if bool(slot.get("low", false)) else colour(&"text").lerp(colour(&"dim"), 1.0 - lift)
 		ink_text(Vector2(rect.position.x, rect.end.y - 8.0), text, 13, Color(tone, alpha), HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 4)
