@@ -149,3 +149,25 @@ Decided 2026-10-11 by grepping every game's HUD for its own version (`gs-ui-hud-
 - **A server browser's model.** The query client and list model are GameSpice Browser's; `GSServerList` is only the window, and takes the rows `GSBrowserEntry.to_row()` makes as dictionaries.
 - **Nine-patch or textured styling.** See "ships no art". A game assigns its own `Theme` and every widget here obeys it.
 - **Touch controls.** GameSpice Player Controller ships `GSFpsTouchSampler`, which turns fingers into commands and deliberately ships no layout. The on-screen buttons are a game's design.
+
+## Loadout bar
+
+`GSLoadoutBar` (`addons/gs_ui/hud/gs_loadout_bar.gd`, a `GSHudPiece`, API 26) is one horizontal row of slots, anchored at the control's right edge, with an optional weight bar over it. It came from game-zombie-zone's `ZzLoadoutBar` (2026-11-26). It takes values only, never a game object; the host builds the array each frame and an equal row redraws nothing.
+
+`set_slots(Array)`, each element a Dictionary:
+
+| key | type | meaning |
+| --- | --- | --- |
+| `key` | String | the key cap; `""` for none |
+| `icon` | Texture2D | exactly one picture per slot; the used rect is cropped so a thin knife fills the slot, and a pale rim keeps dark metal readable. `null` draws `name` |
+| `name` | String | shown only when there is no icon |
+| `text` | String | small line under the icon (ammo, a count) |
+| `selected` | bool | in hand: eased lift and accent edge |
+| `low` | bool | line in the low colour |
+| `empty` | bool | faint (vacant slot, used-up kit) |
+| `accent` | Color | optional selected-edge colour (a medkit may be green) |
+| `fill` | float 0..1 | optional progress bar along the slot's foot (hold to heal) |
+
+`set_weight(carried, limit, pack, pack_max)` feeds the bar (value text, `PACK n`); `clear_weight()` hides it. `footprint()` is the drawn rectangle, for placing other pieces clear of it. Up to `MAX_SLOTS` (8) fit the minimum size; the row grows leftwards.
+
+Colours come from the piece theme (`low`, `highlight`, `good`, `dim`, `text`, `plate_edge`). game-fatal-contact keeps its own vertical `WeaponSlots` column and `AbilityBar` (a different shape: a stacked column squeezed under the ballot, and cooldown buttons); it does not draw this row.

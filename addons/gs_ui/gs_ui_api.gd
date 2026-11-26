@@ -44,5 +44,6 @@ extends RefCounted
 # 24: GSUiGamespice (Gamespice's tokens, card, focus ring, primary/ghost buttons, rows, fit_factor)
 #     and GSServerList (a focusable, phone-width server list that takes rows as dictionaries).
 # 25: GSHealthTag.configure (per-game name/bar visibility, hover reveal, opacity).
-const LEVEL := 25
+# 26: GSLoadoutBar, the bottom-right row of weapon and kit slots with a weight bar (set_slots, set_weight).
+const LEVEL := 26
 const OLDEST := 1

@@ -288,3 +288,43 @@ func _test_icon_plate_and_status_lines() -> void:
 	plate.queue_free()
 	lines.queue_free()
 	_done()
+
+
+func _test_loadout_bar() -> void:
+	_section("loadout bar")
+
+	var tex := ImageTexture.create_from_image(Image.create(8, 4, false, Image.FORMAT_RGBA8))
+	var bar := _piece(GSLoadoutBar.new(), Rect2(0.0, 0.0, 900.0, 120.0)) as GSLoadoutBar
+	_check(bar.slot_count() == 0 and not bar.footprint().has_area(), "empty: nothing drawn")
+	bar.set_slots([
+		{"key": "1", "icon": tex, "text": "12 / 60", "selected": true},
+		{"key": "2", "name": "KIT", "text": "2", "low": true, "accent": Color.GREEN, "fill": 0.4},
+	])
+	_check(bar.slot_count() == 2, "two slots in")
+	var rect := bar.footprint()
+	_close(rect.size.x, 2.0 * GSLoadoutBar.SLOT_W + GSLoadoutBar.GAP, "the row is two slots and a gap wide")
+	_close(rect.end.x, bar.size.x, "the row stays anchored at the right")
+	_close(rect.size.y, bar.size.y - GSLoadoutBar.WEIGHT_H, "no weight bar: the footprint skips its band")
+
+	var picked := [{"key": "1", "selected": true}]
+	bar.set_slots(picked)
+	var kept: Array = bar._slots
+	bar.set_slots([{"key": "1", "selected": true}])
+	_check(bar._slots == kept, "an equal row is a no-op")
+	_check(bar._lift.size() == 1, "one eased lift per slot")
+
+	bar.set_weight(4.2, 10.0, 2, 3)
+	_check(bar.weight_text() == "4.2 / 10.0" and bar.pack_text() == "PACK 2", "weight and pack lines")
+	_close(bar.footprint().size.y, bar.size.y, "the weight band is part of the footprint")
+	bar.set_weight(1.0, 0.0)
+	_check(bar.weight_text() == "1.0 / 0.1", "a zero limit is held above zero")
+	_check(bar.pack_text() == "", "no pack max, no pack line")
+	bar.clear_weight()
+	_close(bar.footprint().size.y, bar.size.y - GSLoadoutBar.WEIGHT_H, "clear_weight hides the band")
+
+	bar._process(0.5)
+	_check(bar._lift[0] > 0.9, "a selected slot lifts")
+	bar.set_slots([])
+	_check(bar.slot_count() == 0 and not bar.footprint().has_area(), "an empty row clears it")
+	bar.queue_free()
+	_done()
