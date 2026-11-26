@@ -22,6 +22,15 @@ extends GSHudPiece
 ## [/codeblock]
 ## Weapons first, then whatever else the host appends: the row grows to the left and stays anchored at the
 ## right. [method set_weight] feeds the bar above it; [method clear_weight] hides it.
+##
+## [b]Layouts[/b] ([method set_layout]). [constant Layout.ROW] is the above. [constant Layout.STACK] is a
+## column down the right edge, one plate per slot (the key cap at the plate's right, the picture left of it,
+## the selected slot's larger), the bottom slot's centre [member stack_foot] up from the bottom and the
+## plates [member stack_pitch] apart: a host that has to squeeze the column sets the pitch and hands in only
+## the slots that fit. [constant Layout.BUTTONS] is a centred row of square buttons for abilities: the key under
+## each, a cooldown darkening it from the top with the seconds left, an [code]active[/code] gold edge and
+## [code]pips[/code] over it. A button's extra keys: [code]"left"[/code] seconds of cooldown left,
+## [code]"total"[/code] its length, [code]"active"[/code] bool, [code]"pips"[/code] and [code]"pips_max"[/code] ints.
 
 const SLOT_W := 104.0
 const SLOT_H := 66.0
@@ -30,6 +39,19 @@ const WEIGHT_H := 30.0
 const MAX_SLOTS := 8
 ## Easing, per second, of a slot's selected lift and the weight bar's fill.
 const EASE := 14.0
+enum Layout { ROW, STACK, BUTTONS }
+## STACK: the plate's width left of its key cap, and the gap between plates.
+const STACK_BODY_W := 112.0
+const STACK_GAP := 6.0
+## BUTTONS: a button's side and the gap between buttons.
+const BUTTON_SIDE := 56.0
+const BUTTON_GAP := 14.0
+
+## STACK: distance between the plates' centres (plate height is this minus [constant STACK_GAP]).
+var stack_pitch: float = 40.0
+## STACK: how far above the bottom the bottom plate's centre sits.
+var stack_foot: float = 20.0
+var layout_kind: Layout = Layout.ROW
 
 var _slots: Array = []
 var _lift: Array[float] = []
@@ -47,6 +69,23 @@ var _shown_share: float = 0.0
 func _init() -> void:
 	super._init()
 	custom_minimum_size = Vector2(MAX_SLOTS * (SLOT_W + GAP), SLOT_H + WEIGHT_H)
+
+
+## Picks the layout; a host that sets [constant Layout.STACK] or [constant Layout.BUTTONS] sizes the control itself.
+func set_layout(mode: Layout) -> void:
+	if mode == layout_kind:
+		return
+	layout_kind = mode
+	if mode != Layout.ROW:
+		custom_minimum_size = Vector2.ZERO
+	queue_redraw()
+
+
+## STACK: the pitch of the plates; redraws only on a change.
+func set_stack_pitch(pitch: float) -> void:
+	if not is_equal_approx(pitch, stack_pitch):
+		stack_pitch = pitch
+		queue_redraw()
 
 
 ## Replaces the row. Equal rows redraw nothing.
@@ -90,6 +129,10 @@ func pack_text() -> String:
 
 
 func footprint() -> Rect2:
+	if layout_kind == Layout.STACK:
+		return _stack_footprint()
+	if layout_kind == Layout.BUTTONS:
+		return _buttons_footprint()
 	if _slots.is_empty() and not _weight_on:
 		return Rect2()
 	var width := _row_width()
@@ -120,6 +163,12 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if layout_kind == Layout.STACK:
+		_draw_stack()
+		return
+	if layout_kind == Layout.BUTTONS:
+		_draw_buttons()
+		return
 	var width := _row_width()
 	var left := size.x - width
 	var slots_top := size.y - SLOT_H
@@ -203,3 +252,122 @@ func _draw_slot(slot: Dictionary, rect: Rect2, lift: float) -> void:
 	if text != "":
 		var tone := colour(&"low") if bool(slot.get("low", false)) else colour(&"text").lerp(colour(&"dim"), 1.0 - lift)
 		ink_text(Vector2(rect.position.x, rect.end.y - 8.0), text, 13, Color(tone, alpha), HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 4)
+
+
+# ---- STACK -------------------------------------------------------------------------------------------
+
+func _stack_plate(slot: Dictionary, i: int) -> Rect2:
+	var key := str(slot.get("key", ""))
+	var cap_w := keycap_width(key, 12) if key != "" else 0.0
+	var right := size.x + 4.0
+	var left := right - 4.0 - cap_w - STACK_BODY_W
+	var height := stack_pitch - STACK_GAP
+	var centre := size.y - stack_foot - float(_slots.size() - 1 - i) * stack_pitch
+	return Rect2(left, centre - height * 0.5, right - left, height)
+
+
+func _stack_footprint() -> Rect2:
+	if _slots.is_empty():
+		return Rect2()
+	var box := _stack_plate(_slots[0], 0)
+	for i in range(1, _slots.size()):
+		box = box.merge(_stack_plate(_slots[i], i))
+	return box
+
+
+## For a subclass: drawn behind a STACK slot's picture ([param at] is its left edge, centred on y), for a halo
+## the host's icon style wants. Nothing by default.
+func _stack_backdrop(_slot: Dictionary, _at: Vector2, _height: float, _alpha: float, _max_width: float) -> void:
+	pass
+
+
+func _draw_stack() -> void:
+	for i in _slots.size():
+		var slot: Dictionary = _slots[i]
+		var rect := _stack_plate(slot, i)
+		var on := bool(slot.get("selected", false))
+		var alpha := 1.0 if on else 0.72
+		var accent: Color = slot.get("accent", colour(&"highlight"))
+		ink_plate(rect, Color(colour(&"plate"), 0.8 if on else 0.6), 7,
+			Color(accent, 0.85) if on else Color(colour(&"plate_edge"), 0.1), 2 if on else 1)
+		var key := str(slot.get("key", ""))
+		var cap_x := rect.end.x - 4.0
+		if key != "":
+			var cap_w := keycap_width(key, 12)
+			cap_x -= cap_w
+			var _w := ink_keycap(Vector2(cap_x, rect.get_center().y), key, 12, alpha)
+		var icon: Texture2D = slot.get("icon", null)
+		var height := minf(24.0 if on else 18.0, rect.size.y - 2.0)
+		if icon != null:
+			var s := icon.get_size()
+			var w := minf(s.x * height / maxf(s.y, 1.0), 90.0)
+			var h := w * s.y / maxf(s.x, 1.0)
+			var at := Vector2(cap_x - 10.0 - w, rect.get_center().y - h * 0.5)
+			_stack_backdrop(slot, Vector2(at.x, at.y + h * 0.5), height, alpha, 90.0)
+			# A shadow first, so a white gun reads on a white wall.
+			draw_texture_rect(icon, Rect2(at + Vector2(1.5, 1.5), Vector2(w, h)), false, Color(0, 0, 0, 0.55 * alpha))
+			draw_texture_rect(icon, Rect2(at, Vector2(w, h)), false, Color(1, 1, 1, alpha))
+		else:
+			ink_text(Vector2(rect.position.x, rect.get_center().y + 5.0), str(slot.get("name", "")), 13,
+				Color(colour(&"text"), alpha), HORIZONTAL_ALIGNMENT_RIGHT, cap_x - 10.0 - rect.position.x, 4)
+
+
+# ---- BUTTONS -----------------------------------------------------------------------------------------
+
+func _buttons_width() -> float:
+	var n := _slots.size()
+	return BUTTON_SIDE * float(n) + BUTTON_GAP * float(maxi(n - 1, 0))
+
+
+## The buttons, the pips over them and the keys under them.
+func _buttons_footprint() -> Rect2:
+	if _slots.is_empty():
+		return Rect2()
+	var width := _buttons_width()
+	return Rect2(size.x * 0.5 - width * 0.5, -14.0, width, 14.0 + BUTTON_SIDE + 2.0 + 22.0 + 2.0)
+
+
+func _draw_buttons() -> void:
+	var x := size.x * 0.5 - _buttons_width() * 0.5
+	for slot in _slots:
+		_draw_button(Rect2(x, 0.0, BUTTON_SIDE, BUTTON_SIDE), slot)
+		x += BUTTON_SIDE + BUTTON_GAP
+
+
+func _draw_button(rect: Rect2, b: Dictionary) -> void:
+	var left := float(b.get("left", 0.0))
+	var total := maxf(float(b.get("total", 1.0)), 0.001)
+	var ready := left <= 0.0
+	var active := bool(b.get("active", false))
+	ink_plate(Rect2(rect.position + Vector2(0.0, 3.0), rect.size), Color(0, 0, 0, 0.4), 10, Color(0, 0, 0, 0), 0)
+	# The dark theme draws a ready button as a deep slate edged in white and a charging one near black; a bright
+	# theme (a high team_fill) as a saturated blue key.
+	var bright := clampf((float(number(&"team_fill")) - 38.0) / 62.0, 0.0, 1.0)
+	var fill := Color(0.11, 0.16, 0.26, 0.92).lerp(Color(0.2, 0.55, 0.95, 0.88), bright) if ready \
+		else Color(0.04, 0.05, 0.08, 0.86).lerp(Color(0.16, 0.2, 0.3, 0.85), bright)
+	var edge := colour(&"highlight") if active else Color(colour(&"text"), (0.7 if ready else 0.22) if bright < 0.5 else (0.55 if ready else 0.25))
+	ink_plate(rect, fill, 10, edge, 3 if active else 2)
+	ink_plate(Rect2(rect.position + Vector2(3.0, 3.0), Vector2(rect.size.x - 6.0, rect.size.y * 0.42)),
+		Color(1, 1, 1, lerpf(0.06, 0.14, bright) if ready else 0.04), 8, Color(0, 0, 0, 0), 0)
+	var icon: Texture2D = b.get("icon", null)
+	if icon != null:
+		var side := BUTTON_SIDE * 0.62
+		draw_texture_rect(icon, Rect2(rect.get_center() - Vector2(side, side) * 0.5, Vector2(side, side)), false, Color(1, 1, 1, 1.0 if ready else 0.45))
+	else:
+		ink_text(Vector2(rect.position.x, rect.get_center().y + 5.0), str(b.get("name", "")).substr(0, 5).to_upper(), 12, colour(&"text"), HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 3)
+	if not ready:
+		var cover := rect.size.y * clampf(left / total, 0.0, 1.0)
+		ink_plate(Rect2(rect.position, Vector2(rect.size.x, cover)), Color(0.0, 0.0, 0.02, 0.5), 10, Color(0, 0, 0, 0), 0)
+		ink_text(Vector2(rect.position.x, rect.get_center().y + 8.0), "%.1f" % left if left < 10.0 else "%d" % int(left), 20, colour(&"text"), HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 5)
+	var pips_max := int(b.get("pips_max", 0))
+	if pips_max > 0:
+		var pips := int(b.get("pips", 0))
+		var px := rect.get_center().x - 8.0 * float(pips_max - 1)
+		for i in range(pips_max):
+			var c := Vector2(px + 16.0 * float(i), rect.position.y - 9.0)
+			draw_circle(c, 5.0, Color(0, 0, 0, 0.55))
+			draw_circle(c, 3.8, colour(&"highlight") if i < pips else Color(1, 1, 1, 0.25))
+	var key := str(b.get("key", ""))
+	if key != "":
+		var cap_w := keycap_width(key, 12)
+		var _w := ink_keycap(Vector2(rect.get_center().x - cap_w * 0.5, rect.end.y + 2.0), key, 12)

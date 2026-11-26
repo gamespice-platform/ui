@@ -170,4 +170,16 @@ Decided 2026-10-11 by grepping every game's HUD for its own version (`gs-ui-hud-
 
 `set_weight(carried, limit, pack, pack_max)` feeds the bar (value text, `PACK n`); `clear_weight()` hides it. `footprint()` is the drawn rectangle, for placing other pieces clear of it. Up to `MAX_SLOTS` (8) fit the minimum size; the row grows leftwards.
 
-Colours come from the piece theme (`low`, `highlight`, `good`, `dim`, `text`, `plate_edge`). game-fatal-contact keeps its own vertical `WeaponSlots` column and `AbilityBar` (a different shape: a stacked column squeezed under the ballot, and cooldown buttons); it does not draw this row.
+Colours come from the piece theme (`low`, `highlight`, `good`, `dim`, `text`, `plate_edge`).
+
+### Layouts (API 27)
+
+`set_layout(GSLoadoutBar.Layout.X)`; the default is `ROW`. The slot keys above apply to all three; weight is `ROW` only.
+
+| layout | shape | extra |
+| --- | --- | --- |
+| `ROW` | the row above | |
+| `STACK` | a column of plates down the right edge; key cap at the plate's right, picture left of it, the selected slot's larger and edged in `accent`/`highlight` | `stack_pitch` (plate centres apart, `set_stack_pitch`), `stack_foot` (bottom plate's centre above the control's bottom). A host that squeezes the column under something sets the pitch and passes only the slots that fit |
+| `BUTTONS` | a centred row of 56 px square buttons, key under each, `name` (5 letters) when no icon | per slot: `left` (cooldown seconds left; darkens from the top and says the number), `total`, `active` (highlight edge), `pips`/`pips_max` (dots over the button) |
+
+`footprint()` is the drawn rectangle in every layout. game-fatal-contact draws its weapon column (`STACK`) and movement abilities (`BUTTONS`) with it; its `WeaponSlots` and `AbilityBar` are thin subclasses that keep the ballot-cover squeeze and the line/has helpers.

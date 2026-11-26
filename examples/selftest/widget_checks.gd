@@ -327,4 +327,33 @@ func _test_loadout_bar() -> void:
 	bar.set_slots([])
 	_check(bar.slot_count() == 0 and not bar.footprint().has_area(), "an empty row clears it")
 	bar.queue_free()
+	# STACK: plates up from the bottom, anchored right.
+	var col := _piece(GSLoadoutBar.new(), Rect2(0.0, 0.0, 160.0, 202.0)) as GSLoadoutBar
+	col.set_layout(GSLoadoutBar.Layout.STACK)
+	col.set_slots([{"key": "1", "name": "A"}, {"key": "2", "name": "B", "selected": true}, {"key": "3", "name": "C"}])
+	var stack := col.footprint()
+	_close(stack.end.x, col.size.x + 4.0, "stack: plates end 4 past the control's right edge")
+	_close(stack.size.y, 2.0 * col.stack_pitch + col.stack_pitch - GSLoadoutBar.STACK_GAP, "stack: three plates at the pitch")
+	_close(stack.end.y, col.size.y - col.stack_foot + (col.stack_pitch - GSLoadoutBar.STACK_GAP) * 0.5, "stack: the bottom plate sits on the foot")
+	col.set_stack_pitch(30.0)
+	_close(col.footprint().size.y, 2.0 * 30.0 + 30.0 - GSLoadoutBar.STACK_GAP, "stack: a tighter pitch squeezes the column")
+	col.set_slots([])
+	_check(not col.footprint().has_area(), "stack: no slots, no footprint")
+	col.queue_free()
+
+	# BUTTONS: a centred row, cooldowns and pips drawn from values.
+	var row := _piece(GSLoadoutBar.new(), Rect2(0.0, 0.0, 380.0, 90.0)) as GSLoadoutBar
+	row.set_layout(GSLoadoutBar.Layout.BUTTONS)
+	row.set_slots([
+		{"key": "C", "name": "slide"},
+		{"key": "E", "name": "launch", "left": 5.5, "total": 8.0},
+		{"key": "Space", "name": "walljump", "pips": 1, "pips_max": 3, "active": true},
+	])
+	var buttons := row.footprint()
+	var want := 3.0 * GSLoadoutBar.BUTTON_SIDE + 2.0 * GSLoadoutBar.BUTTON_GAP
+	_close(buttons.size.x, want, "buttons: three buttons and two gaps wide")
+	_close(buttons.get_center().x, row.size.x * 0.5, "buttons: centred")
+	row.set_slots([])
+	_check(not row.footprint().has_area(), "buttons: none, no footprint")
+	row.queue_free()
 	_done()
