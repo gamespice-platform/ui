@@ -2,6 +2,8 @@
 
 Screens, HUD and menus for a Godot 4 game, with no art assets. A screen stack that works out z-order, input blocking and mouse mode from one place, a settings panel generated from any `GSConfig`, a rebinder with conflict detection, and data-driven HUD widgets.
 
+A GameSpice addon, MIT licensed, built with Claude Code. Run `examples/ui_selftest.tscn` and `examples/form_selftest.tscn` headless to test it. Every game in [Zee's Games](https://zeesgames.com) draws its menus and HUD with it on live servers. Bug reports go to the [issue tracker](https://github.com/gamespice-platform/ui/issues).
+
 ## Install
 
 1. Get [Godot 4.7](https://godotengine.org/download).
@@ -78,6 +80,27 @@ A `GSHudWidget` holds a `Callable` that reads the value, by default ten times a 
 
 Import the project once, then run `examples/ui_selftest.tscn` and `examples/form_selftest.tscn` headless with Godot. They run offline, render nothing and exit non-zero on failure. Further docs are in [docs/](docs/README.md).
 
+## Used by
+
+All of these games from Zee's Games vendor this addon:
+
+- [Fatal Contact](https://zeesgames.com/fatal-contact)
+- [Airdrift](https://zeesgames.com/airdrift)
+- [Playlot](https://zeesgames.com/playlot)
+- [Hungario](https://zeesgames.com/hungario)
+- [Buses From Hell](https://zeesgames.com/buses-from-hell)
+- [Smash Copter](https://zeesgames.com/smash-copter)
+- [Zombie Zone](https://zeesgames.com/zombie-zone)
+- [Hide n Seek](https://zeesgames.com/hide-n-seek)
+- [Prop Hunt](https://zeesgames.com/prop-hunt)
+- [Murder Mystery](https://zeesgames.com/murder-mystery)
+- [Deathrun](https://zeesgames.com/deathrun)
+- [Wipeout](https://zeesgames.com/wipeout)
+- [Dangerous Delivery](https://zeesgames.com/dangerous-delivery)
+- [Look At Me](https://zeesgames.com/look-at-me)
+
+The whole collection is at [zeesgames.com](https://zeesgames.com).
+
 ## Credits
 
 The one exception to "no art" is an optional weapon icon sheet. `GSIconSet` works without it; `GSWeaponIcons.stock()` adds it.
@@ -88,8 +111,6 @@ The one exception to "no art" is an optional weapon icon sheet. `GSIconSet` work
 
 The itch.io page says CC0, and the author confirms in its comment thread that the licence file inside the zip is outdated. Details in `addons/gs_ui/icons/jestan/CREDITS.md`.
 
-## Status and licence
-
-Part of the [**GameSpice**](https://gamespice.net) platform: a family of Godot addons. Written with Claude Code and maintained by `gamemann`. Every addon has headless tests, but little of this has been played by real users yet, so expect rough edges and please [open an issue](https://github.com/gamespice-platform/ui/issues) when you hit one.
+## Licence
 
 MIT licence, see [LICENSE](LICENSE). The only closed part of the [**GameSpice**](https://gamespice.net) platform is the web back end; you can use your own instead of GameSpice's.
